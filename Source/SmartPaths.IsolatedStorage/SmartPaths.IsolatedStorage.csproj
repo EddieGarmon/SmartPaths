@@ -1,0 +1,15 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+      <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+
+      <PackageId>SmartPaths.IsolatedStorage</PackageId>
+      <Title>SmartPaths: IsolatedStorage support</Title>
+      <PackageTags>IsolatedStorage;File;Folder;Directory;Absolute;Relative;Path;Paths</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartPaths\SmartPaths.csproj" />
+  </ItemGroup>
+
+</Project>

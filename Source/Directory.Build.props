@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+    <PropertyGroup>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>12</LangVersion>
+        <!-- todo: <WarningsAsErrors>nullable</WarningsAsErrors> -->
+
+        <Product>SmartPaths</Product>
+        <Authors>Eddie Garmon</Authors>
+        <Copyright>Copyright (c) 2012-2024</Copyright>
+        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageIcon>icon.png</PackageIcon>
+        <RepositoryUrl>https://github.com/EddieGarmon/SmartPaths</RepositoryUrl>
+
+        <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
+        <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
+        <IncludeSource>false</IncludeSource>
+        <EmbedUntrackedSources>true</EmbedUntrackedSources>
+
+        <Version>0.1.0</Version>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+        <DebugType>full</DebugType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
+    </ItemGroup>
+</Project>
