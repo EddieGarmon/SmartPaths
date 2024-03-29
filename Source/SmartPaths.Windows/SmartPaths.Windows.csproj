@@ -1,9 +1,15 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+      <TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
+
+      <PackageId>SmartPaths.Windows</PackageId>
+      <Title>SmartPaths: Windows Storage support</Title>
+      <PackageTags>Windows;File;Folder;Directory;Absolute;Relative;Path;Paths</PackageTags>
   </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\SmartPaths\SmartPaths.csproj" />
+  </ItemGroup>
 
 </Project>
