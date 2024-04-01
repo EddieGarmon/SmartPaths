@@ -1,14 +1,13 @@
-﻿namespace SmartPaths;
+﻿using System.Diagnostics.CodeAnalysis;
 
-/// <summary>Class AbsoluteFilePath</summary>
+namespace SmartPaths;
+
 public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
 {
 
     private string? _extension;
     private string? _userGivenName;
 
-    /// <summary>Initializes a new instance of the <see cref="AbsoluteFilePath" /> class.</summary>
-    /// <param name="path">The path.</param>
     public AbsoluteFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
@@ -37,13 +36,9 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         }
     }
 
-    /// <summary>Gets the folder.</summary>
-    /// <value>The folder.</value>
     public AbsoluteFolderPath Folder => Parent!;
 
-    /// <summary>Performs an implicit conversion from <see cref="string" /> to <see cref="AbsoluteFilePath" />.</summary>
-    /// <param name="path">The path.</param>
-    /// <returns>The result of the conversion.</returns>
+    [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFilePath?(string? path) {
         return path is null ? null : new AbsoluteFilePath(path);
     }

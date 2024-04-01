@@ -25,9 +25,14 @@ public static class IFolderExtensions
         return CreateFile(folder, path, Encoding.UTF8.GetBytes(utf8Contents), collisionStrategy);
     }
 
-    public static async Task<IFile> GetOrCreateFile(this IFolder folder, string name) {
-        IFile? file = await folder.GetFile(name);
-        return file ?? await folder.CreateFile(name);
+    public static async Task<IFile> GetOrCreateFile(this IFolder parent, string name) {
+        IFile? file = await parent.GetFile(name);
+        return file ?? await parent.CreateFile(name);
+    }
+
+    public static async Task<IFolder> GetOrCreateFolder(this IFolder parent, string name) {
+        IFolder? folder = await parent.GetFolder(name);
+        return folder ?? await parent.CreateFolder(name);
     }
 
 }

@@ -51,18 +51,6 @@ public static class IFileSystemExtensions
                          .Unwrap();
     }
 
-    public static Task DeleteFile(this IFileSystem fileSystem, AbsoluteFilePath filePath) {
-        return fileSystem.GetFile(filePath)
-                         .ContinueWith(task => {
-                                           IFile file = task.Result;
-                                           if (file is not null) {
-                                               return file.Delete();
-                                           }
-                                           return Task.CompletedTask;
-                                       })
-                         .Unwrap();
-    }
-
     public static Task<IFile> GetOrCreateFile(this IFileSystem fileSystem, AbsoluteFilePath path) {
         return fileSystem.CreateFolder(path.Folder).ContinueWith(task => task.Result.GetOrCreateFile(path.FileName)).Unwrap();
     }

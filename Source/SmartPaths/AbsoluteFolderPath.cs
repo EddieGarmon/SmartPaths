@@ -1,6 +1,7 @@
-﻿namespace SmartPaths;
+﻿using System.Diagnostics.CodeAnalysis;
 
-/// <summary>Class AbsoluteFolderPath</summary>
+namespace SmartPaths;
+
 public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
 {
 
@@ -29,7 +30,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
     }
 
     public RelativeFilePath MakeRelative(AbsoluteFilePath target) {
-        LinkedList<string> relative = PathHelper.MakeRelative(this, target.Parent);
+        LinkedList<string> relative = PathHelper.MakeRelative(this, target.Folder);
         return new RelativeFilePath(relative, relative.Count, target.FileName);
     }
 
@@ -58,6 +59,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new AbsoluteFilePath(parts, parts.Count);
     }
 
+    [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFolderPath?(string? path) {
         return path is null ? null : new AbsoluteFolderPath(path);
     }

@@ -1,11 +1,10 @@
-﻿namespace SmartPaths;
+﻿using System.Diagnostics.CodeAnalysis;
 
-/// <summary>Class RelativeFolderPath</summary>
+namespace SmartPaths;
+
 public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
 {
 
-    /// <summary>Initializes a new instance of the <see cref="RelativeFolderPath" /> class.</summary>
-    /// <param name="path">The path.</param>
     public RelativeFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
@@ -14,7 +13,6 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
 
     public string FolderName => ItemName;
 
-    /// <inheritdoc />
     public RelativeFilePath GetChildFilePath(string name, string extension) {
         return GetChildFilePath($"{name}.{extension}");
     }
@@ -41,9 +39,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(Parts, Parts.Count, folderName);
     }
 
-    /// <summary>Performs an implicit conversion from <see cref="System.String" /> to <see cref="RelativeFolderPath" />.</summary>
-    /// <param name="path">The path.</param>
-    /// <returns>The result of the conversion.</returns>
+    [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFolderPath?(string? path) {
         return path is null ? null : new RelativeFolderPath(path);
     }

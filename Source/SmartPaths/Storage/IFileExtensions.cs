@@ -9,7 +9,7 @@ public static class IFileExtensions
                                    RelativeFilePath relativePath,
                                    CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(relativePath);
-        AbsoluteFilePath newPath = file.Path.Parent + relativePath;
+        AbsoluteFilePath newPath = file.Path.Folder + relativePath;
         return file.Move(newPath, collisionStrategy);
     }
 

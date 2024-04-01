@@ -1,14 +1,13 @@
-﻿namespace SmartPaths;
+﻿using System.Diagnostics.CodeAnalysis;
 
-/// <summary>Class RelativeFilePath</summary>
+namespace SmartPaths;
+
 public sealed class RelativeFilePath : RelativePath, IFilePath
 {
 
     private string? _extension;
     private string? _userGivenName;
 
-    /// <summary>Initializes a new instance of the <see cref="RelativeFilePath" /> class.</summary>
-    /// <param name="path">The path.</param>
     public RelativeFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
@@ -37,13 +36,9 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
         }
     }
 
-    /// <summary>Gets the folder.</summary>
-    /// <value>The folder.</value>
     public RelativeFolderPath? Folder => Parent;
 
-    /// <summary>Performs an implicit conversion from <see cref="string" /> to <see cref="RelativeFilePath" />.</summary>
-    /// <param name="path">The path.</param>
-    /// <returns>The result of the conversion.</returns>
+    [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFilePath?(string? path) {
         return path is null ? null : new RelativeFilePath(path);
     }
