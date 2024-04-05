@@ -1,0 +1,37 @@
+
+Notes: FileSystem delegates to folder who does the work
+
+Creating Folders:
+- IFileSystem.CreateFolder(AbsoluteFolderPath) => Task<IFoldaer> //recursive build up
+	ram:\ each folder registers as it is created, with parent and filesystem
+- IFolder.CreateFolder(string) => Task<IFolder> //only single child folder
+	ram:\ single folder registers with parent and filesystem
+
+Deleting Folders: all folder deletes are recursive
+- IFileSystem.DeleteFolder(AbsoluteFolderPath) => Task
+	ram:\ start at the leafs and delete back up (recursive)
+- IFolder.Delete() => Task
+	ram:\ start at the leafs and delete back up (recursive)
+
+======
+
+Creating Files:
+- IFileSystem.CreateFile(AbsoluteFilePath, CollisionStrategy) => Task<IFile>
+- IFolder.CreateFile()
+
+Deleting Files:
+- IFileSystem.DeleteFile(AbsoluteFilePath) => Task
+- IFolder.DeleteFile(AbsoluteFilePath) => Task
+- IFile.Delete() => Task
+
+======
+Disk.. do we need to check Exists before Delete()?
+
+
+
+=============>>
+Actions:
+- Create
+- Delete
+- Exists
+- Move (Rename) [absolute and relative]

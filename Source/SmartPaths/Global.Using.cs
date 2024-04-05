@@ -1,0 +1,2 @@
+﻿global using IAbsoluteFolderPath = SmartPaths.IFolderPath<SmartPaths.AbsoluteFolderPath, SmartPaths.AbsoluteFilePath>;
+global using IRelativeFolderPath = SmartPaths.IFolderPath<SmartPaths.RelativeFolderPath, SmartPaths.RelativeFilePath>;
