@@ -3,7 +3,7 @@
 public interface IAbsolutePath : IPath
 {
 
-    new AbsoluteFolderPath? Parent { get; }
+    new AbsoluteFolderPath Parent { get; }
 
     string RootValue { get; }
 

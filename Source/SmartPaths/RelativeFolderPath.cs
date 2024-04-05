@@ -18,9 +18,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     }
 
     public RelativeFilePath GetChildFilePath(string fileNameWithExtension) {
-        if (string.IsNullOrEmpty(fileNameWithExtension)) {
-            throw new ArgumentException("Invalid empty file name.");
-        }
+        ArgumentException.ThrowIfNullOrEmpty(fileNameWithExtension);
         if (fileNameWithExtension.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
             throw new Exception("Invalid filename: " + fileNameWithExtension);
         }
@@ -29,9 +27,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     }
 
     public RelativeFolderPath GetChildFolderPath(string folderName) {
-        if (string.IsNullOrEmpty(folderName)) {
-            throw new ArgumentException("Invalid empty folder name.");
-        }
+        ArgumentException.ThrowIfNullOrEmpty(folderName);
         if (folderName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
             throw new Exception("Invalid folder name: " + folderName);
         }

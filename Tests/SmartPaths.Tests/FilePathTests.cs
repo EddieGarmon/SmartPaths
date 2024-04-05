@@ -46,6 +46,7 @@ public class FilePathTests
     [InlineData(@"..\filename.ext.gz", @"..\filename.ext.gz", @"gz")]
     public void RelativeFileValid(string source, string clean, string extension) {
         RelativeFilePath file = new(source);
+        file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);
     }
 

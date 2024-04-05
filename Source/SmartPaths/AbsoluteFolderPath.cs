@@ -8,7 +8,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
     public AbsoluteFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFolderPath(LinkedList<string> parts, int partsLength, string newItemName = null)
+    internal AbsoluteFolderPath(LinkedList<string> parts, int partsLength, string? newItemName = null)
         : base(true, parts, partsLength, newItemName) { }
 
     public string FolderName => ItemName;

@@ -35,15 +35,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         CleanUpRoute();
     }
 
-    protected BasePath(PathType pathType, bool isFolder, LinkedList<string> parts, int partsLength, string? newItemName = null) {
+    protected BasePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null) {
         PathType = pathType;
         IsFolderPath = isFolder;
-        Parts = new LinkedList<string>();
-        LinkedListNode<string> node = parts.First;
-        for (int i = 0; i < partsLength; i++) {
-            Parts.AddLast(node.Value);
-            node = node.Next;
-        }
+        Parts = new LinkedList<string>(parts.Take(partsLength));
 
         if (newItemName is not null) {
             Parts.AddLast(newItemName);
@@ -71,13 +66,14 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     public PathType PathType { get; }
 
-    public string RootValue => Parts.First.Value;
+    public string RootValue => Parts.First!.Value;
 
-    protected string ItemName => Parts.Last.Value;
+    protected string ItemName => Parts.Last!.Value;
 
     /// <summary>
-    ///     A list containing all the individual parts of the path. <br /> The root is always stored in the first segment. If that segment is
-    ///     <see cref="string.Empty" />, it is a relative path.
+    ///     A list containing all the individual parts of the path. <br /> The root is
+    ///     always stored in the first segment. If that segment is <see cref="string.Empty" />,
+    ///     it is a relative path.
     /// </summary>
     protected internal LinkedList<string> Parts { get; }
 
@@ -106,9 +102,13 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     }
 
     /// <summary>Returns a hash code for this instance.</summary>
-    /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures like a hash table.</returns>
+    /// <returns>
+    ///     A hash code for this instance, suitable for use in hashing algorithms and data
+    ///     structures like a hash table.
+    /// </returns>
     public override int GetHashCode() {
-        return HashCode.Combine((int)PathType, IsFolderPath, Parts);
+        int hashCode = HashCode.Combine((int)PathType, IsFolderPath, ToString());
+        return hashCode;
     }
 
     /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
@@ -118,14 +118,15 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
             return _toString;
         }
         if (Parts.Count == 1) {
-            _toString = Parts.First.Value;
+            //NB: This is a root folder
+            _toString = Parts.First!.Value;
         } else {
             const char separator = '\\'; // todo: support linux paths
 
             StringBuilder builder = new();
-            builder.Append(Parts.First.Value); // append the root
+            builder.Append(Parts.First!.Value); // append the root
             //NB: do not add a separator between first and second parts
-            builder.Append(Parts.First.Next.Value); // append the first segment
+            builder.Append(Parts.First!.Next!.Value); // append the first segment
             foreach (string value in Parts.Skip(2)) {
                 builder.Append(separator);
                 builder.Append(value);
@@ -211,11 +212,11 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         if (IsAbsolutePath) {
             if (IsFolderPath && Parts.Count == 1) {
                 //valid root folder
-            } else if (PathHelper.IsRelativeSpecialPart(Parts.First.Next.Value)) {
+            } else if (PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
                 throw new Exception("Not a valid absolute path.");
             }
         } else {
-            if (!PathHelper.IsRelativeSpecialPart(Parts.First.Next.Value)) {
+            if (!PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
                 throw new Exception("Not a valid relative path.");
             }
         }
@@ -277,7 +278,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return Equals(left, right);
     }
 
-    /// <summary>Performs an implicit conversion from <see cref="BasePath" /> to <see cref="string" />.</summary>
+    /// <summary>
+    ///     Performs an implicit conversion from <see cref="BasePath" /> to
+    ///     <see cref="string" />.
+    /// </summary>
     /// <param name="path">The path.</param>
     /// <returns>The result of the conversion.</returns>
     public static implicit operator string(BasePath path) {

@@ -11,7 +11,7 @@ public class RelativePath : BasePath, IRelativePath
     protected RelativePath(bool isFolder, LinkedList<string> parts, int partsLength, string? newItemName = null)
         : base(PathType.Relative, isFolder, parts, partsLength, newItemName) { }
 
-    public override bool HasParent => Parts.Count > 2 && !PathHelper.IsRelativeSpecialPart(Parts.Last.Previous.Value);
+    public override bool HasParent => Parts.Count > 2 && !PathHelper.IsRelativeSpecialPart(Parts.Last!.Previous!.Value);
 
     public override RelativeFolderPath? Parent => HasParent ? _parent ??= new RelativeFolderPath(Parts, Parts.Count - 1) : null;
 
