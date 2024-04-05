@@ -30,9 +30,4 @@ public static class IFolderExtensions
         return file ?? await parent.CreateFile(name);
     }
 
-    public static async Task<IFolder> GetOrCreateFolder(this IFolder parent, string name) {
-        IFolder? folder = await parent.GetFolder(name);
-        return folder ?? await parent.CreateFolder(name);
-    }
-
 }

@@ -5,6 +5,8 @@ public interface IFile
 
     string Name { get; }
 
+    IFolder Parent { get; }
+
     AbsoluteFilePath Path { get; }
 
     Task Delete();
@@ -13,15 +15,13 @@ public interface IFile
 
     Task<DateTimeOffset> GetLastWriteTime();
 
-    Task<IFile> Move(AbsoluteFilePath absolutePath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    Task<IFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<Stream> OpenToAppend();
 
     Task<Stream> OpenToRead();
 
     Task<Stream> OpenToWrite();
-
-    Task<IFile> Rename(string newFilenameWithExtension, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task Touch();
 

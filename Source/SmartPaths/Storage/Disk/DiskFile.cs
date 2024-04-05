@@ -9,7 +9,11 @@ public class DiskFile : IFile
 
     public string Name => Path.FileName;
 
+    public DiskFolder Parent => new(Path.Parent);
+
     public AbsoluteFilePath Path { get; }
+
+    IFolder IFile.Parent => Parent;
 
     public Task Delete() {
         return Task.Run(() => File.Delete(Path));
@@ -24,7 +28,7 @@ public class DiskFile : IFile
         return Task.Run(() => new DateTimeOffset(File.GetLastWriteTime(Path)));
     }
 
-    public Task<IFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<DiskFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(newPath);
         AssertExists();
 
@@ -44,7 +48,7 @@ public class DiskFile : IFile
         }
 
         File.Move(Path, newPath);
-        return Task.FromResult<IFile>(new DiskFile(newPath));
+        return Task.FromResult(new DiskFile(newPath));
     }
 
     public Task<Stream> OpenToAppend() {
@@ -62,12 +66,6 @@ public class DiskFile : IFile
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Open, FileAccess.ReadWrite));
     }
 
-    public Task<IFile> Rename(string newFilenameWithExtension, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        ArgumentNullException.ThrowIfNull(newFilenameWithExtension);
-        AbsoluteFilePath newPath = Path.GetSiblingFilePath(newFilenameWithExtension);
-        return Move(newPath, collisionStrategy);
-    }
-
     public Task Touch() {
         AssertExists();
         return Task.Run(() => File.SetLastWriteTime(Path, DateTime.Now));
@@ -77,6 +75,10 @@ public class DiskFile : IFile
         if (!File.Exists(Path)) {
             throw StorageExceptions.FileMissing(Path);
         }
+    }
+
+    Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {
+        return Move(newPath, collisionStrategy).ContinueWith(task => (IFile)task.Result);
     }
 
     internal static AbsoluteFilePath MakeUnique(AbsoluteFilePath path) {

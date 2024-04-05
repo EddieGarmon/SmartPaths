@@ -9,15 +9,9 @@ public class DiskFileSystem : IFileSystem
     private DiskFolder? _appRoaming;
     private DiskFolder? _temp;
 
-    public Task<IFolder> AppLocalStorage => Task.FromResult<IFolder>(_appLocal ??= new DiskFolder(AppLocalStoragePath));
-
     public AbsoluteFolderPath AppLocalStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.LocalApplicationData);
 
-    public Task<IFolder> AppRoamingStorage => Task.FromResult<IFolder>(_appRoaming ??= new DiskFolder(AppRoamingStoragePath));
-
     public AbsoluteFolderPath AppRoamingStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.ApplicationData);
-
-    public Task<IFolder> TempStorage => Task.FromResult<IFolder>(_temp ??= new DiskFolder(TempStoragePath));
 
     public AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
 
@@ -56,6 +50,22 @@ public class DiskFileSystem : IFileSystem
                         });
     }
 
+    public Task<bool> FileExists(AbsoluteFilePath path) {
+        return Task.Run(() => File.Exists(path));
+    }
+
+    public Task<bool> FolderExists(AbsoluteFolderPath path) {
+        return Task.Run(() => Directory.Exists(path));
+    }
+
+    public Task<IFolder> GetAppLocalStorage() {
+        return Task.FromResult<IFolder>(_appLocal ??= new DiskFolder(AppLocalStoragePath));
+    }
+
+    public Task<IFolder> GetAppRoamingStorage() {
+        return Task.FromResult<IFolder>(_appRoaming ??= new DiskFolder(AppRoamingStoragePath));
+    }
+
     public Task<IFile?> GetFile(AbsoluteFilePath path) {
         return Task.Run(() => {
                             IFile? result = null;
@@ -66,14 +76,18 @@ public class DiskFileSystem : IFileSystem
                         });
     }
 
-    public Task<IFolder?> GetFolder(AbsoluteFolderPath path) {
+    public Task<IFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         return Task.Run(() => {
                             IFolder? result = null;
-                            if (Directory.Exists(path)) {
-                                result = new DiskFolder(path);
+                            if (Directory.Exists(folderPath)) {
+                                result = new DiskFolder(folderPath);
                             }
                             return result;
                         });
+    }
+
+    public Task<IFolder> GetTempStorage() {
+        return Task.FromResult<IFolder>(_temp ??= new DiskFolder(TempStoragePath));
     }
 
     private static AbsoluteFolderPath MakeAppStoragePath(Environment.SpecialFolder specialFolder) {

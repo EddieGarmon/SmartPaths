@@ -1,5 +1,6 @@
 ﻿using Shouldly;
 using SmartPaths.Storage.Disk;
+using SmartPaths.Storage.Ram;
 
 namespace SmartPaths.Storage;
 
@@ -7,41 +8,63 @@ public class FileSystemTests
 {
 
     [Fact]
-    public async Task Disk_SuperTest() {
-        await SuperTest(new DiskFileSystem());
+    public Task TestAllTheThings_DiskFileSystem() {
+        return TestAllTheThings(new DiskFileSystem());
     }
 
-    private static async Task SuperTest(IFileSystem fileSystem) {
-        AbsoluteFolderPath tempDir = fileSystem.TempStoragePath.GetChildFolderPath("FileSystemTesting");
-        await fileSystem.DeleteFolder(tempDir);
-        IFolder temp = await fileSystem.CreateFolder(tempDir);
-        temp.ShouldNotBeNull();
-        (await temp.GetFolders()).Count.ShouldBe(0);
-        (await temp.GetFiles()).Count.ShouldBe(0);
-        await temp.CreateFolder("child");
-        (await temp.GetFolders()).Count.ShouldBe(1);
-        IFile file = await temp.CreateFile("file1.txt");
-        (await temp.GetFiles()).Count.ShouldBe(1);
+    [Fact]
+    public Task TestAllTheThings_RamFileSystem() {
+        return TestAllTheThings(new RamFileSystem());
+    }
+
+    private static async Task TestAllTheThings(IFileSystem fileSystem) {
+        AbsoluteFolderPath tempPath = fileSystem.TempStoragePath.GetChildFolderPath("FileSystemTesting");
+
+        await fileSystem.DeleteFolder(tempPath);
+        IFolder tempFolder = await fileSystem.CreateFolder(tempPath);
+        tempFolder.ShouldNotBeNull();
+        (await tempFolder.GetFolders()).Count.ShouldBe(0);
+        (await tempFolder.GetFiles()).Count.ShouldBe(0);
+
+        await tempFolder.CreateFolder("child");
+        (await tempFolder.GetFolders()).Count.ShouldBe(1);
+
+        IFile tempFile = await tempFolder.CreateFile("file1.txt");
+        (await tempFolder.GetFiles()).Count.ShouldBe(1);
+
         DateTime timestamp = DateTime.Now;
-        await using (StreamWriter writer = new(await file.OpenToWrite())) {
+        await using (StreamWriter writer = new(await tempFile.OpenToWrite())) {
+            await Task.Delay(100);
             await writer.WriteAsync("Hello World");
         }
-        (await file.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
-        using (StreamReader reader = new(await file.OpenToRead())) {
+        await Task.Delay(100); //let the stream close
+        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
+        using (StreamReader reader = new(await tempFile.OpenToRead())) {
             (await reader.ReadToEndAsync()).ShouldBe("Hello World");
         }
+
         timestamp = DateTime.Now;
-        await using (StreamWriter writer = new(await file.OpenToAppend())) {
+        await using (StreamWriter writer = new(await tempFile.OpenToAppend())) {
+            await Task.Delay(100);
             await writer.WriteAsync(" - PASS");
         }
-        (await file.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
-        using (StreamReader reader = new(await file.OpenToRead())) {
+        await Task.Delay(100); //let the stream close
+        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
+        using (StreamReader reader = new(await tempFile.OpenToRead())) {
             (await reader.ReadToEndAsync()).ShouldBe("Hello World - PASS");
         }
-        await file.Delete();
-        (await temp.GetFiles()).Count.ShouldBe(0);
-        await temp.Delete();
-        (await fileSystem.GetFolder(tempDir)).ShouldBeNull();
+
+        tempFile = await tempFile.Rename("moved1.txt");
+        using (StreamReader reader = new(await tempFile.OpenToRead())) {
+            (await reader.ReadToEndAsync()).ShouldBe("Hello World - PASS");
+        }
+
+        tempFile = await tempFolder.CreateFile("file 2.txt");
+        (await tempFolder.GetFiles()).Count.ShouldBe(2);
+        await tempFile.Delete();
+        (await tempFolder.GetFiles()).Count.ShouldBe(1);
+        await tempFolder.Delete();
+        (await fileSystem.GetFolder(tempPath)).ShouldBeNull();
     }
 
 }

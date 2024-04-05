@@ -3,15 +3,9 @@
 public interface IFileSystem
 {
 
-    Task<IFolder> AppLocalStorage { get; }
-
     AbsoluteFolderPath AppLocalStoragePath { get; }
 
-    Task<IFolder> AppRoamingStorage { get; }
-
     AbsoluteFolderPath AppRoamingStoragePath { get; }
-
-    Task<IFolder> TempStorage { get; }
 
     AbsoluteFolderPath TempStoragePath { get; }
 
@@ -23,8 +17,18 @@ public interface IFileSystem
 
     Task DeleteFolder(AbsoluteFolderPath path);
 
+    Task<bool> FileExists(AbsoluteFilePath path);
+
+    Task<bool> FolderExists(AbsoluteFolderPath path);
+
+    Task<IFolder> GetAppLocalStorage();
+
+    Task<IFolder> GetAppRoamingStorage();
+
     Task<IFile?> GetFile(AbsoluteFilePath path);
 
-    Task<IFolder?> GetFolder(AbsoluteFolderPath path);
+    Task<IFolder?> GetFolder(AbsoluteFolderPath folderPath);
+
+    Task<IFolder> GetTempStorage();
 
 }
