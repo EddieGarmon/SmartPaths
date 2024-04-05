@@ -59,6 +59,11 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new AbsoluteFilePath(parts, parts.Count);
     }
 
+    public static explicit operator RelativeFolderPath(AbsoluteFolderPath path) {
+        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
+        return path - currentDir;
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFolderPath?(string? path) {
         return path is null ? null : new AbsoluteFolderPath(path);

@@ -35,6 +35,11 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(Parts, Parts.Count, folderName);
     }
 
+    public static explicit operator AbsoluteFolderPath(RelativeFolderPath path) {
+        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
+        return currentDir / path;
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFolderPath?(string? path) {
         return path is null ? null : new RelativeFolderPath(path);
