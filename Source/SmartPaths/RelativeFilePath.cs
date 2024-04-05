@@ -38,6 +38,11 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
 
     public RelativeFolderPath? Folder => Parent;
 
+    public static explicit operator AbsoluteFilePath(RelativeFilePath path) {
+        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
+        return currentDir / path;
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFilePath?(string? path) {
         return path is null ? null : new RelativeFilePath(path);
