@@ -11,7 +11,7 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public RelativeFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFilePath(LinkedList<string> parts, int partsLength, string? newItemName = null)
+    internal RelativeFilePath(IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(false, parts, partsLength, newItemName) { }
 
     public string FileExtension {
@@ -37,11 +37,6 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     }
 
     public RelativeFolderPath? Folder => Parent;
-
-    public static explicit operator AbsoluteFilePath(RelativeFilePath path) {
-        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
-        return currentDir / path;
-    }
 
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFilePath?(string? path) {

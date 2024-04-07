@@ -8,7 +8,7 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
     protected AbsolutePath(bool isFolder, string path)
         : base(PathType.Absolute, isFolder, path) { }
 
-    protected AbsolutePath(bool isFolder, LinkedList<string> parts, int partsLength, string? newItemName = null)
+    protected AbsolutePath(bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(PathType.Absolute, isFolder, parts, partsLength, newItemName) { }
 
     public override bool HasParent => Parts.Count > 1;

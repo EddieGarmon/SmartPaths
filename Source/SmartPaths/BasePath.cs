@@ -121,19 +121,17 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
             //NB: This is a root folder
             _toString = Parts.First!.Value;
         } else {
-            const char separator = '\\'; // todo: support linux paths
-
             StringBuilder builder = new();
             builder.Append(Parts.First!.Value); // append the root
-            //NB: do not add a separator between first and second parts
+            //NB: do not add a separator between root and first segment
             builder.Append(Parts.First!.Next!.Value); // append the first segment
             foreach (string value in Parts.Skip(2)) {
-                builder.Append(separator);
+                builder.Append(Path.DirectorySeparatorChar);
                 builder.Append(value);
             }
 
             if (IsFolderPath) {
-                builder.Append(separator);
+                builder.Append(Path.DirectorySeparatorChar);
             }
 
             _toString = builder.ToString();
