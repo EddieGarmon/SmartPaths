@@ -13,6 +13,11 @@ public class DiskFileSystem : IFileSystem
 
     public AbsoluteFolderPath AppRoamingStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.ApplicationData);
 
+    public AbsoluteFolderPath CurrentDirectory {
+        get => Environment.CurrentDirectory;
+        set => Environment.CurrentDirectory = value;
+    }
+
     public AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
 
     public Task<IFile> CreateFile(AbsoluteFilePath path, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {

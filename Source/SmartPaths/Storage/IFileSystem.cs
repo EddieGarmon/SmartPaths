@@ -7,6 +7,8 @@ public interface IFileSystem
 
     AbsoluteFolderPath AppRoamingStoragePath { get; }
 
+    AbsoluteFolderPath CurrentDirectory { get; set; }
+
     AbsoluteFolderPath TempStoragePath { get; }
 
     Task<IFile> CreateFile(AbsoluteFilePath path, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);

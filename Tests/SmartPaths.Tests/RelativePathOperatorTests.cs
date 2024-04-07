@@ -11,7 +11,7 @@ public class RelativePathOperatorTests
         AbsoluteFolderPath start = startDir;
         AbsoluteFilePath end = endDir;
         RelativeFilePath combined;
-        Should.Throw<Exception>(() => combined = end - start);
+        Should.Throw<Exception>(() => combined = start >> end);
     }
 
     [Theory]
@@ -19,7 +19,7 @@ public class RelativePathOperatorTests
     public void FileValid(string startDir, string endFile, string relativePath) {
         AbsoluteFolderPath start = startDir;
         AbsoluteFilePath end = endFile;
-        RelativeFilePath relative = end - start;
+        RelativeFilePath relative = start >> end;
         relative.ToString().ShouldBe(relativePath);
     }
 
@@ -29,7 +29,7 @@ public class RelativePathOperatorTests
         AbsoluteFolderPath start = startDir;
         AbsoluteFolderPath end = endDir;
         RelativeFolderPath combined;
-        Should.Throw<Exception>(() => combined = end - start);
+        Should.Throw<Exception>(() => combined = start >> end);
     }
 
     [Theory]
@@ -40,7 +40,7 @@ public class RelativePathOperatorTests
     public void FolderValid(string startDir, string endDir, string relativePath) {
         AbsoluteFolderPath start = startDir;
         AbsoluteFolderPath end = endDir;
-        RelativeFolderPath relative = end - start;
+        RelativeFolderPath relative = start >> end;
         relative.ToString().ShouldBe(relativePath);
     }
 

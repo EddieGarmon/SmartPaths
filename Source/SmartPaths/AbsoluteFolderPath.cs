@@ -8,7 +8,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
     public AbsoluteFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFolderPath(LinkedList<string> parts, int partsLength, string? newItemName = null)
+    internal AbsoluteFolderPath(IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(true, parts, partsLength, newItemName) { }
 
     public string FolderName => ItemName;
@@ -39,29 +39,30 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new RelativeFolderPath(relative, relative.Count);
     }
 
-    public static AbsoluteFolderPath operator +(AbsoluteFolderPath root, RelativeFolderPath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(root, relative);
+    public AbsoluteFolderPath ResolveRelative(RelativeFolderPath relative) {
+        LinkedList<string> parts = PathHelper.MakeAbsolute(this, relative);
         return new AbsoluteFolderPath(parts, parts.Count);
+    }
+
+    public AbsoluteFilePath ResolveRelative(RelativeFilePath relative) {
+        LinkedList<string> parts = PathHelper.MakeAbsolute(this, relative);
+        return new AbsoluteFilePath(parts, parts.Count);
+    }
+
+    public static AbsoluteFolderPath operator +(AbsoluteFolderPath root, RelativeFolderPath relative) {
+        return root.ResolveRelative(relative);
     }
 
     public static AbsoluteFilePath operator +(AbsoluteFolderPath root, RelativeFilePath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(root, relative);
-        return new AbsoluteFilePath(parts, parts.Count);
+        return root.ResolveRelative(relative);
     }
 
     public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, RelativeFolderPath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(root, relative);
-        return new AbsoluteFolderPath(parts, parts.Count);
+        return root.ResolveRelative(relative);
     }
 
     public static AbsoluteFilePath operator /(AbsoluteFolderPath root, RelativeFilePath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(root, relative);
-        return new AbsoluteFilePath(parts, parts.Count);
-    }
-
-    public static explicit operator RelativeFolderPath(AbsoluteFolderPath path) {
-        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
-        return path - currentDir;
+        return root.ResolveRelative(relative);
     }
 
     [return: NotNullIfNotNull(nameof(path))]
@@ -69,15 +70,12 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return path is null ? null : new AbsoluteFolderPath(path);
     }
 
-    public static RelativeFolderPath operator -(AbsoluteFolderPath toDir, AbsoluteFolderPath fromDir) {
-        LinkedList<string> relative = PathHelper.MakeRelative(fromDir, toDir);
-        //todo fix duplicate memory use in these situations
-        return new RelativeFolderPath(relative, relative.Count);
+    public static RelativeFolderPath operator >> (AbsoluteFolderPath fromDir, AbsoluteFolderPath toDir) {
+        return fromDir.MakeRelative(toDir);
     }
 
-    public static RelativeFilePath operator -(AbsoluteFilePath toFile, AbsoluteFolderPath fromDir) {
-        LinkedList<string> relativePath = PathHelper.MakeRelative(fromDir, toFile.Parent);
-        return new RelativeFilePath(relativePath, relativePath.Count, toFile.FileName);
+    public static RelativeFilePath operator >> (AbsoluteFolderPath fromDir, AbsoluteFilePath toFile) {
+        return fromDir.MakeRelative(toFile);
     }
 
 }

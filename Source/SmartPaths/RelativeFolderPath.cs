@@ -8,7 +8,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     public RelativeFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFolderPath(LinkedList<string> parts, int partsLength, string? newItemName = null)
+    internal RelativeFolderPath(IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(true, parts, partsLength, newItemName) { }
 
     public string FolderName => ItemName;
@@ -33,11 +33,6 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         }
 
         return new RelativeFolderPath(Parts, Parts.Count, folderName);
-    }
-
-    public static explicit operator AbsoluteFolderPath(RelativeFolderPath path) {
-        AbsoluteFolderPath currentDir = Environment.CurrentDirectory;
-        return currentDir / path;
     }
 
     [return: NotNullIfNotNull(nameof(path))]

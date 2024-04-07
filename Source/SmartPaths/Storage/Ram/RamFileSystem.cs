@@ -10,11 +10,14 @@ public class RamFileSystem : IFileSystem
     public RamFileSystem() {
         _root = new RamFolder(this, "ram:\\");
         _allFolders.Add(_root.Path, _root);
+        CurrentDirectory = _root.Path;
     }
 
     public AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";
 
     public AbsoluteFolderPath AppRoamingStoragePath { get; } = @"ram:\RoamingStorage\";
+
+    public AbsoluteFolderPath CurrentDirectory { get; set; }
 
     public AbsoluteFolderPath TempStoragePath { get; } = @"ram:\Temp\";
 
