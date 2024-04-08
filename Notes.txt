@@ -26,12 +26,3 @@ Deleting Files:
 
 ======
 Disk.. do we need to check Exists before Delete()?
-
-
-
-=============>>
-Actions:
-- Create
-- Delete
-- Exists
-- Move (Rename) [absolute and relative]
