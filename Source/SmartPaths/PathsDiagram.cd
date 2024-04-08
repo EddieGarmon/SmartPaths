@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="SmartPaths.AbsoluteFilePath">
-    <Position X="13.75" Y="0.5" Width="1.5" />
+    <Position X="16.25" Y="1" Width="2.5" />
+    <Members>
+      <Field Name="_extension" Hidden="true" />
+      <Field Name="_userGivenName" Hidden="true" />
+    </Members>
     <TypeIdentifier>
       <HashCode>AAAACAAAAAAAAACAAAAAAAAAAAAAAAEAAoEAAABABAA=</HashCode>
       <FileName>AbsoluteFilePath.cs</FileName>
@@ -9,7 +13,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.AbsoluteFolderPath">
-    <Position X="13.75" Y="8.25" Width="1.5" />
+    <Position X="16.25" Y="8.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAABAAAAAAAQAQAAAIBAAAAAAAAAyAACAAAAAA=</HashCode>
       <FileName>AbsoluteFolderPath.cs</FileName>
@@ -17,7 +21,11 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.RelativeFilePath">
-    <Position X="8.75" Y="0.75" Width="1.5" />
+    <Position X="10.75" Y="1" Width="2.5" />
+    <Members>
+      <Field Name="_extension" Hidden="true" />
+      <Field Name="_userGivenName" Hidden="true" />
+    </Members>
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAEAAIEAAABABIA=</HashCode>
       <FileName>RelativeFilePath.cs</FileName>
@@ -25,7 +33,7 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.RelativeFolderPath">
-    <Position X="8.75" Y="9" Width="1.5" />
+    <Position X="10.75" Y="8.5" Width="2.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAABAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RelativeFolderPath.cs</FileName>
@@ -33,15 +41,21 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.RelativePath">
-    <Position X="8.75" Y="5" Width="1.5" />
+    <Position X="10.75" Y="5" Width="2.5" />
+    <Members>
+      <Field Name="_parent" Hidden="true" />
+    </Members>
     <TypeIdentifier>
       <HashCode>AAAAAAAARAAAAAAAAAACQAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>RelativePath.cs</FileName>
     </TypeIdentifier>
-    <Lollipop Position="0.2" />
+    <Lollipop Position="0.21" />
   </Class>
   <Class Name="SmartPaths.AbsolutePath">
-    <Position X="13.75" Y="4.75" Width="1.5" />
+    <Position X="16.25" Y="5" Width="2.5" />
+    <Members>
+      <Field Name="_parent" Hidden="true" />
+    </Members>
     <TypeIdentifier>
       <HashCode>AAAAAAAARAAAAAAAAAACQAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>AbsolutePath.cs</FileName>
@@ -49,7 +63,10 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.BasePath">
-    <Position X="11.25" Y="2.5" Width="1.5" />
+    <Position X="13.75" Y="2.5" Width="2" />
+    <Members>
+      <Field Name="_toString" Hidden="true" />
+    </Members>
     <TypeIdentifier>
       <HashCode>IABEIAAAAACAAAgEgBGKQIAAAAAAAIAAAAAAABgAAiA=</HashCode>
       <FileName>BasePath.cs</FileName>
@@ -57,70 +74,70 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.IAbsolutePathExtensions">
-    <Position X="6" Y="6.25" Width="1.5" />
+    <Position X="7.75" Y="5.5" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IAbsolutePathExtensions.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SmartPaths.SmartPath">
-    <Position X="16.5" Y="1.5" Width="1.5" />
+    <Position X="20.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>QAAhAgAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>SmartPath.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="SmartPaths.WildcardSearch">
-    <Position X="18.25" Y="1.5" Width="1.5" />
+    <Position X="22.75" Y="1.5" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAAAAgABAAAAAAAAIAAAAAAAA=</HashCode>
       <FileName>WildcardSearch.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Interface Name="SmartPaths.IPath">
-    <Position X="4" Y="3.75" Width="1.5" />
+    <Position X="5.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>IABAAAAAAAAAAAgAAAACQAAAAAAAAAAAAAAAABgAAAA=</HashCode>
       <FileName>IPath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="SmartPaths.IFilePath">
-    <Position X="4" Y="0.75" Width="1.5" />
+    <Position X="5.25" Y="1" Width="2" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAEAAABAAAA=</HashCode>
       <FileName>IFilePath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="SmartPaths.IFolderPath">
-    <Position X="4" Y="7.25" Width="1.5" />
+    <Position X="5.5" Y="6.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IFolderPath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="SmartPaths.IFolderPath&lt;TFolderPath, TFilePath&gt;">
-    <Position X="4" Y="9" Width="1.5" />
+    <Position X="5" Y="8" Width="2.5" />
     <TypeIdentifier>
       <HashCode>EAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IFolderPath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="SmartPaths.IAbsolutePath">
-    <Position X="6" Y="4" Width="1.5" />
+    <Position X="7.5" Y="3.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAARAAAAAAAAAAAQAAAAAAAAAAAAAAAABAAAAA=</HashCode>
       <FileName>IAbsolutePath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Interface Name="SmartPaths.IRelativePath">
-    <Position X="2" Y="4" Width="1.5" />
+    <Position X="2.75" Y="3.25" Width="2.25" />
     <TypeIdentifier>
       <HashCode>AAAAAAAARAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
       <FileName>IRelativePath.cs</FileName>
     </TypeIdentifier>
   </Interface>
   <Enum Name="SmartPaths.PathType">
-    <Position X="0.5" Y="0.5" Width="1.5" />
+    <Position X="0.5" Y="1" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAgAAAAAAAgAAAAAAAAAABAAAAAAAAAAAAAAACACABA=</HashCode>
       <FileName>PathType.cs</FileName>

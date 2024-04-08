@@ -30,6 +30,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\..\icon.png" Pack="true" PackagePath="\" Visible="false" />
+        <None Include="..\..\Docs\icon.png" Pack="true" PackagePath="\" Visible="false" />
     </ItemGroup>
 </Project>

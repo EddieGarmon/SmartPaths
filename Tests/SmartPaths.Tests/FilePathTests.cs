@@ -24,7 +24,7 @@ public class FilePathTests
     [InlineData(@"\\server\share\filename", @"\\server\share\filename", @"")]
     [InlineData(@"\\server\share\filename.ext", @"\\server\share\filename.ext", @"ext")]
     public void AbsoluteFileValid(string source, string clean, string extension) {
-        AbsoluteFilePath file = new(source);
+        AbsoluteFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);
     }
@@ -45,7 +45,7 @@ public class FilePathTests
     [InlineData(@"..\filename.ext", @"..\filename.ext", @"ext")]
     [InlineData(@"..\filename.ext.gz", @"..\filename.ext.gz", @"gz")]
     public void RelativeFileValid(string source, string clean, string extension) {
-        RelativeFilePath file = new(source);
+        RelativeFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);
     }
