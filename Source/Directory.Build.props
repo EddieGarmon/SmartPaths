@@ -9,9 +9,13 @@
         <Product>SmartPaths</Product>
         <Authors>Eddie Garmon</Authors>
         <Copyright>Copyright (c) 2012-2024</Copyright>
-        <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageIcon>icon.png</PackageIcon>
+
+        <PackageProjectUrl>https://github.com/EddieGarmon/SmartPaths</PackageProjectUrl>
         <RepositoryUrl>https://github.com/EddieGarmon/SmartPaths</RepositoryUrl>
+        <PublishRepositoryUrl>true</PublishRepositoryUrl>
 
         <GeneratePackageOnBuild>False</GeneratePackageOnBuild>
         <AllowedOutputExtensionsInPackageBuildOutputFolder>$(AllowedOutputExtensionsInPackageBuildOutputFolder);.pdb</AllowedOutputExtensionsInPackageBuildOutputFolder>
