@@ -74,7 +74,15 @@ class Build : NukeBuild
 
     AbsolutePath PathToTests => RootDirectory / "Tests";
 
-    Target Publish => def => def.Executes(() => { });
+    Target Publish =>
+        def => def.DependsOn(Clean)
+                  .DependsOn(Test)
+                  .DependsOn(Pack)
+                  .WhenSkipped(DependencyBehavior.Execute)
+                  .Executes(() =>
+                            {
+                                PublishTo("nuget.org");
+                            });
 
     Target Restore =>
         def => def.Executes(() =>
