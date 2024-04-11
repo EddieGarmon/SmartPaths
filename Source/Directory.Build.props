@@ -8,7 +8,7 @@
 
         <Product>SmartPaths</Product>
         <Authors>Eddie Garmon</Authors>
-        <Copyright>Copyright (c) 2012-2024</Copyright>
+        <Copyright>Copyright (c) 2024</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageIcon>icon.png</PackageIcon>

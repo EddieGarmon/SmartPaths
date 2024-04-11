@@ -17,7 +17,7 @@ public static class IFileExtensions
     public static async Task<string> ReadAllText(this IFile file, Encoding? encoding = null) {
         ArgumentNullException.ThrowIfNull(file);
         encoding ??= Encoding.UTF8;
-        await using Stream stream = await file.OpenToRead();
+        using Stream stream = await file.OpenToRead();
         using StreamReader reader = new(stream, encoding);
         return await reader.ReadToEndAsync();
     }
@@ -34,8 +34,8 @@ public static class IFileExtensions
     public static async Task WriteAllText(this IFile file, string content, Encoding? encoding = null) {
         encoding ??= Encoding.UTF8;
         byte[] bytes1 = encoding.GetBytes(content);
-        await using Stream stream = await file.OpenToWrite();
-        await stream.WriteAsync(bytes1);
+        using Stream stream = await file.OpenToWrite();
+        await stream.WriteAsync(bytes1, 0, bytes1.Length);
     }
 
 }
