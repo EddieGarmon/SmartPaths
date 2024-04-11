@@ -72,7 +72,8 @@ public class RamFolder : IFolder
 
     public Task DeleteFile(string fileName) {
         AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
-        if (_files.Remove(filePath, out RamFile? file)) {
+        if (_files.TryGetValue(filePath, out RamFile? file)) {
+            _files.Remove(filePath);
             _fileSystem.Expunge(file);
         }
         return Task.CompletedTask;
@@ -89,7 +90,7 @@ public class RamFolder : IFolder
 
     public Task<RamFile?> GetFile(string fileName) {
         _files.TryGetValue(Path.GetChildFilePath(fileName), out RamFile? file);
-        return Task.FromResult(file);
+        return Task.FromResult<RamFile?>(file);
     }
 
     public Task<IReadOnlyList<RamFile>> GetFiles() {
@@ -98,7 +99,7 @@ public class RamFolder : IFolder
 
     public Task<RamFolder?> GetFolder(string folderName) {
         _folders.TryGetValue(Path.GetChildFolderPath(folderName), out RamFolder? folder);
-        return Task.FromResult(folder);
+        return Task.FromResult<RamFolder?>(folder);
     }
 
     public Task<IReadOnlyList<RamFolder>> GetFolders() {
@@ -125,7 +126,7 @@ public class RamFolder : IFolder
 
     internal void ExpungeFolder(RamFolder folder) {
         _fileSystem.Expunge(folder);
-        Parent!._folders.Remove(folder.Path, out _);
+        Parent!._folders.TryRemove(folder.Path, out _);
     }
 
     internal void Register(RamFile newFile) {

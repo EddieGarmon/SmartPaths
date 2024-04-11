@@ -2,44 +2,45 @@
 
 namespace SmartPaths.Storage.Disk;
 
-public class DiskFileSystem : IFileSystem
+public class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
 {
 
     private DiskFolder? _appLocal;
     private DiskFolder? _appRoaming;
     private DiskFolder? _temp;
 
-    public AbsoluteFolderPath AppLocalStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.LocalApplicationData);
+    public override AbsoluteFolderPath AppLocalStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.LocalApplicationData);
 
-    public AbsoluteFolderPath AppRoamingStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.ApplicationData);
+    public override AbsoluteFolderPath AppRoamingStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.ApplicationData);
 
-    public AbsoluteFolderPath CurrentDirectory {
+    public override AbsoluteFolderPath CurrentDirectory {
         get => Environment.CurrentDirectory;
         set => Environment.CurrentDirectory = value;
     }
 
-    public AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
+    public override AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
 
-    public Task<IFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return Task.Run<IFile>(() => {
-                                   if (!File.Exists(absoluteFile)) {
-                                       Directory.CreateDirectory(absoluteFile.Folder);
-                                       using FileStream? _ = File.Create(absoluteFile);
-                                       return new DiskFile(absoluteFile);
-                                   }
-                                   //todo: support collisions
-                                   throw new NotImplementedException("DiskFileSystem.CreateFile - with collision");
-                               });
+    public override Task<DiskFile> CreateFile(AbsoluteFilePath absoluteFile,
+                                              CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        return Task.Run(() => {
+                            if (!File.Exists(absoluteFile)) {
+                                Directory.CreateDirectory(absoluteFile.Folder);
+                                using FileStream? _ = File.Create(absoluteFile);
+                                return new DiskFile(absoluteFile);
+                            }
+                            //todo: support collisions
+                            throw new NotImplementedException("DiskFileSystem.CreateFile - with collision");
+                        });
     }
 
-    public Task<IFolder> CreateFolder(AbsoluteFolderPath absoluteFolder) {
-        return Task.Run<IFolder>(() => {
-                                     Directory.CreateDirectory(absoluteFolder);
-                                     return new DiskFolder(absoluteFolder);
-                                 });
+    public override Task<DiskFolder> CreateFolder(AbsoluteFolderPath absoluteFolder) {
+        return Task.Run(() => {
+                            Directory.CreateDirectory(absoluteFolder);
+                            return new DiskFolder(absoluteFolder);
+                        });
     }
 
-    public Task DeleteFile(AbsoluteFilePath absoluteFile) {
+    public override Task DeleteFile(AbsoluteFilePath absoluteFile) {
         return Task.Run(() => {
                             if (File.Exists(absoluteFile)) {
                                 File.Delete(absoluteFile);
@@ -47,7 +48,7 @@ public class DiskFileSystem : IFileSystem
                         });
     }
 
-    public Task DeleteFolder(AbsoluteFolderPath absoluteFolder) {
+    public override Task DeleteFolder(AbsoluteFolderPath absoluteFolder) {
         return Task.Run(() => {
                             if (Directory.Exists(absoluteFolder)) {
                                 Directory.Delete(absoluteFolder, true);
@@ -55,44 +56,32 @@ public class DiskFileSystem : IFileSystem
                         });
     }
 
-    public Task<bool> FileExists(AbsoluteFilePath absoluteFile) {
+    public override Task<bool> FileExists(AbsoluteFilePath absoluteFile) {
         return Task.Run(() => File.Exists(absoluteFile));
     }
 
-    public Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder) {
+    public override Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder) {
         return Task.Run(() => Directory.Exists(absoluteFolder));
     }
 
-    public Task<IFolder> GetAppLocalStorage() {
-        return Task.FromResult<IFolder>(_appLocal ??= new DiskFolder(AppLocalStoragePath));
+    public override Task<DiskFolder> GetAppLocalStorage() {
+        return Task.FromResult(_appLocal ??= new DiskFolder(AppLocalStoragePath));
     }
 
-    public Task<IFolder> GetAppRoamingStorage() {
-        return Task.FromResult<IFolder>(_appRoaming ??= new DiskFolder(AppRoamingStoragePath));
+    public override Task<DiskFolder> GetAppRoamingStorage() {
+        return Task.FromResult(_appRoaming ??= new DiskFolder(AppRoamingStoragePath));
     }
 
-    public Task<IFile?> GetFile(AbsoluteFilePath absoluteFile) {
-        return Task.Run(() => {
-                            IFile? result = null;
-                            if (File.Exists(absoluteFile)) {
-                                result = new DiskFile(absoluteFile);
-                            }
-                            return result;
-                        });
+    public override Task<DiskFile?> GetFile(AbsoluteFilePath absoluteFile) {
+        return Task.Run(() => File.Exists(absoluteFile) ? new DiskFile(absoluteFile) : null);
     }
 
-    public Task<IFolder?> GetFolder(AbsoluteFolderPath absoluteFolder) {
-        return Task.Run(() => {
-                            IFolder? result = null;
-                            if (Directory.Exists(absoluteFolder)) {
-                                result = new DiskFolder(absoluteFolder);
-                            }
-                            return result;
-                        });
+    public override Task<DiskFolder?> GetFolder(AbsoluteFolderPath absoluteFolder) {
+        return Task.Run(() => Directory.Exists(absoluteFolder) ? new DiskFolder(absoluteFolder) : null);
     }
 
-    public Task<IFolder> GetTempStorage() {
-        return Task.FromResult<IFolder>(_temp ??= new DiskFolder(TempStoragePath));
+    public override Task<DiskFolder> GetTempStorage() {
+        return Task.FromResult(_temp ??= new DiskFolder(TempStoragePath));
     }
 
     private static AbsoluteFolderPath MakeAppStoragePath(Environment.SpecialFolder specialFolder) {
