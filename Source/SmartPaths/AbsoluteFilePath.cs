@@ -48,6 +48,22 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         }
     }
 
+    public static AbsoluteFolderPath operator +(AbsoluteFilePath file, RelativeFolderPath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFilePath?(string? path) {
         return path is null ? null : new AbsoluteFilePath(path);
