@@ -109,8 +109,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return hashCode;
     }
 
-    public abstract IFolderPath? GetParent();
-
     /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
     /// <returns>A <see cref="string" /> that represents this instance.</returns>
     public override string ToString() {
@@ -139,6 +137,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
         return _toString;
     }
+
+    protected abstract IFolderPath? GetParent();
 
     private void CleanUpRoute() {
         if (Parts.Count == 1) {
@@ -245,6 +245,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    IFolderPath? IPath.GetParent() {
+        return GetParent();
     }
 
     private void Segment(string path) {
