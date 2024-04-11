@@ -38,6 +38,16 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
 
     public RelativeFolderPath? Folder => Parent;
 
+    public static bool TryParse(string value, out RelativeFilePath? path) {
+        try {
+            path = new RelativeFilePath(value);
+            return true;
+        } catch {
+            path = null;
+            return false;
+        }
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFilePath?(string? path) {
         return path is null ? null : new RelativeFilePath(path);

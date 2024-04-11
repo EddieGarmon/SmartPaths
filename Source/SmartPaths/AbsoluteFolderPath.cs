@@ -49,6 +49,16 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new AbsoluteFilePath(parts, parts.Count);
     }
 
+    public static bool TryParse(string value, out AbsoluteFolderPath? path) {
+        try {
+            path = new AbsoluteFolderPath(value);
+            return true;
+        } catch {
+            path = null;
+            return false;
+        }
+    }
+
     public static AbsoluteFolderPath operator +(AbsoluteFolderPath root, RelativeFolderPath relative) {
         return root.ResolveRelative(relative);
     }
