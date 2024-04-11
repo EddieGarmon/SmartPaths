@@ -62,8 +62,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     /// <inheritdoc />
     public bool IsRelativePath => (PathType | PathType.Relative) == PathType.Relative;
 
-    public abstract IFolderPath? Parent { get; }
-
     public PathType PathType { get; }
 
     public string RootValue => Parts.First!.Value;
@@ -110,6 +108,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         int hashCode = HashCode.Combine((int)PathType, IsFolderPath, ToString());
         return hashCode;
     }
+
+    public abstract IFolderPath? GetParent();
 
     /// <summary>Returns a <see cref="string" /> that represents this instance.</summary>
     /// <returns>A <see cref="string" /> that represents this instance.</returns>

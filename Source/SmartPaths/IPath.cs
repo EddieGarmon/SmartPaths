@@ -21,8 +21,8 @@ public interface IPath
     /// <value><c>true</c> if this instance is a relative path; otherwise, <c>false</c>.</value>
     bool IsRelativePath { get; }
 
-    IFolderPath? Parent { get; }
-
     PathType PathType { get; }
+
+    IFolderPath? GetParent();
 
 }

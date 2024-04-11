@@ -3,7 +3,7 @@
 public interface IRelativePath : IPath
 {
 
-    new RelativeFolderPath? Parent { get; }
+    RelativeFolderPath? Parent { get; }
 
     RelativeFilePath GetSiblingFilePath(string name, string extension);
 
