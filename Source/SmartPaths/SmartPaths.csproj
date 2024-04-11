@@ -6,11 +6,16 @@
         <PackageId>SmartPaths</PackageId>
         <Title>SmartPaths: Path Abstraction Library</Title>
         <PackageTags>File;Folder;Directory;Absolute;Relative;Path;Paths</PackageTags>
+        <PackageReadmeFile>ReadMe.md</PackageReadmeFile>
     </PropertyGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
       <PackageReference Include="System.Memory" Version="4.5.5" />
       <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="ReadMe.md" Pack="true" PackagePath="\" />
     </ItemGroup>
 
 </Project>

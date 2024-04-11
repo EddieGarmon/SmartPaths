@@ -1,11 +1,11 @@
-# SmartPaths
+﻿## "~/Path/../SmartPaths/"  => ~/SmartPaths/
 
 A library for dealing with paths as strongly typed objects instead of strings.\
 \
 Also included are abstractions for IFile, IFolder, and IFileSystem.\
 FileSystem implementations include physical disks as well as in memory RAM drives.
 
-## How are paths handled in SmartPaths?
+### How are paths handled in SmartPaths?
 
 Paths can be easily constructed via implicit conversion from string:
 
@@ -28,26 +28,7 @@ RelativeFilePath relative = absoluteFolder >> absoluteFile;
 // this results in @"..\..\Windows\notepad.exe"
 ```
 
-## How are Paths modeled in SmartPaths
+### Feedback / Contribute
 
-The core path abstractions are illustrated in the following diagram:
-
-![path-interfaces](Docs/path-interfaces.png)
-
-The implementation of the abstractions are illustrated in the following diagram:
-
-![path-implementation](Docs/path-implementation.png)
-
-## How are Files and Folders handled in SmartPaths?
-
-TODO
-
-## How are Files and Folders modeled in SmartPaths?
-
-The storage abstractions are illustrated in the following diagram:
-
-![storage-abstractions](Docs/storage-abstractions.png)
-
-### Build
-You can build SmartPaths using Visual Studio 2022.\
-We use [Nuke](https://nuke.build/) as the build engine, and deliver packages on [NuGet.org](https://www.nuget.org/packages?q=SmartPaths)
+Project development is hosted on [GitHub](https://github.com/EddieGarmon/SmartPaths).\
+Issues, bugs, and improvements can be [logged here](https://github.com/EddieGarmon/SmartPaths/issues).
