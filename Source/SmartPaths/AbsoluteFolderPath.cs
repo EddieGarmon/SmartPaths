@@ -49,7 +49,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new AbsoluteFilePath(parts, parts.Count);
     }
 
-    public static bool TryParse(string value, out AbsoluteFolderPath? path) {
+    public static bool TryParse(string value, [NotNullWhen(true)] out AbsoluteFolderPath? path) {
         try {
             path = new AbsoluteFolderPath(value);
             return true;

@@ -38,7 +38,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
 
     public AbsoluteFolderPath Folder => Parent!;
 
-    public static bool TryParse(string value, out AbsoluteFilePath? path) {
+    public static bool TryParse(string value, [NotNullWhen(true)] out AbsoluteFilePath? path) {
         try {
             path = new AbsoluteFilePath(value);
             return true;
