@@ -35,6 +35,16 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(Parts, Parts.Count, folderName);
     }
 
+    public static bool TryParse(string value, out RelativeFolderPath? path) {
+        try {
+            path = new RelativeFolderPath(value);
+            return true;
+        } catch {
+            path = null;
+            return false;
+        }
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFolderPath?(string? path) {
         return path is null ? null : new RelativeFolderPath(path);

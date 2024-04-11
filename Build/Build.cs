@@ -20,6 +20,8 @@ class Build : NukeBuild
 
     [Parameter("Configuration to build - Default is 'Release' (server)")] Configuration Configuration = Configuration.Release;
 
+    [Parameter] string NugetApiKey;
+
     Target Clean =>
         def => def.Before(Restore)
                   .Executes(() =>
@@ -75,13 +77,19 @@ class Build : NukeBuild
     AbsolutePath PathToTests => RootDirectory / "Tests";
 
     Target Publish =>
-        def => def.DependsOn(Clean)
+        def => def.Requires(() => NugetApiKey)
+                  .DependsOn(Clean)
                   .DependsOn(Test)
                   .DependsOn(Pack)
                   .WhenSkipped(DependencyBehavior.Execute)
                   .Executes(() =>
                             {
-                                PublishTo("nuget.org");
+                                DotNetNuGetPush(nuget => nuget.SetSource("nuget.org")
+                                                              .SetApiKey(NugetApiKey)
+                                                              .EnableNoServiceEndpoint()
+                                                              .EnableSkipDuplicate()
+                                                              .CombineWith(PathToGeneratedPackages.GlobFiles("*.nupkg"),
+                                                                           (s, package) => s.SetTargetPath(package)));
                             });
 
     Target Restore =>
@@ -124,13 +132,6 @@ class Build : NukeBuild
                                                       .SetReportTypes(ReportTypes.Html)
                                                       .SetReports(PathToCoverageResults / "*.xml"));
                             });
-
-    void PublishTo(string nugetSource) =>
-        DotNetNuGetPush(nuget => nuget.SetSource(nugetSource)
-                                      .SetApiKey("...")
-                                      .EnableNoServiceEndpoint()
-                                      .EnableSkipDuplicate()
-                                      .CombineWith(PathToGeneratedPackages.GlobFiles("*.nupkg"), (s, package) => s.SetTargetPath(package)));
 
     public static int Main() => Execute<Build>(run => run.Test, run => run.Pack);
 
