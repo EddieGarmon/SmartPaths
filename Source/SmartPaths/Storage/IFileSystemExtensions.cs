@@ -18,8 +18,8 @@ public static class IFileSystemExtensions
             return false;
         }
         file ??= await targetFolder.CreateFile(targetPath.FileName);
-        await using Stream to = await file.OpenToWrite();
-        await using Stream from = await file.OpenToRead();
+        using Stream to = await file.OpenToWrite();
+        using Stream from = await file.OpenToRead();
         await from.CopyToAsync(to);
 
         return true;

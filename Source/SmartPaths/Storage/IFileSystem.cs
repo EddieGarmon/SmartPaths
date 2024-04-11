@@ -13,39 +13,27 @@ public interface IFileSystem
 
     Task<IFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
-    Task<IFile> CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return CreateFile(CurrentDirectory / relativeFile, collisionStrategy);
-    }
+    Task<IFile> CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<IFolder> CreateFolder(AbsoluteFolderPath absoluteFolder);
 
-    Task<IFolder> CreateFolder(RelativeFolderPath relativeFolder) {
-        return CreateFolder(CurrentDirectory / relativeFolder);
-    }
+    Task<IFolder> CreateFolder(RelativeFolderPath relativeFolder);
 
     Task DeleteFile(AbsoluteFilePath absoluteFile);
 
-    Task DeleteFile(RelativeFilePath relativeFile) {
-        return DeleteFile(CurrentDirectory / relativeFile);
-    }
+    Task DeleteFile(RelativeFilePath relativeFile);
 
     Task DeleteFolder(AbsoluteFolderPath absoluteFolder);
 
-    Task DeleteFolder(RelativeFolderPath relativeFolder) {
-        return DeleteFolder(CurrentDirectory / relativeFolder);
-    }
+    Task DeleteFolder(RelativeFolderPath relativeFolder);
 
     Task<bool> FileExists(AbsoluteFilePath absoluteFile);
 
-    Task<bool> FileExists(RelativeFilePath relativeFile) {
-        return FileExists(CurrentDirectory / relativeFile);
-    }
+    Task<bool> FileExists(RelativeFilePath relativeFile);
 
     Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder);
 
-    Task<bool> FolderExists(RelativeFolderPath relativeFolder) {
-        return FolderExists(CurrentDirectory / relativeFolder);
-    }
+    Task<bool> FolderExists(RelativeFolderPath relativeFolder);
 
     Task<IFolder> GetAppLocalStorage();
 
@@ -53,15 +41,11 @@ public interface IFileSystem
 
     Task<IFile?> GetFile(AbsoluteFilePath absoluteFile);
 
-    Task<IFile?> GetFile(RelativeFilePath relativeFile) {
-        return GetFile(CurrentDirectory / relativeFile);
-    }
+    Task<IFile?> GetFile(RelativeFilePath relativeFile);
 
     Task<IFolder?> GetFolder(AbsoluteFolderPath absoluteFolder);
 
-    Task<IFolder?> GetFolder(RelativeFolderPath relativeFolder) {
-        return GetFolder(CurrentDirectory / relativeFolder);
-    }
+    Task<IFolder?> GetFolder(RelativeFolderPath relativeFolder);
 
     Task<IFolder> GetTempStorage();
 

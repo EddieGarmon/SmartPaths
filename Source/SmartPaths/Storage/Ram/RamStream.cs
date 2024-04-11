@@ -11,7 +11,9 @@ internal class RamStream : Stream
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();
-        _stream.Write(file.Data);
+        if (file.Data is not null) {
+            _stream.Write(file.Data, 0, file.Data.Length);
+        }
         _stream.Seek(0, SeekOrigin.Begin);
     }
 

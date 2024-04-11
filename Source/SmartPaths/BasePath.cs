@@ -62,8 +62,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     /// <inheritdoc />
     public bool IsRelativePath => (PathType | PathType.Relative) == PathType.Relative;
 
-    public abstract IFolderPath? Parent { get; }
-
     public PathType PathType { get; }
 
     public string RootValue => Parts.First!.Value;
@@ -139,6 +137,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
         return _toString;
     }
+
+    protected abstract IFolderPath? GetParent();
 
     private void CleanUpRoute() {
         if (Parts.Count == 1) {
@@ -245,6 +245,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
             default:
                 throw new ArgumentOutOfRangeException();
         }
+    }
+
+    IFolderPath? IPath.GetParent() {
+        return GetParent();
     }
 
     private void Segment(string path) {

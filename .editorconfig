@@ -1,0 +1,3 @@
+[*.cs]
+
+csharp_style_prefer_primary_constructors = false

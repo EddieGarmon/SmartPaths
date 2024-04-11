@@ -1,6 +1,6 @@
 ﻿namespace SmartPaths;
 
-public class RelativePath : BasePath, IRelativePath
+public abstract class RelativePath : BasePath, IRelativePath
 {
 
     private RelativeFolderPath? _parent;
@@ -13,7 +13,7 @@ public class RelativePath : BasePath, IRelativePath
 
     public override bool HasParent => Parts.Count > 2 && !PathHelper.IsRelativeSpecialPart(Parts.Last!.Previous!.Value);
 
-    public override RelativeFolderPath? Parent => HasParent ? _parent ??= new RelativeFolderPath(Parts, Parts.Count - 1) : null;
+    public RelativeFolderPath? Parent => HasParent ? _parent ??= new RelativeFolderPath(Parts, Parts.Count - 1) : null;
 
     public RelativeFilePath GetSiblingFilePath(string name, string extension) {
         return GetSiblingFilePath($"{name}.{extension}");
@@ -37,6 +37,10 @@ public class RelativePath : BasePath, IRelativePath
         }
 
         return new RelativeFolderPath(Parts, Parts.Count - 1, folderName);
+    }
+
+    protected override IFolderPath? GetParent() {
+        return HasParent ? Parent : null;
     }
 
 }

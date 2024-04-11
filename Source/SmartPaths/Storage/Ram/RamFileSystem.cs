@@ -1,6 +1,6 @@
 ﻿namespace SmartPaths.Storage.Ram;
 
-public class RamFileSystem : IFileSystem
+public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
 {
 
     private readonly Dictionary<AbsoluteFilePath, RamFile> _allFiles = [];
@@ -13,16 +13,16 @@ public class RamFileSystem : IFileSystem
         CurrentDirectory = _root.Path;
     }
 
-    public AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";
+    public override AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";
 
-    public AbsoluteFolderPath AppRoamingStoragePath { get; } = @"ram:\RoamingStorage\";
+    public override AbsoluteFolderPath AppRoamingStoragePath { get; } = @"ram:\RoamingStorage\";
 
-    public AbsoluteFolderPath CurrentDirectory { get; set; }
+    public override AbsoluteFolderPath CurrentDirectory { get; set; }
 
-    public AbsoluteFolderPath TempStoragePath { get; } = @"ram:\Temp\";
+    public override AbsoluteFolderPath TempStoragePath { get; } = @"ram:\Temp\";
 
-    public async Task<RamFile> CreateFile(AbsoluteFilePath absoluteFile,
-                                          CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override async Task<RamFile> CreateFile(AbsoluteFilePath absoluteFile,
+                                                   CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         EnsureIsRamPath(absoluteFile);
         if (!_allFolders.TryGetValue(absoluteFile.Folder, out RamFolder? folder)) {
             folder = await _root.EnsureFolderTree(absoluteFile.Folder);
@@ -30,7 +30,7 @@ public class RamFileSystem : IFileSystem
         return await folder.CreateFile(absoluteFile);
     }
 
-    public async Task<RamFolder> CreateFolder(AbsoluteFolderPath absoluteFolder) {
+    public override async Task<RamFolder> CreateFolder(AbsoluteFolderPath absoluteFolder) {
         EnsureIsRamPath(absoluteFolder);
         if (!_allFolders.TryGetValue(absoluteFolder, out RamFolder? folder)) {
             folder = await _root.EnsureFolderTree(absoluteFolder);
@@ -38,47 +38,47 @@ public class RamFileSystem : IFileSystem
         return folder;
     }
 
-    public Task DeleteFile(AbsoluteFilePath absoluteFile) {
+    public override Task DeleteFile(AbsoluteFilePath absoluteFile) {
         EnsureIsRamPath(absoluteFile);
         return !_allFiles.TryGetValue(absoluteFile, out RamFile? file) ? Task.CompletedTask : file.Delete();
     }
 
-    public Task DeleteFolder(AbsoluteFolderPath absoluteFolder) {
+    public override Task DeleteFolder(AbsoluteFolderPath absoluteFolder) {
         EnsureIsRamPath(absoluteFolder);
         return !_allFolders.TryGetValue(absoluteFolder, out RamFolder? folder) ? Task.CompletedTask : folder.Delete();
     }
 
-    public Task<bool> FileExists(AbsoluteFilePath absoluteFile) {
+    public override Task<bool> FileExists(AbsoluteFilePath absoluteFile) {
         EnsureIsRamPath(absoluteFile);
         return Task.FromResult(_allFiles.ContainsKey(absoluteFile));
     }
 
-    public Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder) {
+    public override Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder) {
         EnsureIsRamPath(absoluteFolder);
         return Task.FromResult(_allFolders.ContainsKey(absoluteFolder));
     }
 
-    public Task<RamFolder> GetAppLocalStorage() {
+    public override Task<RamFolder> GetAppLocalStorage() {
         return _root.CreateFolder(AppLocalStoragePath);
     }
 
-    public Task<RamFolder> GetAppRoamingStorage() {
+    public override Task<RamFolder> GetAppRoamingStorage() {
         return _root.CreateFolder(AppRoamingStoragePath);
     }
 
-    public Task<RamFile?> GetFile(AbsoluteFilePath absoluteFile) {
+    public override Task<RamFile?> GetFile(AbsoluteFilePath absoluteFile) {
         EnsureIsRamPath(absoluteFile);
         _allFiles.TryGetValue(absoluteFile, out RamFile? file);
-        return Task.FromResult(file);
+        return Task.FromResult<RamFile?>(file);
     }
 
-    public Task<RamFolder?> GetFolder(AbsoluteFolderPath absoluteFolder) {
+    public override Task<RamFolder?> GetFolder(AbsoluteFolderPath absoluteFolder) {
         EnsureIsRamPath(absoluteFolder);
         _allFolders.TryGetValue(absoluteFolder, out RamFolder? folder);
-        return Task.FromResult(folder);
+        return Task.FromResult<RamFolder?>(folder);
     }
 
-    public Task<RamFolder> GetTempStorage() {
+    public override Task<RamFolder> GetTempStorage() {
         return _root.CreateFolder(TempStoragePath);
     }
 
@@ -108,34 +108,6 @@ public class RamFileSystem : IFileSystem
 
     internal void Register(RamFolder folder) {
         _allFolders[folder.Path] = folder;
-    }
-
-    Task<IFile> IFileSystem.CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy) {
-        return CreateFile(absoluteFile, collisionStrategy).ContinueWith(task => (IFile)task.Result);
-    }
-
-    Task<IFolder> IFileSystem.CreateFolder(AbsoluteFolderPath absoluteFolder) {
-        return CreateFolder(absoluteFolder).ContinueWith(task => (IFolder)task.Result);
-    }
-
-    Task<IFolder> IFileSystem.GetAppLocalStorage() {
-        return GetAppLocalStorage().ContinueWith(task => (IFolder)task.Result);
-    }
-
-    Task<IFolder> IFileSystem.GetAppRoamingStorage() {
-        return GetAppRoamingStorage().ContinueWith(task => (IFolder)task.Result);
-    }
-
-    Task<IFile?> IFileSystem.GetFile(AbsoluteFilePath absoluteFile) {
-        return GetFile(absoluteFile).ContinueWith(task => (IFile?)task.Result);
-    }
-
-    Task<IFolder?> IFileSystem.GetFolder(AbsoluteFolderPath absoluteFolder) {
-        return GetFolder(absoluteFolder).ContinueWith(task => (IFolder?)task.Result);
-    }
-
-    Task<IFolder> IFileSystem.GetTempStorage() {
-        return GetTempStorage().ContinueWith(task => (IFolder)task.Result);
     }
 
     private static void EnsureIsRamPath(AbsolutePath filePath) {

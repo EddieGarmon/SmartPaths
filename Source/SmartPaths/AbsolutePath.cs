@@ -13,7 +13,7 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
 
     public override bool HasParent => Parts.Count > 1;
 
-    public override AbsoluteFolderPath Parent =>
+    public AbsoluteFolderPath Parent =>
         HasParent ?
             _parent ??= new AbsoluteFolderPath(Parts, Parts.Count - 1) :
             throw new Exception($"The root {RootValue} does not have a parent.");
@@ -40,6 +40,10 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
         }
 
         return new AbsoluteFolderPath(Parts, Parts.Count - 1, folderName);
+    }
+
+    protected override IFolderPath? GetParent() {
+        return HasParent ? Parent : null;
     }
 
 }
