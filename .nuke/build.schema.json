@@ -81,7 +81,9 @@
               "Pack",
               "Publish",
               "Restore",
-              "Test"
+              "Test",
+              "TestExecution",
+              "TestReporting"
             ]
           }
         },
@@ -101,7 +103,9 @@
               "Pack",
               "Publish",
               "Restore",
-              "Test"
+              "Test",
+              "TestExecution",
+              "TestReporting"
             ]
           }
         },
