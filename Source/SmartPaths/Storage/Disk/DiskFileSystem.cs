@@ -13,12 +13,12 @@ public class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
 
     public override AbsoluteFolderPath AppRoamingStoragePath { get; } = MakeAppStoragePath(Environment.SpecialFolder.ApplicationData);
 
-    public override AbsoluteFolderPath CurrentDirectory {
+    public override AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
+
+    public override AbsoluteFolderPath WorkingDirectory {
         get => Environment.CurrentDirectory;
         set => Environment.CurrentDirectory = value;
     }
-
-    public override AbsoluteFolderPath TempStoragePath { get; } = Path.GetTempPath();
 
     public override Task<DiskFile> CreateFile(AbsoluteFilePath absoluteFile,
                                               CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {

@@ -9,45 +9,45 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
 
     public abstract AbsoluteFolderPath AppRoamingStoragePath { get; }
 
-    public abstract AbsoluteFolderPath CurrentDirectory { get; set; }
-
     public abstract AbsoluteFolderPath TempStoragePath { get; }
+
+    public abstract AbsoluteFolderPath WorkingDirectory { get; set; }
 
     public abstract Task<TFile> CreateFile(AbsoluteFilePath absoluteFile,
                                            CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     public Task<TFile> CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return CreateFile(CurrentDirectory / relativeFile, collisionStrategy);
+        return CreateFile(WorkingDirectory / relativeFile, collisionStrategy);
     }
 
     public abstract Task<TFolder> CreateFolder(AbsoluteFolderPath absoluteFolder);
 
     public Task<TFolder> CreateFolder(RelativeFolderPath relativeFolder) {
-        return CreateFolder(CurrentDirectory / relativeFolder);
+        return CreateFolder(WorkingDirectory / relativeFolder);
     }
 
     public abstract Task DeleteFile(AbsoluteFilePath absoluteFile);
 
     public Task DeleteFile(RelativeFilePath relativeFile) {
-        return DeleteFile(CurrentDirectory / relativeFile);
+        return DeleteFile(WorkingDirectory / relativeFile);
     }
 
     public abstract Task DeleteFolder(AbsoluteFolderPath absoluteFolder);
 
     public Task DeleteFolder(RelativeFolderPath relativeFolder) {
-        return DeleteFolder(CurrentDirectory / relativeFolder);
+        return DeleteFolder(WorkingDirectory / relativeFolder);
     }
 
     public abstract Task<bool> FileExists(AbsoluteFilePath absoluteFile);
 
     public Task<bool> FileExists(RelativeFilePath relativeFile) {
-        return FileExists(CurrentDirectory / relativeFile);
+        return FileExists(WorkingDirectory / relativeFile);
     }
 
     public abstract Task<bool> FolderExists(AbsoluteFolderPath absoluteFolder);
 
     public Task<bool> FolderExists(RelativeFolderPath relativeFolder) {
-        return FolderExists(CurrentDirectory / relativeFolder);
+        return FolderExists(WorkingDirectory / relativeFolder);
     }
 
     public abstract Task<TFolder> GetAppLocalStorage();
@@ -57,13 +57,13 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
     public abstract Task<TFile?> GetFile(AbsoluteFilePath absoluteFile);
 
     public Task<TFile?> GetFile(RelativeFilePath relativeFile) {
-        return GetFile(CurrentDirectory / relativeFile);
+        return GetFile(WorkingDirectory / relativeFile);
     }
 
     public abstract Task<TFolder?> GetFolder(AbsoluteFolderPath absoluteFolder);
 
     public Task<TFolder?> GetFolder(RelativeFolderPath relativeFolder) {
-        return GetFolder(CurrentDirectory / relativeFolder);
+        return GetFolder(WorkingDirectory / relativeFolder);
     }
 
     public abstract Task<TFolder> GetTempStorage();
