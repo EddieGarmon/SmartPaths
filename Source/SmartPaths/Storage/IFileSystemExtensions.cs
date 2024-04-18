@@ -33,26 +33,25 @@ public static class IFileSystemExtensions
         return CopyFile(fileSystem, sourcePath, absoluteTargetPath, overwriteIfExists);
     }
 
-    public static Task<IFile> CreateFile(this IFileSystem fileSystem,
-                                         AbsoluteFilePath path,
-                                         byte[] contents,
-                                         CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return fileSystem.CreateFolder(path.Folder)
-                         .ContinueWith(task => task.Result.CreateFile(path, contents, collisionStrategy))
-                         .Unwrap();
+    public static async Task<IFile> CreateFile(this IFileSystem fileSystem,
+                                               AbsoluteFilePath path,
+                                               byte[] contents,
+                                               CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        IFolder folder = await fileSystem.CreateFolder(path.Folder);
+        return await folder.CreateFile(path, contents, collisionStrategy);
     }
 
-    public static Task<IFile> CreateFile(this IFileSystem fileSystem,
-                                         AbsoluteFilePath path,
-                                         string utf8Contents,
-                                         CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return fileSystem.CreateFolder(path.Folder)
-                         .ContinueWith(task => task.Result.CreateFile(path, utf8Contents, collisionStrategy))
-                         .Unwrap();
+    public static async Task<IFile> CreateFile(this IFileSystem fileSystem,
+                                               AbsoluteFilePath path,
+                                               string utf8Contents,
+                                               CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        IFolder folder = await fileSystem.CreateFolder(path.Folder);
+        return await folder.CreateFile(path, utf8Contents, collisionStrategy);
     }
 
-    public static Task<IFile> GetOrCreateFile(this IFileSystem fileSystem, AbsoluteFilePath path) {
-        return fileSystem.CreateFolder(path.Folder).ContinueWith(task => task.Result.GetOrCreateFile(path.FileName)).Unwrap();
+    public static async Task<IFile> GetOrCreateFile(this IFileSystem fileSystem, AbsoluteFilePath path) {
+        IFolder folder = await fileSystem.CreateFolder(path.Folder);
+        return await folder.GetOrCreateFile(path.FileName);
     }
 
     public static Task<bool> MoveFile(this IFileSystem fileSystem,
