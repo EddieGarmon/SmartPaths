@@ -42,6 +42,18 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
         return new AbsoluteFolderPath(Parts, Parts.Count - 1, folderName);
     }
 
+    internal AbsoluteFolderPath GetRoot() {
+        AbsoluteFolderPath root = this switch {
+            AbsoluteFolderPath folderPath => folderPath,
+            AbsoluteFilePath filePath => filePath.Folder,
+            _ => throw new NotSupportedException("Unsupported absolute path type.")
+        };
+        while (root.HasParent) {
+            root = root.Parent;
+        }
+        return root;
+    }
+
     protected override IFolderPath? GetParent() {
         return HasParent ? Parent : null;
     }
