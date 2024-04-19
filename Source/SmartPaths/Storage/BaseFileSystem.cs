@@ -112,7 +112,6 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
         return GetTempStorage().ContinueWith(task => (IFolder)task.Result, ContinuationOptions);
     }
 
-    private const TaskContinuationOptions ContinuationOptions =
-        TaskContinuationOptions.OnlyOnRanToCompletion | TaskContinuationOptions.ExecuteSynchronously;
+    private const TaskContinuationOptions ContinuationOptions = TaskContinuationOptions.ExecuteSynchronously;
 
 }

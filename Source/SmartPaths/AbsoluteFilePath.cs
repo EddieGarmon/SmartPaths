@@ -11,8 +11,8 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     public AbsoluteFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFilePath(IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(false, parts, partsLength, newItemName) { }
+    internal AbsoluteFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
+        : base(pathType, false, parts, partsLength, newItemName) { }
 
     public string FileExtension {
         get {

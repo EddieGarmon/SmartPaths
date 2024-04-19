@@ -35,6 +35,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         if (!matchType.HasFlag(pathType)) {
             throw PathExceptions.TypeMismatch(pathType, matchType);
         }
+        //set the more specific path type
+        PathType = matchType;
         switch (matchType) {
             case PathType.Relative:
                 Parts.AddFirst(string.Empty);
@@ -253,22 +255,20 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         }
 
         // re-validate cleaned up input
-        // .\ and ..\ required for relative path part[1]
-        // .\ and ..\ illegal for absolute path[1]
-        if (IsAbsolutePath) {
-            if (IsFolderPath && Parts.Count == 1) {
-                //valid root folder
-            } else if (PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
-                throw new Exception("Not a valid absolute path.");
-            }
-        } else {
-            if (!PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
-                //normalize to current directory relative
-                Parts.AddAfter(Parts.First, ".");
-            }
+        // .\ and ..\ required for non-rooted relative path: part[1]
+        // .\ and ..\ illegal for absolute path: path[1]
+        if (IsAbsolutePath && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+            throw new Exception("Not a valid absolute path.");
         }
-
-        if (IsFilePath && ((IsAbsolutePath && Parts.Count == 1) || (IsRelativePath && Parts.Count == 2))) {
+        if (PathType == PathType.Relative && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+            //normalize to current directory relative
+            Parts.AddAfter(Parts.First, ".");
+        }
+        // ensure filename on file path
+        if (IsFilePath &&
+            ((IsAbsolutePath && Parts.Count == 1) ||
+             (PathType == PathType.RootRelative && Parts.Count == 1) ||
+             (PathType == PathType.Relative && Parts.Count == 2))) {
             throw new Exception("No file name specified.");
         }
     }

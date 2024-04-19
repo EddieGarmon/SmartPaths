@@ -28,9 +28,6 @@ public class FilePathTests
     //RAM
     [InlineData(@"ram:\filename", @"ram:\filename", "")]
     [InlineData(@"ram:\filename.ext", @"ram:\filename.ext", "ext")]
-    //Root Relative
-    [InlineData(@"\filename", @"\filename", "")]
-    [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
     public void AbsoluteFileValid(string source, string clean, string extension) {
         AbsoluteFilePath file = source;
         file.ToString().ShouldBe(clean);
@@ -57,6 +54,9 @@ public class FilePathTests
     //current directory
     [InlineData(@"filename", @".\filename", "")]
     [InlineData(@"filename.ext", @".\filename.ext", "ext")]
+    //Root Relative
+    [InlineData(@"\filename", @"\filename", "")]
+    [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
     public void RelativeFileValid(string source, string clean, string extension) {
         RelativeFilePath file = source;
         file.ToString().ShouldBe(clean);

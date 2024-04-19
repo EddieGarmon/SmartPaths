@@ -8,9 +8,10 @@ public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
     private readonly RamFolder _root;
 
     public RamFileSystem() {
-        _root = new RamFolder(this, "ram:\\");
+        AbsoluteFolderPath rootPath = @"ram:\";
+        WorkingDirectory = rootPath;
+        _root = new RamFolder(this, rootPath);
         _allFolders.Add(_root.Path, _root);
-        WorkingDirectory = _root.Path;
     }
 
     public override AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";

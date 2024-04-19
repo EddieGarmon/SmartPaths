@@ -17,7 +17,9 @@ public class AbsolutePathOperatorTests
 
     [Theory]
     [InlineData(@"c:\", @".\relative", @"c:\relative")]
+    [InlineData(@"c:\Hello\World", @"..\Moto", @"c:\Hello\Moto")]
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto")]
+    [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto")]
     public void FileValid(string absoluteDir, string relativeFile, string combinedFile) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFilePath relative = relativeFile;
@@ -37,7 +39,9 @@ public class AbsolutePathOperatorTests
 
     [Theory]
     [InlineData(@"c:\", @".\relative", @"c:\relative\")]
+    [InlineData(@"c:\Hello\World", @"..\Moto", @"c:\Hello\Moto\")]
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto\")]
+    [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto\")]
     public void FolderValid(string absoluteDir, string relativeDir, string combinedDir) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFolderPath relative = relativeDir;

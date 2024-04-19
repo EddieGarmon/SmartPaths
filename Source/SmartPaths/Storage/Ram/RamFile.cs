@@ -1,7 +1,9 @@
+using System.Diagnostics;
 using System.Text;
 
 namespace SmartPaths.Storage.Ram;
 
+[DebuggerDisplay("{Path.ToString()}")]
 public class RamFile : IFile
 {
 

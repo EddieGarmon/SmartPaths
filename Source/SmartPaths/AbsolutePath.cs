@@ -8,14 +8,14 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
     protected AbsolutePath(bool isFolder, string path)
         : base(PathType.Absolute, isFolder, path) { }
 
-    protected AbsolutePath(bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(PathType.Absolute, isFolder, parts, partsLength, newItemName) { }
+    protected AbsolutePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
+        : base(pathType, isFolder, parts, partsLength, newItemName) { }
 
     public override bool HasParent => Parts.Count > 1;
 
     public AbsoluteFolderPath Parent =>
         HasParent ?
-            _parent ??= new AbsoluteFolderPath(Parts, Parts.Count - 1) :
+            _parent ??= new AbsoluteFolderPath(PathType, Parts, Parts.Count - 1) :
             throw new Exception($"The root {RootValue} does not have a parent.");
 
     public AbsoluteFilePath GetSiblingFilePath(string name, string extension) {
@@ -29,7 +29,7 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
             throw PathExceptions.UndefinedSiblingFor(RootValue);
         }
 
-        return new AbsoluteFilePath(Parts, Parts.Count - 1, fileNameWithExtension);
+        return new AbsoluteFilePath(PathType, Parts, Parts.Count - 1, fileNameWithExtension);
     }
 
     public AbsoluteFolderPath GetSiblingFolderPath(string folderName) {
@@ -39,7 +39,7 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
             throw PathExceptions.UndefinedSiblingFor(RootValue);
         }
 
-        return new AbsoluteFolderPath(Parts, Parts.Count - 1, folderName);
+        return new AbsoluteFolderPath(PathType, Parts, Parts.Count - 1, folderName);
     }
 
     internal AbsoluteFolderPath GetRoot() {
