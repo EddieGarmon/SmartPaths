@@ -7,11 +7,11 @@ public class RelativePathOperatorTests
 
     [Theory]
     [InlineData(@"c:\hello", @"d:\world\filename.ext")]
+    [InlineData(@"c:\hello", @"ram:\hello\filename.ext")]
     public void FileInvalid(string startDir, string endDir) {
         AbsoluteFolderPath start = startDir;
         AbsoluteFilePath end = endDir;
-        RelativeFilePath combined;
-        Should.Throw<Exception>(() => combined = start >> end);
+        Should.Throw<Exception>(() => start >> end);
     }
 
     [Theory]
@@ -25,11 +25,11 @@ public class RelativePathOperatorTests
 
     [Theory]
     [InlineData(@"c:\hello", @"d:\world")]
+    [InlineData(@"c:\hello", @"ram:\world")]
     public void FolderInvalid(string startDir, string endDir) {
         AbsoluteFolderPath start = startDir;
         AbsoluteFolderPath end = endDir;
-        RelativeFolderPath combined;
-        Should.Throw<Exception>(() => combined = start >> end);
+        Should.Throw<Exception>(() => start >> end);
     }
 
     [Theory]
