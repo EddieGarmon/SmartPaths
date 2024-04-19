@@ -41,7 +41,6 @@ public class FolderPathTests
     [InlineData(@"c:\")]
     [InlineData(@"\\unc\path")]
     [InlineData(@"http://path/")]
-    [InlineData(@"hello\world\")]
     public void RelativeFolderInvalid(string source) {
         Should.Throw<Exception>(() => new RelativeFolderPath(source));
     }
@@ -60,6 +59,7 @@ public class FolderPathTests
     [InlineData(@"..\.", @"..\")]
     [InlineData(@"..\Hello\World", @"..\Hello\World\")]
     [InlineData(@"..\Hello\World\", @"..\Hello\World\")]
+    [InlineData(@"hello\world\", @".\hello\world\")]
     public void RelativeFolderValid(string source, string clean) {
         RelativeFolderPath dir = new(source);
         dir.ToString().ShouldBe(clean);
