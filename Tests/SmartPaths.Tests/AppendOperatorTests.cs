@@ -8,9 +8,21 @@ public class AppendOperatorTests
     [Theory]
     [InlineData(@"c:\", @"..\relative")]
     [InlineData(@"c:\Hello\World", @".\..\..\..\Moto")]
-    public void FileInvalid(AbsoluteFolderPath absoluteDir, RelativeFilePath relativeFile) {
-        Should.Throw<Exception>(() => absoluteDir + relativeFile);
-        Should.Throw<Exception>(() => absoluteDir / relativeFile);
+    public void InvalidFile(string absoluteDir, string relativeFile) {
+        AbsoluteFolderPath absolute = absoluteDir;
+        RelativeFilePath relative = relativeFile;
+        Should.Throw<Exception>(() => absolute + relative);
+        Should.Throw<Exception>(() => absolute / relative);
+    }
+
+    [Theory]
+    [InlineData(@"c:\", @"..\relative")]
+    [InlineData(@"c:\Hello\World", @".\..\..\..\Moto")]
+    public void InvalidFolder(string absoluteDir, string relativeDir) {
+        AbsoluteFolderPath absolute = absoluteDir;
+        RelativeFolderPath relative = relativeDir;
+        Should.Throw<Exception>(() => absolute + relative);
+        Should.Throw<Exception>(() => absolute / relative);
     }
 
     [Theory]
@@ -19,17 +31,12 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto")]
-    public void FileValid(AbsoluteFolderPath absoluteDir, RelativeFilePath relativeFile, AbsoluteFilePath combinedFile) {
-        (absoluteDir + relativeFile).ShouldBe(combinedFile);
-        (absoluteDir / relativeFile).ShouldBe(combinedFile);
-    }
-
-    [Theory]
-    [InlineData(@"c:\", @"..\relative")]
-    [InlineData(@"c:\Hello\World", @".\..\..\..\Moto")]
-    public void FolderInvalid(AbsoluteFolderPath absoluteDir, RelativeFolderPath relativeDir) {
-        Should.Throw<Exception>(() => absoluteDir + relativeDir);
-        Should.Throw<Exception>(() => absoluteDir / relativeDir);
+    public void ValidFile(string absoluteDir, string relativeFile, string combinedFile) {
+        AbsoluteFolderPath absolute = absoluteDir;
+        RelativeFilePath relative = relativeFile;
+        AbsoluteFilePath combined = combinedFile;
+        (absolute + relative).ShouldBe(combined);
+        (absolute / relative).ShouldBe(combined);
     }
 
     [Theory]
@@ -38,9 +45,12 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto\")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto\")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto\")]
-    public void FolderValid(AbsoluteFolderPath absoluteDir, RelativeFolderPath relativeDir, AbsoluteFolderPath combinedDir) {
-        (absoluteDir + relativeDir).ShouldBe(combinedDir);
-        (absoluteDir / relativeDir).ShouldBe(combinedDir);
+    public void ValidFolder(string absoluteDir, string relativeDir, string combinedDir) {
+        AbsoluteFolderPath absolute = absoluteDir;
+        RelativeFolderPath relative = relativeDir;
+        AbsoluteFolderPath combined = combinedDir;
+        (absolute + relative).ShouldBe(combined);
+        (absolute / relative).ShouldBe(combined);
     }
 
 }
