@@ -2,7 +2,7 @@
 
 namespace SmartPaths;
 
-public class FilePathTests
+public class FileParsingTests
 {
 
     [Theory]
@@ -13,8 +13,16 @@ public class FilePathTests
     [InlineData(@"c:\")]
     [InlineData(@"c:\filename\")]
     [InlineData(@"c:\filename.ext\")]
-    public void AbsoluteFileInvalid(string source) {
+    public void InvalidAbsoluteFile(string source) {
         Should.Throw<Exception>(() => new AbsoluteFilePath(source));
+    }
+
+    [Theory]
+    [InlineData(@"")]
+    [InlineData(@".\")]
+    [InlineData(@"c:\filename")]
+    public void InvalidRelativeFile(string source) {
+        Should.Throw<Exception>(() => new RelativeFilePath(source));
     }
 
     [Theory]
@@ -28,18 +36,10 @@ public class FilePathTests
     //RAM
     [InlineData(@"ram:\filename", @"ram:\filename", "")]
     [InlineData(@"ram:\filename.ext", @"ram:\filename.ext", "ext")]
-    public void AbsoluteFileValid(string source, string clean, string extension) {
+    public void ValidAbsoluteFile(string source, string clean, string extension) {
         AbsoluteFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);
-    }
-
-    [Theory]
-    [InlineData(@"")]
-    [InlineData(@".\")]
-    [InlineData(@"c:\filename")]
-    public void RelativeFileInvalid(string source) {
-        Should.Throw<Exception>(() => new RelativeFilePath(source));
     }
 
     [Theory]
@@ -57,7 +57,7 @@ public class FilePathTests
     //Root Relative
     [InlineData(@"\filename", @"\filename", "")]
     [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
-    public void RelativeFileValid(string source, string clean, string extension) {
+    public void ValidRelativeFile(string source, string clean, string extension) {
         RelativeFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);

@@ -22,7 +22,7 @@ public class PatternTests
 
     [Fact]
     public void NullInputThrows() {
-        Assert.Throws<ArgumentNullException>(() => PathPatterns.DeterminePathType(null));
+        Assert.Throws<ArgumentNullException>(() => PathPatterns.DeterminePathType(null!));
     }
 
     [Theory]

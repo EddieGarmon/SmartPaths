@@ -43,6 +43,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
                 break;
             case PathType.RootRelative:
                 Parts.AddFirst($"{Path.DirectorySeparatorChar}");
+                path = path.Substring(1);
                 break;
             case PathType.DriveLetter:
                 Parts.AddFirst($@"{match.Groups[1].Value}:\");
