@@ -99,7 +99,12 @@ class Build : NukeBuild
                             });
 
     Target Test =>
-        def => def.DependsOn(Compile)
+        def => def.DependsOn(TestExecution)
+                  .DependsOn(TestReporting);
+
+    Target TestExecution =>
+        def => def.Unlisted()
+                  .DependsOn(Compile)
                   .Produces(PathToTestOutput, PathToTestResults, PathToCoverageResults, PathToCoverageReport)
                   .Executes(() =>
                             {
@@ -118,7 +123,14 @@ class Build : NukeBuild
                                                      .CombineWith(testProjects,
                                                                   (s, p) => s.SetProjectFile(p)
                                                                              .SetLoggers($"trx;LogFileName={p.Name}.trx")));
+                            });
 
+    Target TestReporting =>
+        def => def.Unlisted()
+                  .DependsOn(TestExecution)
+                  .AssuredAfterFailure()
+                  .Executes(() =>
+                            {
                                 foreach (AbsolutePath path in PathToTestOutput.GlobFiles("*.trx")) {
                                     TrxHelper helper = new(path);
                                     //move results.trx file to test results
@@ -128,7 +140,7 @@ class Build : NukeBuild
                                 }
 
                                 ReportGenerator(s => s.SetTargetDirectory(PathToCoverageReport)
-                                                      .SetFramework("net7.0")
+                                                      .SetFramework("net8.0")
                                                       .SetReportTypes(ReportTypes.Html)
                                                       .SetReports(PathToCoverageResults / "*.xml"));
                             });

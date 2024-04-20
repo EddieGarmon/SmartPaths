@@ -8,7 +8,20 @@ internal static class PathHelper
     }
 
     public static LinkedList<string> MakeAbsolute(AbsolutePath fromHere, RelativePath adjustment) {
-        LinkedList<string> result = new(fromHere.Parts);
+        LinkedList<string> result;
+
+        //handle RootRelative
+        if (adjustment.PathType == PathType.RootRelative) {
+            result = [];
+            result.AddFirst(fromHere.RootValue);
+            foreach (string part in adjustment.PartsAfterRoot) {
+                result.AddLast(part);
+            }
+            return result;
+        }
+
+        //handle Relative
+        result = new LinkedList<string>(fromHere.Parts);
         foreach (string part in adjustment.PartsAfterRoot) {
             switch (part) {
                 case ".":

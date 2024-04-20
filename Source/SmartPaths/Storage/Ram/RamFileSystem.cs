@@ -8,18 +8,19 @@ public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
     private readonly RamFolder _root;
 
     public RamFileSystem() {
-        _root = new RamFolder(this, "ram:\\");
+        AbsoluteFolderPath rootPath = @"ram:\";
+        WorkingDirectory = rootPath;
+        _root = new RamFolder(this, rootPath);
         _allFolders.Add(_root.Path, _root);
-        CurrentDirectory = _root.Path;
     }
 
     public override AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";
 
     public override AbsoluteFolderPath AppRoamingStoragePath { get; } = @"ram:\RoamingStorage\";
 
-    public override AbsoluteFolderPath CurrentDirectory { get; set; }
-
     public override AbsoluteFolderPath TempStoragePath { get; } = @"ram:\Temp\";
+
+    public override AbsoluteFolderPath WorkingDirectory { get; set; }
 
     public override async Task<RamFile> CreateFile(AbsoluteFilePath absoluteFile,
                                                    CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {

@@ -11,8 +11,8 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public RelativeFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFilePath(IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(false, parts, partsLength, newItemName) { }
+    internal RelativeFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
+        : base(pathType, false, parts, partsLength, newItemName) { }
 
     public string FileExtension {
         get {

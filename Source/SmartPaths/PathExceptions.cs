@@ -3,8 +3,8 @@
 internal static class PathExceptions
 {
 
-    public static Exception NotARelativePath(string path) {
-        return new Exception("The specified path is not a relative path: " + path);
+    public static Exception TypeMismatch(PathType expected, PathType actual) {
+        return new Exception($"Expected a path of type: {expected}, but found a path of type: {actual}.");
     }
 
     public static Exception UndefinedSiblingFor(string path) {

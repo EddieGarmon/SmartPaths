@@ -13,4 +13,6 @@ public static class FileSystem
 
     public static RamFileSystem Ram => _ram ??= new RamFileSystem();
 
+    public static IFileSystem Current { get; set; } = Disk;
+
 }

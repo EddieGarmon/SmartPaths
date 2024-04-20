@@ -30,8 +30,59 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
             }
         }
 
-        path = ExtractRootFromPath(path);
-        Segment(path);
+        //Match and strip the root
+        (PathType matchType, Match match) = PathPatterns.DeterminePathType(path);
+        if (!matchType.HasFlag(pathType)) {
+            throw PathExceptions.TypeMismatch(pathType, matchType);
+        }
+        //set the more specific path type
+        PathType = matchType;
+        switch (matchType) {
+            case PathType.Relative:
+                Parts.AddFirst(string.Empty);
+                break;
+            case PathType.RootRelative:
+                Parts.AddFirst($"{Path.DirectorySeparatorChar}");
+                path = path.Substring(1);
+                break;
+            case PathType.DriveLetter:
+                Parts.AddFirst($@"{match.Groups[1].Value}:\");
+                path = match.Groups[2].Value;
+                break;
+            case PathType.RamDrive:
+                Parts.AddFirst(@"ram:\");
+                path = match.Groups[2].Value;
+                break;
+            case PathType.NetworkShare:
+                Parts.AddFirst($@"{match.Groups[1].Value}\");
+                path = match.Groups[2].Value;
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(path));
+        }
+
+        //parse remaining parts now that the root has been stripped
+        ReadOnlySpan<char> span = path.AsSpan();
+        int nextSegmentStart = 0;
+        for (int i = 0; i < path.Length; i++) {
+            char @char = span[i];
+            if (@char != '\\' && @char != '/') {
+                continue;
+            }
+
+            // add a segment if length is > 0;
+            int length = i - nextSegmentStart;
+            if (length > 0) {
+                Parts.AddLast(span.Slice(nextSegmentStart, length).ToString());
+            }
+
+            nextSegmentStart = i + 1;
+        }
+
+        if (nextSegmentStart < path.Length) {
+            Parts.AddLast(span.Slice(nextSegmentStart).ToString());
+        }
+
         CleanUpRoute();
     }
 
@@ -51,7 +102,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     /// <summary>Gets a value indicating whether this instance is an absolute path.</summary>
     /// <value><c>true</c> if this instance is absolute path; otherwise, <c>false</c>.</value>
-    public bool IsAbsolutePath => (PathType & PathType.Absolute) == PathType.Absolute;
+    public bool IsAbsolutePath => PathType.HasFlag(PathType.Absolute);
 
     /// <inheritdoc />
     public bool IsFilePath => !IsFolderPath;
@@ -60,7 +111,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     public bool IsFolderPath { get; }
 
     /// <inheritdoc />
-    public bool IsRelativePath => (PathType | PathType.Relative) == PathType.Relative;
+    public bool IsRelativePath => PathType.HasFlag(PathType.Relative);
 
     public PathType PathType { get; }
 
@@ -205,75 +256,26 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         }
 
         // re-validate cleaned up input
-        // .\ and ..\ required for relative path part[1]
-        // .\ and ..\ illegal for absolute path[1]
-        if (IsAbsolutePath) {
-            if (IsFolderPath && Parts.Count == 1) {
-                //valid root folder
-            } else if (PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
-                throw new Exception("Not a valid absolute path.");
-            }
-        } else {
-            if (!PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
-                throw new Exception("Not a valid relative path.");
-            }
+        // .\ and ..\ required for non-rooted relative path: part[1]
+        // .\ and ..\ illegal for absolute path: path[1]
+        if (IsAbsolutePath && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+            throw new Exception("Not a valid absolute path.");
         }
-
-        if (IsFilePath && ((IsAbsolutePath && Parts.Count == 1) || (IsRelativePath && Parts.Count == 2))) {
+        if (PathType == PathType.Relative && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+            //normalize to current directory relative
+            Parts.AddAfter(Parts.First, ".");
+        }
+        // ensure filename on file path
+        if (IsFilePath &&
+            ((IsAbsolutePath && Parts.Count == 1) ||
+             (PathType == PathType.RootRelative && Parts.Count == 1) ||
+             (PathType == PathType.Relative && Parts.Count == 2))) {
             throw new Exception("No file name specified.");
-        }
-    }
-
-    private string ExtractRootFromPath(string path) {
-        (PathType pathType, Match match) = PathPatterns.DeterminePathType(path);
-        switch (pathType) {
-            case PathType.Relative:
-                if (!IsRelativePath) {
-                    throw PathExceptions.NotARelativePath(path);
-                }
-                Parts.AddFirst(string.Empty);
-                return path;
-            case PathType.DriveLetter:
-                Parts.AddFirst(match.Groups[1].Value + @":\");
-                return match.Groups[2].Value;
-            case PathType.RamDrive:
-                Parts.AddFirst(@"ram:\");
-                return match.Groups[2].Value;
-            case PathType.NetworkShare:
-                Parts.AddFirst(match.Groups[1].Value);
-                return match.Groups[2].Value;
-            default:
-                throw new ArgumentOutOfRangeException();
         }
     }
 
     IFolderPath? IPath.GetParent() {
         return GetParent();
-    }
-
-    private void Segment(string path) {
-        ReadOnlySpan<char> span = path.AsSpan();
-
-        //parse parts after root has been stripped
-        int nextSegmentStart = 0;
-        for (int i = 0; i < path.Length; i++) {
-            char @char = span[i];
-            if (@char != '\\' && @char != '/') {
-                continue;
-            }
-
-            // add a segment if length is > 0;
-            int length = i - nextSegmentStart;
-            if (length > 0) {
-                Parts.AddLast(span.Slice(nextSegmentStart, length).ToString());
-            }
-
-            nextSegmentStart = i + 1;
-        }
-
-        if (nextSegmentStart < path.Length) {
-            Parts.AddLast(span.Slice(nextSegmentStart).ToString());
-        }
     }
 
     public static bool operator ==(BasePath? left, BasePath? right) {

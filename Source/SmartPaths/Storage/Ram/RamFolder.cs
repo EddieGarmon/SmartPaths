@@ -1,7 +1,9 @@
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace SmartPaths.Storage.Ram;
 
+[DebuggerDisplay("{Path.ToString()}")]
 public class RamFolder : IFolder
 {
 
@@ -14,7 +16,9 @@ public class RamFolder : IFolder
         _folders = [];
         _files = [];
         Path = path;
-        Parent = path.IsRoot ? this : _fileSystem.GetFolder(Path.Parent).Result!;
+        Parent = path.IsRoot ?
+                     this :
+                     _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
     }
 
     public bool IsRoot => Path.IsRoot;
@@ -55,15 +59,13 @@ public class RamFolder : IFolder
 
     public Task<RamFolder> CreateFolder(string folderName) {
         AbsoluteFolderPath fullPath = Path.GetChildFolderPath(folderName);
-        lock (_fileSystem) {
-            RamFolder folder = _folders.GetOrAdd(fullPath,
-                                                 path => {
-                                                     RamFolder newFolder = new(_fileSystem, fullPath);
-                                                     _fileSystem.Register(newFolder);
-                                                     return newFolder;
-                                                 });
-            return Task.FromResult(folder);
-        }
+        RamFolder folder = _folders.GetOrAdd(fullPath,
+                                             path => {
+                                                 RamFolder newFolder = new(_fileSystem, path);
+                                                 _fileSystem.Register(newFolder);
+                                                 return newFolder;
+                                             });
+        return Task.FromResult(folder);
     }
 
     public Task Delete() {
