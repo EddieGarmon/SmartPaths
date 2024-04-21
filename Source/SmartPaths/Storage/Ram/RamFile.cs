@@ -3,7 +3,7 @@ using System.Text;
 
 namespace SmartPaths.Storage.Ram;
 
-[DebuggerDisplay("{Path.ToString()}")]
+[DebuggerDisplay("[File] {Path.ToString()}")]
 public class RamFile : IFile
 {
 

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace SmartPaths;
 
 /// <summary>Directories will always end with a 'PathSeparator' and files will not.</summary>
-[DebuggerDisplay("{ToString()}")]
+[DebuggerDisplay("[Path] {ToString()}")]
 public abstract class BasePath : IPath, IEquatable<BasePath>
 {
 

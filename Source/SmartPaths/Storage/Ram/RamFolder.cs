@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace SmartPaths.Storage.Ram;
 
-[DebuggerDisplay("{Path.ToString()}")]
+[DebuggerDisplay("[Folder] {Path.ToString()}")]
 public class RamFolder : IFolder
 {
 
