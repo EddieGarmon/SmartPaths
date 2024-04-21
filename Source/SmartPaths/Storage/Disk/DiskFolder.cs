@@ -1,5 +1,8 @@
-﻿namespace SmartPaths.Storage.Disk;
+﻿using System.Diagnostics;
 
+namespace SmartPaths.Storage.Disk;
+
+[DebuggerDisplay("[Folder] {Path.ToString()}")]
 public class DiskFolder : IFolder
 {
 

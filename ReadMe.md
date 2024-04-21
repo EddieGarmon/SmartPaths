@@ -40,7 +40,33 @@ The implementation of the abstractions are illustrated in the following diagram:
 
 ## How are Files and Folders handled in SmartPaths?
 
-TODO
+A "Disk" file system and a "RAM" file system have been implemented.\
+Both types can be instantiated explicitly, or accessed from the "FileSystem" class.
+
+```C#
+FileSystem.Disk
+FileSystem.Ram
+```
+
+The FileSystem class has a "Current" property that defaults to the DiskFileSystem.\
+This property is settable if you wish to use another file system in your application.\
+
+```C#
+FileSystem.Current
+```
+
+There is a "WorkingDirectory" folder path in every file system.\
+With the disk file system, this is backed by Environment.CurrentDirectory.
+
+```C#
+FileSystem.Disk.WorkingDirectory = @"c:\my\path\";
+```
+
+All file system methods taking a relative path, are resolved against the "WorkingDirectory" before being executed.
+
+```C#
+FileSystem.Disk.GetOrCreateFile(@"some\path");
+```
 
 ## How are Files and Folders modeled in SmartPaths?
 

@@ -1,5 +1,8 @@
+using System.Diagnostics;
+
 namespace SmartPaths.Storage.Disk;
 
+[DebuggerDisplay("[File] {Path.ToString()}")]
 public class DiskFile : IFile
 {
 

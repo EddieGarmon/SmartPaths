@@ -23,7 +23,7 @@ public class FolderParsingTests
     [InlineData(@"c:\")]
     [InlineData(@"\\unc\path")]
     [InlineData(@"http://path/")]
-    //[InlineData(@"\..")] todo: should not be able to go above the root
+    [InlineData(@"\..")]
     public void InvalidRelativeFolder(string input) {
         Should.Throw<Exception>(() => new RelativeFolderPath(input));
     }
@@ -67,7 +67,7 @@ public class FolderParsingTests
     [InlineData(@"..\..", @"..\..\", false)]
     [InlineData(@"..\Hello\World", @"..\Hello\World\", false)]
     [InlineData(@"..\Hello\World\", @"..\Hello\World\", false)]
-    //[InlineData(@"\", @"\", true)]
+    [InlineData(@"\", @"\", true)]
     [InlineData(@"\Hello", @"\Hello\", true)]
     public void ValidRelativeFolder(string input, string clean, bool isRooted) {
         RelativeFolderPath source = input;

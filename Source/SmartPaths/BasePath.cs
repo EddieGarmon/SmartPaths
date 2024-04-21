@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace SmartPaths;
 
 /// <summary>Directories will always end with a 'PathSeparator' and files will not.</summary>
-[DebuggerDisplay("{ToString()}")]
+[DebuggerDisplay("[Path] {ToString()}")]
 public abstract class BasePath : IPath, IEquatable<BasePath>
 {
 
@@ -104,18 +104,35 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     /// <value><c>true</c> if this instance is absolute path; otherwise, <c>false</c>.</value>
     public bool IsAbsolutePath => PathType.HasFlag(PathType.Absolute);
 
-    /// <inheritdoc />
     public bool IsFilePath => !IsFolderPath;
 
-    /// <inheritdoc />
     public bool IsFolderPath { get; }
 
-    /// <inheritdoc />
     public bool IsRelativePath => PathType.HasFlag(PathType.Relative);
 
     public PathType PathType { get; }
 
     public string RootValue => Parts.First!.Value;
+
+    protected bool IsRootedPath {
+        get {
+            switch (PathType) {
+                case PathType.Relative:
+                    return false;
+
+                case PathType.RootRelative:
+                case PathType.Absolute:
+                case PathType.DriveLetter:
+                case PathType.RamDrive:
+                case PathType.NetworkShare:
+                    return true;
+
+                case PathType.Unknown:
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+        }
+    }
 
     protected string ItemName => Parts.Last!.Value;
 
@@ -128,7 +145,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     protected internal IEnumerable<string> PartsAfterRoot => Parts.Skip(1);
 
-    /// <inheritdoc />
     public bool Equals(BasePath? other) {
         if (other is null) {
             return false;
@@ -139,7 +155,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return PathType == other.PathType && IsFolderPath == other.IsFolderPath && Parts.SequenceEqual(other.Parts);
     }
 
-    /// <inheritdoc />
     public override bool Equals(object? obj) {
         if (obj is null) {
             return false;
@@ -193,11 +208,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     private void CleanUpRoute() {
         if (Parts.Count == 1) {
-            if (IsFolderPath && IsAbsolutePath) {
+            if (IsFolderPath && IsRootedPath) {
                 //a single root folder is allowed.
                 return;
             }
-
             throw new Exception("Empty path is not valid.");
         }
 
@@ -256,10 +270,10 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         }
 
         // re-validate cleaned up input
-        // .\ and ..\ required for non-rooted relative path: part[1]
-        // .\ and ..\ illegal for absolute path: path[1]
-        if (IsAbsolutePath && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
-            throw new Exception("Not a valid absolute path.");
+        // .\ and ..\ required for non-rooted relative paths: part[1]
+        // .\ and ..\ illegal for all rooted paths: path[1]
+        if (IsRootedPath && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+            throw new Exception("Not a valid rooted path.");
         }
         if (PathType == PathType.Relative && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
             //normalize to current directory relative
