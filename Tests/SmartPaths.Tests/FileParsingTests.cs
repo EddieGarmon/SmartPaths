@@ -36,7 +36,9 @@ public class FileParsingTests
     //RAM
     [InlineData(@"ram:\filename", @"ram:\filename", "")]
     [InlineData(@"ram:\filename.ext", @"ram:\filename.ext", "ext")]
-    public void ValidAbsoluteFile(string source, string clean, string extension) {
+    public void ValidAbsoluteFile(string source,
+                                  string clean,
+                                  string extension) {
         AbsoluteFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);
@@ -57,7 +59,9 @@ public class FileParsingTests
     //Root Relative
     [InlineData(@"\filename", @"\filename", "")]
     [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
-    public void ValidRelativeFile(string source, string clean, string extension) {
+    public void ValidRelativeFile(string source,
+                                  string clean,
+                                  string extension) {
         RelativeFilePath file = source;
         file.ToString().ShouldBe(clean);
         file.FileExtension.ShouldBe(extension);

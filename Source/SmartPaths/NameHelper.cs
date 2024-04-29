@@ -24,7 +24,9 @@ internal static class NameHelper
         }
     }
 
-    public static void ExtractExtension(string nameWithExtension, out string userGivenPart, out string extension) {
+    public static void ExtractExtension(string nameWithExtension,
+                                        out string userGivenPart,
+                                        out string extension) {
         int lastDot = nameWithExtension.LastIndexOf('.');
         if (lastDot > 0) {
             userGivenPart = nameWithExtension.Substring(0, lastDot);

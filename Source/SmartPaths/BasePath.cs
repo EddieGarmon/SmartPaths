@@ -11,7 +11,9 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     private string? _toString;
 
-    protected BasePath(PathType pathType, bool isFolder, string path) {
+    protected BasePath(PathType pathType,
+                       bool isFolder,
+                       string path) {
         PathType = pathType;
         IsFolderPath = isFolder;
         Parts = new LinkedList<string>();
@@ -86,7 +88,11 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         CleanUpRoute();
     }
 
-    protected BasePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null) {
+    protected BasePath(PathType pathType,
+                       bool isFolder,
+                       IEnumerable<string> parts,
+                       int partsLength,
+                       string? newItemName = null) {
         PathType = pathType;
         IsFolderPath = isFolder;
         Parts = new LinkedList<string>(parts.Take(partsLength));
@@ -136,11 +142,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     protected string ItemName => Parts.Last!.Value;
 
-    /// <summary>
-    ///     A list containing all the individual parts of the path. <br /> The root is
-    ///     always stored in the first segment. If that segment is <see cref="string.Empty" />,
-    ///     it is a relative path.
-    /// </summary>
+    /// <summary>A list containing all the individual parts of the path. <br /> The root is always stored
+    ///     in the first segment. If that segment is <see cref="string.Empty" />, it is a relative path.</summary>
     protected internal LinkedList<string> Parts { get; }
 
     protected internal IEnumerable<string> PartsAfterRoot => Parts.Skip(1);
@@ -166,10 +169,8 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     }
 
     /// <summary>Returns a hash code for this instance.</summary>
-    /// <returns>
-    ///     A hash code for this instance, suitable for use in hashing algorithms and data
-    ///     structures like a hash table.
-    /// </returns>
+    /// <returns>A hash code for this instance, suitable for use in hashing algorithms and data structures
+    ///     like a hash table.</returns>
     public override int GetHashCode() {
         int hashCode = HashCode.Combine((int)PathType, IsFolderPath, ToString());
         return hashCode;
@@ -292,21 +293,20 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return GetParent();
     }
 
-    public static bool operator ==(BasePath? left, BasePath? right) {
+    public static bool operator ==(BasePath? left,
+                                   BasePath? right) {
         return Equals(left, right);
     }
 
-    /// <summary>
-    ///     Performs an implicit conversion from <see cref="BasePath" /> to
-    ///     <see cref="string" />.
-    /// </summary>
+    /// <summary>Performs an implicit conversion from <see cref="BasePath" /> to <see cref="string" />.</summary>
     /// <param name="path">The path.</param>
     /// <returns>The result of the conversion.</returns>
     public static implicit operator string(BasePath path) {
         return path.ToString();
     }
 
-    public static bool operator !=(BasePath? left, BasePath? right) {
+    public static bool operator !=(BasePath? left,
+                                   BasePath? right) {
         return !Equals(left, right);
     }
 
