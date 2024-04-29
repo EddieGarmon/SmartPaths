@@ -10,7 +10,8 @@ public interface IFolderPath : IPath
 public interface IFolderPath<out TFolderPath, out TFilePath> : IFolderPath
 {
 
-    TFilePath GetChildFilePath(string name, string extension);
+    TFilePath GetChildFilePath(string name,
+                               string extension);
 
     TFilePath GetChildFilePath(string fileNameWithExtension);
 

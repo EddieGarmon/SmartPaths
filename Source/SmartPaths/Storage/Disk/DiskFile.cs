@@ -31,7 +31,8 @@ public class DiskFile : IFile
         return Task.Run(() => new DateTimeOffset(File.GetLastWriteTime(Path)));
     }
 
-    public Task<DiskFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<DiskFile> Move(AbsoluteFilePath newPath,
+                               CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(newPath);
         AssertExists();
 
@@ -80,7 +81,8 @@ public class DiskFile : IFile
         }
     }
 
-    Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {
+    Task<IFile> IFile.Move(AbsoluteFilePath newPath,
+                           CollisionStrategy collisionStrategy) {
         return Move(newPath, collisionStrategy).ContinueWith(task => (IFile)task.Result);
     }
 

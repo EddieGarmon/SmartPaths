@@ -112,7 +112,8 @@ namespace SmartPaths
     {
 
         public static void ThrowIfNullOrEmpty([NotNull] string? argument,
-                                              [CallerArgumentExpression(nameof(argument))] string? paramName = null) {
+                                              [CallerArgumentExpression(nameof(argument))]
+                                              string? paramName = null) {
             ArgumentNullException.ThrowIfNull(argument, paramName);
             if (string.IsNullOrEmpty(argument)) {
                 throw new System.ArgumentException("Argument is empty", paramName);

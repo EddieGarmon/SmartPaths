@@ -2,10 +2,8 @@
 
 namespace SmartPaths;
 
-/// <summary>
-///     Parses a path from a string. By convention, ALL Folder paths end with the
-///     <see cref="Path.DirectorySeparatorChar" />
-/// </summary>
+/// <summary>Parses a path from a string. By convention, ALL Folder paths end with the
+///     <see cref="Path.DirectorySeparatorChar" /></summary>
 public static class SmartPath
 {
 

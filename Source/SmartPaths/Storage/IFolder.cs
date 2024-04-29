@@ -9,7 +9,8 @@ public interface IFolder
 
     AbsoluteFolderPath Path { get; }
 
-    Task<IFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    Task<IFile> CreateFile(string fileName,
+                           CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<IFolder> CreateFolder(string folderName);
 

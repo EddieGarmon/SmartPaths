@@ -11,7 +11,8 @@ public class RamFolder : IFolder
     private readonly RamFileSystem _fileSystem;
     private readonly ConcurrentDictionary<AbsoluteFolderPath, RamFolder> _folders;
 
-    internal RamFolder(RamFileSystem fileSystem, AbsoluteFolderPath path) {
+    internal RamFolder(RamFileSystem fileSystem,
+                       AbsoluteFolderPath path) {
         _fileSystem = fileSystem;
         _folders = [];
         _files = [];
@@ -31,7 +32,8 @@ public class RamFolder : IFolder
 
     IFolder IFolder.Parent => Parent;
 
-    public Task<RamFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<RamFile> CreateFile(string fileName,
+                                    CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
         if (!_files.ContainsKey(filePath)) {
             //get the folder, create the file
@@ -136,7 +138,8 @@ public class RamFolder : IFolder
         _files.Add(newFile.Path, newFile);
     }
 
-    Task<IFile> IFolder.CreateFile(string fileName, CollisionStrategy collisionStrategy) {
+    Task<IFile> IFolder.CreateFile(string fileName,
+                                   CollisionStrategy collisionStrategy) {
         return CreateFile(fileName, collisionStrategy).ContinueWith(task => (IFile)task.Result);
     }
 

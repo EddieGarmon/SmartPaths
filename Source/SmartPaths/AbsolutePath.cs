@@ -5,10 +5,15 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
 
     private AbsoluteFolderPath? _parent;
 
-    protected AbsolutePath(bool isFolder, string path)
+    protected AbsolutePath(bool isFolder,
+                           string path)
         : base(PathType.Absolute, isFolder, path) { }
 
-    protected AbsolutePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
+    protected AbsolutePath(PathType pathType,
+                           bool isFolder,
+                           IEnumerable<string> parts,
+                           int partsLength,
+                           string? newItemName = null)
         : base(pathType, isFolder, parts, partsLength, newItemName) { }
 
     public override bool HasParent => Parts.Count > 1;
@@ -18,7 +23,8 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
             _parent ??= new AbsoluteFolderPath(PathType, Parts, Parts.Count - 1) :
             throw new Exception($"The root {RootValue} does not have a parent.");
 
-    public AbsoluteFilePath GetSiblingFilePath(string name, string extension) {
+    public AbsoluteFilePath GetSiblingFilePath(string name,
+                                               string extension) {
         return GetSiblingFilePath($"{name}.{extension}");
     }
 

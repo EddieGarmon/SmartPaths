@@ -91,7 +91,7 @@ internal static partial class PathPatterns
         return new Regex(RamDrivePattern);
     }
 
-    public static Regex RootRelativeRegex(){
+    public static Regex RootRelativeRegex() {
         return new Regex(RootRelativePattern);
     }
 

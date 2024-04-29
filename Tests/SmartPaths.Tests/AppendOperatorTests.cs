@@ -8,7 +8,8 @@ public class AppendOperatorTests
     [Theory]
     [InlineData(@"c:\", @"..\relative")]
     [InlineData(@"c:\Hello\World", @".\..\..\..\Moto")]
-    public void InvalidFile(string absoluteDir, string relativeFile) {
+    public void InvalidFile(string absoluteDir,
+                            string relativeFile) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFilePath relative = relativeFile;
         Should.Throw<Exception>(() => absolute + relative);
@@ -18,7 +19,8 @@ public class AppendOperatorTests
     [Theory]
     [InlineData(@"c:\", @"..\relative")]
     [InlineData(@"c:\Hello\World", @".\..\..\..\Moto")]
-    public void InvalidFolder(string absoluteDir, string relativeDir) {
+    public void InvalidFolder(string absoluteDir,
+                              string relativeDir) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFolderPath relative = relativeDir;
         Should.Throw<Exception>(() => absolute + relative);
@@ -31,7 +33,9 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto")]
-    public void ValidFile(string absoluteDir, string relativeFile, string combinedFile) {
+    public void ValidFile(string absoluteDir,
+                          string relativeFile,
+                          string combinedFile) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFilePath relative = relativeFile;
         AbsoluteFilePath combined = combinedFile;
@@ -45,7 +49,9 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto\")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto\")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto\")]
-    public void ValidFolder(string absoluteDir, string relativeDir, string combinedDir) {
+    public void ValidFolder(string absoluteDir,
+                            string relativeDir,
+                            string combinedDir) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFolderPath relative = relativeDir;
         AbsoluteFolderPath combined = combinedDir;

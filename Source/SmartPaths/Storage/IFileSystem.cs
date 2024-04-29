@@ -11,9 +11,11 @@ public interface IFileSystem
 
     AbsoluteFolderPath WorkingDirectory { get; set; }
 
-    Task<IFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    Task<IFile> CreateFile(AbsoluteFilePath absoluteFile,
+                           CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
-    Task<IFile> CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    Task<IFile> CreateFile(RelativeFilePath relativeFile,
+                           CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<IFolder> CreateFolder(AbsoluteFolderPath absoluteFolder);
 
