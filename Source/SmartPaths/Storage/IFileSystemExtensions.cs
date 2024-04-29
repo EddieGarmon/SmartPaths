@@ -49,7 +49,30 @@ public static class IFileSystemExtensions
         return await folder.CreateFile(path, utf8Contents, collisionStrategy);
     }
 
-    public static async Task<IFile> GetOrCreateFile(this IFileSystem fileSystem, AbsoluteFilePath path) {
+    public static async Task<IEnumerable<IFile>> GetFiles(this IFileSystem filesystem,
+                                                          AbsoluteFolderPath folderPath,
+                                                          string wildcardPattern = "") {
+        IFolder? folder = await filesystem.GetFolder(folderPath);
+        if (folder is null) {
+            return [];
+        }
+        IReadOnlyList<IFile> files = await folder.GetFiles();
+        return wildcardPattern == string.Empty ? files : files.Filter(wildcardPattern);
+    }
+
+    public static async Task<IEnumerable<IFolder>> GetFolders(this IFileSystem filesystem,
+                                                              AbsoluteFolderPath folderPath,
+                                                              string wildcardPattern = "") {
+        IFolder? folder = await filesystem.GetFolder(folderPath);
+        if (folder is null) {
+            return [];
+        }
+        IReadOnlyList<IFolder> folders = await folder.GetFolders();
+        return wildcardPattern == string.Empty ? folders : folders.Filter(wildcardPattern);
+    }
+
+    public static async Task<IFile> GetOrCreateFile(this IFileSystem fileSystem,
+                                                    AbsoluteFilePath path) {
         IFolder folder = await fileSystem.CreateFolder(path.Folder);
         return await folder.GetOrCreateFile(path.FileName);
     }
