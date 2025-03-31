@@ -4,10 +4,7 @@
 public static class IFileSystemExtensions
 {
 
-    public static async Task<bool> CopyFile(this IFileSystem fileSystem,
-                                            AbsoluteFilePath sourcePath,
-                                            AbsoluteFilePath targetPath,
-                                            bool overwriteIfExists = false) {
+    public static async Task<bool> CopyFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, AbsoluteFilePath targetPath, bool overwriteIfExists = false) {
         IFile? source = await fileSystem.GetFile(sourcePath);
         if (source is null) {
             return false;
@@ -25,10 +22,7 @@ public static class IFileSystemExtensions
         return true;
     }
 
-    public static Task<bool> CopyFile(this IFileSystem fileSystem,
-                                      AbsoluteFilePath sourcePath,
-                                      RelativeFilePath targetPath,
-                                      bool overwriteIfExists = false) {
+    public static Task<bool> CopyFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, RelativeFilePath targetPath, bool overwriteIfExists = false) {
         AbsoluteFilePath absoluteTargetPath = sourcePath.Folder + targetPath;
         return CopyFile(fileSystem, sourcePath, absoluteTargetPath, overwriteIfExists);
     }
@@ -49,9 +43,7 @@ public static class IFileSystemExtensions
         return await folder.CreateFile(path, utf8Contents, collisionStrategy);
     }
 
-    public static async Task<IEnumerable<IFile>> GetFiles(this IFileSystem filesystem,
-                                                          AbsoluteFolderPath folderPath,
-                                                          string wildcardPattern = "") {
+    public static async Task<IEnumerable<IFile>> GetFiles(this IFileSystem filesystem, AbsoluteFolderPath folderPath, string wildcardPattern = "") {
         IFolder? folder = await filesystem.GetFolder(folderPath);
         if (folder is null) {
             return [];
@@ -60,9 +52,7 @@ public static class IFileSystemExtensions
         return wildcardPattern == string.Empty ? files : files.Filter(wildcardPattern);
     }
 
-    public static async Task<IEnumerable<IFolder>> GetFolders(this IFileSystem filesystem,
-                                                              AbsoluteFolderPath folderPath,
-                                                              string wildcardPattern = "") {
+    public static async Task<IEnumerable<IFolder>> GetFolders(this IFileSystem filesystem, AbsoluteFolderPath folderPath, string wildcardPattern = "") {
         IFolder? folder = await filesystem.GetFolder(folderPath);
         if (folder is null) {
             return [];
@@ -71,23 +61,16 @@ public static class IFileSystemExtensions
         return wildcardPattern == string.Empty ? folders : folders.Filter(wildcardPattern);
     }
 
-    public static async Task<IFile> GetOrCreateFile(this IFileSystem fileSystem,
-                                                    AbsoluteFilePath path) {
+    public static async Task<IFile> GetOrCreateFile(this IFileSystem fileSystem, AbsoluteFilePath path) {
         IFolder folder = await fileSystem.CreateFolder(path.Folder);
         return await folder.GetOrCreateFile(path.FileName);
     }
 
-    public static Task<bool> MoveFile(this IFileSystem fileSystem,
-                                      AbsoluteFilePath sourcePath,
-                                      AbsoluteFilePath targetPath,
-                                      bool overwriteIfExists = false) {
+    public static Task<bool> MoveFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, AbsoluteFilePath targetPath, bool overwriteIfExists = false) {
         throw new NotImplementedException();
     }
 
-    public static Task<bool> MoveFile(this IFileSystem fileSystem,
-                                      AbsoluteFilePath sourcePath,
-                                      RelativeFilePath targetPath,
-                                      bool overwriteIfExists = false) {
+    public static Task<bool> MoveFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, RelativeFilePath targetPath, bool overwriteIfExists = false) {
         AbsoluteFilePath absoluteTargetPath = sourcePath.Folder + targetPath;
         return fileSystem.MoveFile(sourcePath, absoluteTargetPath, overwriteIfExists);
     }

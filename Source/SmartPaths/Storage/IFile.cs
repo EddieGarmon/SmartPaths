@@ -15,8 +15,7 @@ public interface IFile
 
     Task<DateTimeOffset> GetLastWriteTime();
 
-    Task<IFile> Move(AbsoluteFilePath newPath,
-                     CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    Task<IFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<Stream> OpenToAppend();
 

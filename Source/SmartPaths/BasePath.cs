@@ -11,9 +11,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     private string? _toString;
 
-    protected BasePath(PathType pathType,
-                       bool isFolder,
-                       string path) {
+    protected BasePath(PathType pathType, bool isFolder, string path) {
         PathType = pathType;
         IsFolderPath = isFolder;
         Parts = new LinkedList<string>();
@@ -88,11 +86,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         CleanUpRoute();
     }
 
-    protected BasePath(PathType pathType,
-                       bool isFolder,
-                       IEnumerable<string> parts,
-                       int partsLength,
-                       string? newItemName = null) {
+    protected BasePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null) {
         PathType = pathType;
         IsFolderPath = isFolder;
         Parts = new LinkedList<string>(parts.Take(partsLength));
@@ -282,9 +276,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         }
         // ensure filename on file path
         if (IsFilePath &&
-            ((IsAbsolutePath && Parts.Count == 1) ||
-             (PathType == PathType.RootRelative && Parts.Count == 1) ||
-             (PathType == PathType.Relative && Parts.Count == 2))) {
+            ((IsAbsolutePath && Parts.Count == 1) || (PathType == PathType.RootRelative && Parts.Count == 1) || (PathType == PathType.Relative && Parts.Count == 2))) {
             throw new Exception("No file name specified.");
         }
     }
@@ -293,8 +285,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return GetParent();
     }
 
-    public static bool operator ==(BasePath? left,
-                                   BasePath? right) {
+    public static bool operator ==(BasePath? left, BasePath? right) {
         return Equals(left, right);
     }
 
@@ -305,8 +296,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return path.ToString();
     }
 
-    public static bool operator !=(BasePath? left,
-                                   BasePath? right) {
+    public static bool operator !=(BasePath? left, BasePath? right) {
         return !Equals(left, right);
     }
 

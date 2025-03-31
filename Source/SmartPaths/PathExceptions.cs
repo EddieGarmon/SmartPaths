@@ -3,8 +3,7 @@
 internal static class PathExceptions
 {
 
-    public static Exception TypeMismatch(PathType expected,
-                                         PathType actual) {
+    public static Exception TypeMismatch(PathType expected, PathType actual) {
         return new Exception($"Expected a path of type: {expected}, but found a path of type: {actual}.");
     }
 
