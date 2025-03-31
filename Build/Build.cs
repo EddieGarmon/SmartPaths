@@ -8,7 +8,6 @@ using Nuke.Common.Tooling;
 using Nuke.Common.Tools.DotNet;
 using Nuke.Common.Tools.ReportGenerator;
 using Nuke.Common.Utilities.Collections;
-using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
 using static Nuke.Common.Tools.ReportGenerator.ReportGeneratorTasks;
 
@@ -134,9 +133,9 @@ class Build : NukeBuild
                                 foreach (AbsolutePath path in PathToTestOutput.GlobFiles("*.trx")) {
                                     TrxHelper helper = new(path);
                                     //move results.trx file to test results
-                                    MoveFileToDirectory(helper.TrxFilepath, PathToTestResults);
+                                    helper.TrxFilepath.MoveToDirectory(PathToTestResults);
                                     //move coverage.xml file to coverage results folder
-                                    MoveFile(helper.CoverageSource, PathToCoverageResults / helper.CoverageDestination);
+                                    helper.CoverageSource.Move(PathToCoverageResults / helper.CoverageDestination);
                                 }
 
                                 ReportGenerator(s => s.SetTargetDirectory(PathToCoverageReport)
