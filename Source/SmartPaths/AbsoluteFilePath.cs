@@ -11,10 +11,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     public AbsoluteFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFilePath(PathType pathType,
-                              IEnumerable<string> parts,
-                              int partsLength,
-                              string? newItemName = null)
+    internal AbsoluteFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(pathType, false, parts, partsLength, newItemName) { }
 
     public string FileExtension {
@@ -41,8 +38,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
 
     public AbsoluteFolderPath Folder => Parent!;
 
-    public static bool TryParse(string value,
-                                [NotNullWhen(true)] out AbsoluteFilePath? path) {
+    public static bool TryParse(string value, [NotNullWhen(true)] out AbsoluteFilePath? path) {
         try {
             path = new AbsoluteFilePath(value);
             return true;
@@ -52,23 +48,19 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         }
     }
 
-    public static AbsoluteFolderPath operator +(AbsoluteFilePath file,
-                                                RelativeFolderPath relative) {
+    public static AbsoluteFolderPath operator +(AbsoluteFilePath file, RelativeFolderPath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
-    public static AbsoluteFilePath operator +(AbsoluteFilePath file,
-                                              RelativeFilePath relative) {
+    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
-    public static AbsoluteFolderPath operator /(AbsoluteFilePath file,
-                                                RelativeFolderPath relative) {
+    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
-    public static AbsoluteFilePath operator /(AbsoluteFilePath file,
-                                              RelativeFilePath relative) {
+    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -77,13 +69,11 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return path is null ? null : new AbsoluteFilePath(path);
     }
 
-    public static RelativeFolderPath operator >> (AbsoluteFilePath fromFile,
-                                                  AbsoluteFolderPath toDir) {
+    public static RelativeFolderPath operator >> (AbsoluteFilePath fromFile, AbsoluteFolderPath toDir) {
         return fromFile.Parent.MakeRelative(toDir);
     }
 
-    public static RelativeFilePath operator >> (AbsoluteFilePath fromFile,
-                                                AbsoluteFilePath toFile) {
+    public static RelativeFilePath operator >> (AbsoluteFilePath fromFile, AbsoluteFilePath toFile) {
         return fromFile.Parent.MakeRelative(toFile);
     }
 

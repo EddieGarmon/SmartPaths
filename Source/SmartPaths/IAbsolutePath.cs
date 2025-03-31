@@ -7,8 +7,7 @@ public interface IAbsolutePath : IPath
 
     string RootValue { get; }
 
-    AbsoluteFilePath GetSiblingFilePath(string name,
-                                        string extension);
+    AbsoluteFilePath GetSiblingFilePath(string name, string extension);
 
     AbsoluteFilePath GetSiblingFilePath(string fileNameWithExtension);
 

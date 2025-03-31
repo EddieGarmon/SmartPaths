@@ -40,9 +40,7 @@ public class FolderParsingTests
     [InlineData(@"C:\Hello\World\..\..", @"C:\", @"C:\")]
     [InlineData(@"\\server\share\Hello\World\..", @"\\server\share\Hello\", @"\\server\share\")]
     [InlineData(@"ram:\Hello\World\..", @"ram:\Hello\", @"ram:\")]
-    public void ValidAbsoluteFolder(string input,
-                                    string clean,
-                                    string rootValue) {
+    public void ValidAbsoluteFolder(string input, string clean, string rootValue) {
         AbsoluteFolderPath source = input;
         source.PathType.HasFlag(PathType.Absolute).ShouldBeTrue();
         source.RootValue.ShouldBe(rootValue);
@@ -71,9 +69,7 @@ public class FolderParsingTests
     [InlineData(@"..\Hello\World\", @"..\Hello\World\", false)]
     [InlineData(@"\", @"\", true)]
     [InlineData(@"\Hello", @"\Hello\", true)]
-    public void ValidRelativeFolder(string input,
-                                    string clean,
-                                    bool isRooted) {
+    public void ValidRelativeFolder(string input, string clean, bool isRooted) {
         RelativeFolderPath source = input;
         source.PathType.ShouldBe(isRooted ? PathType.RootRelative : PathType.Relative);
         source.ToString().ShouldBe(clean);

@@ -2,7 +2,7 @@
 
 namespace SmartPaths;
 
-internal static partial class PathPatterns
+internal static class PathPatterns
 {
 
     //https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats

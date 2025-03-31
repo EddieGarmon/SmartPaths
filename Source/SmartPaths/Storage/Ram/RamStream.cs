@@ -7,8 +7,7 @@ internal class RamStream : Stream
     private readonly RamFile _file;
     private readonly MemoryStream _stream;
 
-    public RamStream(RamFile file,
-                     bool canWrite) {
+    public RamStream(RamFile file, bool canWrite) {
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();
@@ -38,14 +37,11 @@ internal class RamStream : Stream
         _stream.Flush();
     }
 
-    public override int Read(byte[] buffer,
-                             int offset,
-                             int count) {
+    public override int Read(byte[] buffer, int offset, int count) {
         return _stream.Read(buffer, offset, count);
     }
 
-    public override long Seek(long offset,
-                              SeekOrigin origin) {
+    public override long Seek(long offset, SeekOrigin origin) {
         return _stream.Seek(offset, origin);
     }
 
@@ -56,9 +52,7 @@ internal class RamStream : Stream
         _stream.SetLength(value);
     }
 
-    public override void Write(byte[] buffer,
-                               int offset,
-                               int count) {
+    public override void Write(byte[] buffer, int offset, int count) {
         if (!_canWrite) {
             throw new Exception("File not opened for writing." + _file.Path);
         }

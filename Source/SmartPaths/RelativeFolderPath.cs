@@ -8,16 +8,12 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     public RelativeFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFolderPath(PathType pathType,
-                                IEnumerable<string> parts,
-                                int partsLength,
-                                string? newItemName = null)
+    internal RelativeFolderPath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
         : base(pathType, true, parts, partsLength, newItemName) { }
 
     public string FolderName => ItemName;
 
-    public RelativeFilePath GetChildFilePath(string name,
-                                             string extension) {
+    public RelativeFilePath GetChildFilePath(string name, string extension) {
         return GetChildFilePath($"{name}.{extension}");
     }
 
@@ -39,8 +35,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(PathType, Parts, Parts.Count, folderName);
     }
 
-    public static bool TryParse(string value,
-                                [NotNullWhen(true)] out RelativeFolderPath? path) {
+    public static bool TryParse(string value, [NotNullWhen(true)] out RelativeFolderPath? path) {
         try {
             path = new RelativeFolderPath(value);
             return true;

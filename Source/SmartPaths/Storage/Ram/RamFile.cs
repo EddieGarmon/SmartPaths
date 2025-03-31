@@ -9,9 +9,7 @@ public class RamFile : IFile
 
     private readonly RamFileSystem _fileSystem;
 
-    internal RamFile(RamFileSystem fileSystem,
-                     AbsoluteFilePath path,
-                     DateTimeOffset lastWrite) {
+    internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
         Path = path;
         Data = [];
@@ -19,16 +17,10 @@ public class RamFile : IFile
         Parent = _fileSystem.GetFolder(path.Parent).Result!;
     }
 
-    internal RamFile(RamFileSystem fileSystem,
-                     AbsoluteFilePath path,
-                     string contents,
-                     DateTimeOffset lastWrite)
+    internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, string contents, DateTimeOffset lastWrite)
         : this(fileSystem, path, Encoding.UTF8.GetBytes(contents), lastWrite) { }
 
-    internal RamFile(RamFileSystem fileSystem,
-                     AbsoluteFilePath path,
-                     byte[] data,
-                     DateTimeOffset lastWrite) {
+    internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
         Path = path;
         Data = data;
@@ -63,8 +55,7 @@ public class RamFile : IFile
         return Task.FromResult(LastWrite);
     }
 
-    public async Task<RamFile> Move(AbsoluteFilePath newPath,
-                                    CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public async Task<RamFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(newPath);
         if (Data is null) {
             throw StorageExceptions.FileMissing(Path);
@@ -112,8 +103,7 @@ public class RamFile : IFile
         return Task.Run(() => LastWrite = DateTimeOffset.Now);
     }
 
-    Task<IFile> IFile.Move(AbsoluteFilePath newPath,
-                           CollisionStrategy collisionStrategy) {
+    Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {
         return Move(newPath, collisionStrategy).ContinueWith(task => (IFile)task.Result);
     }
 

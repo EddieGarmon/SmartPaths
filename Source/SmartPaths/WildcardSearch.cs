@@ -3,51 +3,45 @@ using SmartPaths.Storage;
 
 namespace SmartPaths;
 
-internal static class WildcardSearch
+public static class WildcardSearch
 {
 
-    public static IEnumerable<AbsoluteFolderPath> Filter(this IEnumerable<AbsoluteFolderPath> paths,
-                                                         string wildcardPattern) {
+    public static IEnumerable<AbsoluteFolderPath> Filter(this IEnumerable<AbsoluteFolderPath> paths, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);
         return paths.Where(p => regex.IsMatch(p.FolderName));
     }
 
-    public static IEnumerable<AbsoluteFilePath> Filter(this IEnumerable<AbsoluteFilePath> paths,
-                                                       string wildcardPattern) {
+    public static IEnumerable<AbsoluteFilePath> Filter(this IEnumerable<AbsoluteFilePath> paths, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);
         return paths.Where(p => regex.IsMatch(p.FileName));
     }
 
-    public static IEnumerable<RelativeFolderPath> Filter(this IEnumerable<RelativeFolderPath> paths,
-                                                         string wildcardPattern) {
+    public static IEnumerable<RelativeFolderPath> Filter(this IEnumerable<RelativeFolderPath> paths, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);
         return paths.Where(p => regex.IsMatch(p.FolderName));
     }
 
-    public static IEnumerable<RelativeFilePath> Filter(this IEnumerable<RelativeFilePath> paths,
-                                                       string wildcardPattern) {
+    public static IEnumerable<RelativeFilePath> Filter(this IEnumerable<RelativeFilePath> paths, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);
         return paths.Where(p => regex.IsMatch(p.FileName));
     }
 
-    public static IEnumerable<IFolder> Filter(this IEnumerable<IFolder> folders,
-                                              string wildcardPattern) {
+    public static IEnumerable<IFolder> Filter(this IEnumerable<IFolder> folders, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);
         return folders.Where(folder => regex.IsMatch(folder.Name));
     }
 
-    public static IEnumerable<IFile> Filter(this IEnumerable<IFile> files,
-                                            string wildcardPattern) {
+    public static IEnumerable<IFile> Filter(this IEnumerable<IFile> files, string wildcardPattern) {
         EnsureValidWildcardPattern(wildcardPattern);
         string regexPattern = BuildRegexPattern(wildcardPattern);
         Regex regex = new(regexPattern);

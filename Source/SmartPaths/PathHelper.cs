@@ -7,8 +7,7 @@ internal static class PathHelper
         return part is "." or "..";
     }
 
-    public static LinkedList<string> MakeAbsolute(AbsolutePath fromHere,
-                                                  RelativePath adjustment) {
+    public static LinkedList<string> MakeAbsolute(AbsolutePath fromHere, RelativePath adjustment) {
         LinkedList<string> result;
 
         //handle RootRelative
@@ -43,8 +42,7 @@ internal static class PathHelper
         return result;
     }
 
-    public static LinkedList<string> MakeRelative(AbsolutePath fromHere,
-                                                  AbsolutePath toHere) {
+    public static LinkedList<string> MakeRelative(AbsolutePath fromHere, AbsolutePath toHere) {
         if (fromHere.RootValue != toHere.RootValue) {
             throw new Exception("No shared root between: " + fromHere + " -> " + toHere);
         }

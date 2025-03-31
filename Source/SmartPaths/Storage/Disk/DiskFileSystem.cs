@@ -20,8 +20,7 @@ public class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
         set => Environment.CurrentDirectory = value;
     }
 
-    public override Task<DiskFile> CreateFile(AbsoluteFilePath absoluteFile,
-                                              CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override Task<DiskFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         return Task.Run(() => {
                             if (!File.Exists(absoluteFile)) {
                                 Directory.CreateDirectory(absoluteFile.Folder);
@@ -99,8 +98,7 @@ public class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
             if (productAttribute is not null) {
                 productName = productAttribute.Product;
             }
-            AssemblyInformationalVersionAttribute? versionAttribute =
-                entryAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+            AssemblyInformationalVersionAttribute? versionAttribute = entryAssembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
             if (versionAttribute is not null) {
                 productVersion = versionAttribute.InformationalVersion;
             }

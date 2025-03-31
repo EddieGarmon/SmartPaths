@@ -8,7 +8,7 @@
 
         <Product>SmartPaths</Product>
         <Authors>Eddie Garmon</Authors>
-        <Copyright>Copyright (c) 2024</Copyright>
+        <Copyright>Copyright (c) 2024-2025</Copyright>
         <PackageLicenseExpression>MIT</PackageLicenseExpression>
         <PackageRequireLicenseAcceptance>true</PackageRequireLicenseAcceptance>
         <PackageIcon>icon.png</PackageIcon>
@@ -22,7 +22,7 @@
         <IncludeSource>false</IncludeSource>
         <EmbedUntrackedSources>true</EmbedUntrackedSources>
 
-        <Version>0.8.3</Version>
+        <Version>0.9.0</Version>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)'=='Debug'">

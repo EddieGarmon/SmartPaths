@@ -15,4 +15,12 @@ public static class FileSystem
 
     public static IFileSystem Current { get; set; } = Disk;
 
+    public static void UseDisk() {
+        Current = Disk;
+    }
+
+    public static void UseRam() {
+        Current = Ram;
+    }
+
 }

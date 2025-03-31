@@ -13,11 +13,9 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
 
     public abstract AbsoluteFolderPath WorkingDirectory { get; set; }
 
-    public abstract Task<TFile> CreateFile(AbsoluteFilePath absoluteFile,
-                                           CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+    public abstract Task<TFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
-    public Task<TFile> CreateFile(RelativeFilePath relativeFile,
-                                  CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<TFile> CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         return CreateFile(WorkingDirectory / relativeFile, collisionStrategy);
     }
 
@@ -69,13 +67,11 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
 
     public abstract Task<TFolder> GetTempStorage();
 
-    Task<IFile> IFileSystem.CreateFile(AbsoluteFilePath absoluteFile,
-                                       CollisionStrategy collisionStrategy) {
+    Task<IFile> IFileSystem.CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy) {
         return CreateFile(absoluteFile, collisionStrategy).ContinueWith(task => (IFile)task.Result, ContinuationOptions);
     }
 
-    Task<IFile> IFileSystem.CreateFile(RelativeFilePath relativeFile,
-                                       CollisionStrategy collisionStrategy) {
+    Task<IFile> IFileSystem.CreateFile(RelativeFilePath relativeFile, CollisionStrategy collisionStrategy) {
         return CreateFile(relativeFile, collisionStrategy).ContinueWith(task => (IFile)task.Result, ContinuationOptions);
     }
 

@@ -18,8 +18,7 @@ public class DiskFolder : IFolder
 
     IFolder IFolder.Parent => Parent;
 
-    public Task<DiskFile> CreateFile(string fileName,
-                                     CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<DiskFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         AssertExists();
         AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
         if (File.Exists(filePath)) {
@@ -111,8 +110,7 @@ public class DiskFolder : IFolder
         }
     }
 
-    Task<IFile> IFolder.CreateFile(string fileName,
-                                   CollisionStrategy collisionStrategy) {
+    Task<IFile> IFolder.CreateFile(string fileName, CollisionStrategy collisionStrategy) {
         return CreateFile(fileName, collisionStrategy).ContinueWith(task => (IFile)task.Result);
     }
 
@@ -136,10 +134,7 @@ public class DiskFolder : IFolder
 
     Task<IReadOnlyList<IFolder>> IFolder.GetFolders() {
         AssertExists();
-        IReadOnlyList<IFolder> result = Directory.GetDirectories(Path)
-                                                 .Select(child => new DiskFolder(child))
-                                                 .ToList<IFolder>()
-                                                 .AsReadOnly();
+        IReadOnlyList<IFolder> result = Directory.GetDirectories(Path).Select(child => new DiskFolder(child)).ToList<IFolder>().AsReadOnly();
         return Task.FromResult(result);
     }
 
