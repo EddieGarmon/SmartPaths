@@ -8,9 +8,8 @@ public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
     private readonly RamFolder _root;
 
     public RamFileSystem() {
-        AbsoluteFolderPath rootPath = @"ram:\";
-        WorkingDirectory = rootPath;
-        _root = new RamFolder(this, rootPath);
+        WorkingDirectory = RootPath;
+        _root = new RamFolder(this, RootPath);
         _allFolders.Add(_root.Path, _root);
     }
 
@@ -22,13 +21,12 @@ public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
 
     public override AbsoluteFolderPath WorkingDirectory { get; set; }
 
-    public override async Task<RamFile> CreateFile(AbsoluteFilePath absoluteFile,
-                                                   CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override async Task<RamFile> CreateFile(AbsoluteFilePath absoluteFile, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         EnsureIsRamPath(absoluteFile);
         if (!_allFolders.TryGetValue(absoluteFile.Folder, out RamFolder? folder)) {
             folder = await _root.EnsureFolderTree(absoluteFile.Folder);
         }
-        return await folder.CreateFile(absoluteFile);
+        return await folder.CreateFile(absoluteFile.FileName);
     }
 
     public override async Task<RamFolder> CreateFolder(AbsoluteFolderPath absoluteFolder) {
@@ -110,6 +108,8 @@ public class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
     internal void Register(RamFolder folder) {
         _allFolders[folder.Path] = folder;
     }
+
+    public static AbsoluteFolderPath RootPath { get; } = @"ram:\";
 
     private static void EnsureIsRamPath(AbsolutePath filePath) {
         if (filePath.RootValue != "ram:\\") {
