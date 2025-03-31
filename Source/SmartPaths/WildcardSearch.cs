@@ -3,7 +3,7 @@ using SmartPaths.Storage;
 
 namespace SmartPaths;
 
-internal static class WildcardSearch
+public static class WildcardSearch
 {
 
     public static IEnumerable<AbsoluteFolderPath> Filter(this IEnumerable<AbsoluteFolderPath> paths,
