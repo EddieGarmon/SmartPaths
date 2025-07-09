@@ -12,7 +12,7 @@ internal static partial class PathPatterns
     public const string DriveLetterPattern = @"^([a-zA-Z]):(\\?$|\\(.*))$";
 
     // language=regex
-    public const string NetworkSharePattern = @"^(\\\\\w+\\\w+)(?:\\?$|\\(.*))$";
+    public const string NetworkSharePattern = @"(\\\\[a-zA-Z0-9\.\-_]{1,}\\[a-zA-Z0-9\-_]{1,})(?:\\?$|\\(.*))$";
 
     // language=regex
     public const string RamDrivePattern = @"^[Rr][Aa][Mm]:(\\?$|\\(.*)$)";
