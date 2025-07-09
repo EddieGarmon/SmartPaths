@@ -47,6 +47,7 @@ public class PatternTests
     [InlineData(@"\\server\share\hello.world")]
     [InlineData(@"\\server\share\.hello")]
     [InlineData(@"\\server\share\..hello")]
+    [InlineData(@"\\abc.def.company.net\share\folder\folder_with space\")]
     public void ValidNetworkSharePaths(string value) {
         (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
         pathType.ShouldBe(PathType.NetworkShare);
