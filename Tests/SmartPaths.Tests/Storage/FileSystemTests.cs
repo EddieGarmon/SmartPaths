@@ -1,6 +1,4 @@
 ﻿using Shouldly;
-using SmartPaths.Storage.Disk;
-using SmartPaths.Storage.Ram;
 
 namespace SmartPaths.Storage;
 
