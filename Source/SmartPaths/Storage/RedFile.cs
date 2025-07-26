@@ -2,15 +2,21 @@
 
 namespace SmartPaths.Storage;
 
-[DebuggerDisplay("[XFile:{IsCached}] {Path}")]
-public class RamEditFile : IRamFile
+/// <summary>Represents a file within the RAM-based file system, providing functionality for file
+///     manipulation, caching, and metadata management. This class is designed to handle in-memory file
+///     operations and integrates with the <see cref="RedFileSystem" />.</summary>
+/// <remarks>The <see cref="RedFile" /> class supports operations such as reading, writing, deleting,
+///     and moving files. It also provides caching capabilities to optimize file access and tracks
+///     metadata such as the last write time.</remarks>
+[DebuggerDisplay("[RedFile:{IsCached}] {Path}")]
+public class RedFile : IRamFile
 {
 
-    private readonly RamEditFileSystem _fileSystem;
+    private readonly RedFileSystem _fileSystem;
     private byte[]? _data;
     private DateTimeOffset _lastWrite;
 
-    internal RamEditFile(RamEditFileSystem fileSystem, AbsoluteFilePath path) {
+    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path) {
         _fileSystem = fileSystem;
         Parent = _fileSystem.GetFolder(path.Parent).Result!;
         Path = path;
@@ -22,7 +28,7 @@ public class RamEditFile : IRamFile
         }
     }
 
-    internal RamEditFile(RamEditFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite) {
+    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
         Parent = _fileSystem.GetFolder(path.Parent).Result!;
         Path = path;
@@ -35,7 +41,7 @@ public class RamEditFile : IRamFile
 
     public string Name => Path.FileName;
 
-    public RamEditFolder Parent { get; }
+    public RedFolder Parent { get; }
 
     public AbsoluteFilePath Path { get; }
 
@@ -83,32 +89,37 @@ public class RamEditFile : IRamFile
         return Task.FromResult(_lastWrite);
     }
 
-    public Task<RamEditFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public Task<RedFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         throw new NotImplementedException();
     }
 
     public Task<Stream> OpenToAppend() {
         return Task.Run(() => {
-                            Stream stream = new RamStream<RamEditFile>(this, true);
+                            Stream stream = new RamStream<RedFile>(this, true);
                             stream.Seek(0, SeekOrigin.End);
                             return stream;
                         });
     }
 
     public Task<Stream> OpenToRead() {
-        return Task.Run(Stream () => new RamStream<RamEditFile>(this, false));
+        return Task.Run(Stream () => new RamStream<RedFile>(this, false));
     }
 
     public Task<Stream> OpenToWrite() {
-        return Task.Run<Stream>(() => new RamStream<RamEditFile>(this, true));
+        return Task.Run<Stream>(() => new RamStream<RedFile>(this, true));
     }
 
     public Task Touch() {
         return Task.Run(() => _lastWrite = DateTimeOffset.Now);
     }
 
+    internal void Restore() {
+        WasDeleted = false;
+        _lastWrite = DateTimeOffset.Now;
+    }
+
     internal void ZeroOutContent() {
-        using RamStream<RamEditFile> stream = new(this, true);
+        using RamStream<RedFile> stream = new(this, true);
         stream.SetLength(0);
         _lastWrite = DateTimeOffset.Now;
     }

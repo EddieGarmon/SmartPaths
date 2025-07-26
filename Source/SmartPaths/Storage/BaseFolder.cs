@@ -29,25 +29,59 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
         return CreateFolder(folderPath);
     }
 
+    /// <summary>Deletes the current folder and its contents asynchronously.</summary>
+    /// <remarks>This method removes the folder and all its child files and subfolders. The exact behavior
+    ///     of this method depends on the specific implementation in derived classes.</remarks>
+    /// <returns>A <see cref="Task" /> representing the asynchronous delete operation.</returns>
     public abstract Task Delete();
 
-    public abstract Task DeleteFile(string fileName);
+    /// <summary>Deletes a file with the specified name from the folder.</summary>
+    /// <param name="fileName">The name of the file to delete. This should be the name of an existing file
+    ///     within the folder.</param>
+    /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
+    /// <remarks>If the file does not exist, the method completes without performing any action.</remarks>
+    public async Task DeleteFile(string fileName) {
+        TFile? file = await GetFile(fileName);
+        if (file is not null) {
+            await file.Delete();
+        }
+    }
 
-    public abstract Task DeleteFolder(string folderName);
+    /// <summary>Deletes a subfolder with the specified name from the current folder asynchronously.</summary>
+    /// <param name="folderName">The name of the subfolder to delete. This should be the name of an
+    ///     existing subfolder within the current folder.</param>
+    /// <returns>A <see cref="Task" /> that represents the asynchronous operation.</returns>
+    /// <remarks>If the subfolder does not exist, the method completes without performing any action.</remarks>
+    public async Task DeleteFolder(string folderName) {
+        TFolder? folder = await GetFolder(folderName);
+        if (folder is not null) {
+            await folder.Delete();
+        }
+    }
 
     public abstract Task<bool> Exists();
 
-    public abstract Task<TFile?> GetFile(string fileName);
+    public Task<TFile?> GetFile(string fileName) {
+        AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
+        return GetFile(filePath);
+    }
 
     public abstract Task<IReadOnlyList<TFile>> GetFiles();
 
-    public abstract Task<TFolder?> GetFolder(string folderName);
+    public Task<TFolder?> GetFolder(string folderName) {
+        AbsoluteFolderPath folderPath = Path.GetChildFolderPath(folderName);
+        return GetFolder(folderPath);
+    }
 
     public abstract Task<IReadOnlyList<TFolder>> GetFolders();
 
     internal abstract Task<TFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy);
 
     internal abstract Task<TFolder> CreateFolder(AbsoluteFolderPath folderPath);
+
+    internal abstract Task<TFile?> GetFile(AbsoluteFilePath filePath);
+
+    internal abstract Task<TFolder?> GetFolder(AbsoluteFolderPath folderPath);
 
     Task<IFile> IFolder.CreateFile(string fileName, CollisionStrategy collisionStrategy) {
         return CreateFile(fileName, collisionStrategy).ContinueWith(IFile (task) => task.Result);

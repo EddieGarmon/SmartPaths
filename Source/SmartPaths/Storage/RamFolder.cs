@@ -23,35 +23,12 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
         return Task.Run(() => DeleteFolderAndChildren(this));
     }
 
-    public override Task DeleteFile(string fileName) {
-        AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
-        if (_files.TryRemove(filePath, out _)) {
-            _fileSystem.Files.TryRemove(filePath, out _);
-        }
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteFolder(string folderName) {
-        AbsoluteFolderPath folderPath = Path.GetChildFolderPath(folderName);
-        return _folders.TryGetValue(folderPath, out RamFolder? folder) ? DeleteFolderAndChildren(folder) : Task.CompletedTask;
-    }
-
     public override Task<bool> Exists() {
         return Task.FromResult(true);
     }
 
-    public override Task<RamFile?> GetFile(string fileName) {
-        _files.TryGetValue(Path.GetChildFilePath(fileName), out RamFile? file);
-        return Task.FromResult<RamFile?>(file);
-    }
-
     public override Task<IReadOnlyList<RamFile>> GetFiles() {
         return Task.FromResult<IReadOnlyList<RamFile>>(_files.Values.ToList());
-    }
-
-    public override Task<RamFolder?> GetFolder(string folderName) {
-        _folders.TryGetValue(Path.GetChildFolderPath(folderName), out RamFolder? folder);
-        return Task.FromResult<RamFolder?>(folder);
     }
 
     public override Task<IReadOnlyList<RamFolder>> GetFolders() {
@@ -114,6 +91,16 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
     internal void ExpungeFolder(RamFolder folder) {
         _folders.TryRemove(folder.Path, out _);
         _fileSystem.Folders.TryRemove(folder.Path, out _);
+    }
+
+    internal override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
+        _files.TryGetValue(filePath, out RamFile? file);
+        return Task.FromResult<RamFile?>(file);
+    }
+
+    internal override Task<RamFolder?> GetFolder(AbsoluteFolderPath folderPath) {
+        _folders.TryGetValue(folderPath, out RamFolder? folder);
+        return Task.FromResult<RamFolder?>(folder);
     }
 
     internal void Register(RamFile newFile) {

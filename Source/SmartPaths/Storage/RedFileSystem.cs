@@ -6,11 +6,12 @@ namespace SmartPaths.Storage;
 //todo: implement a way to persist state?
 
 /// <summary>Represents an in-memory file system that supports editing operations.</summary>
-/// <remarks>The <see cref="RamEditFileSystem" /> provides an editable, in-memory representation of a
-///     file system. It allows creating, deleting, and querying files and folders, while maintaining a
-///     cache of the current state. This class is particularly useful for scenarios where a temporary
-///     or mock file system is needed, such as testing or prototyping.</remarks>
-public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFile>
+/// <remarks>RED stands for Ram Edited Disk, allowing a non-permanent write back file system.<br /> The
+///     <see cref="RedFileSystem" /> provides an editable, in-memory representation of a file system.
+///     It allows creating, deleting, and querying files and folders, while maintaining a cache of the
+///     current state. This class is particularly useful for scenarios where a temporary or mock file
+///     system is needed, such as testing or prototyping.</remarks>
+public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
 {
 
     public override AbsoluteFolderPath AppLocalStoragePath => Disk.AppLocalStoragePath;
@@ -26,18 +27,18 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
 
     internal DiskFileSystem Disk { get; } = new();
 
-    internal ConcurrentDictionary<AbsoluteFilePath, RamEditFile> Files { get; } = [];
+    internal ConcurrentDictionary<AbsoluteFilePath, RedFile> Files { get; } = [];
 
-    internal ConcurrentDictionary<AbsoluteFolderPath, RamEditFolder> Folders { get; } = [];
+    internal ConcurrentDictionary<AbsoluteFolderPath, RedFolder> Folders { get; } = [];
 
-    public override async Task<RamEditFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        RamEditFolder folder = await CreateFolder(filePath.Folder);
+    public override async Task<RedFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        RedFolder folder = await CreateFolder(filePath.Folder);
         return await folder.CreateFile(filePath.FileName, collisionStrategy);
     }
 
-    public override async Task<RamEditFolder> CreateFolder(AbsoluteFolderPath folderPath) {
+    public override async Task<RedFolder> CreateFolder(AbsoluteFolderPath folderPath) {
         //Check cache
-        if (Folders.TryGetValue(folderPath, out RamEditFolder? folder)) {
+        if (Folders.TryGetValue(folderPath, out RedFolder? folder)) {
             return folder;
         }
         //Create folders
@@ -46,7 +47,7 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
 
     public override async Task DeleteFile(AbsoluteFilePath filePath) {
         //Call GetFile() to ensure the disk state is observed
-        RamEditFile? file = await GetFile(filePath);
+        RedFile? file = await GetFile(filePath);
         if (file is not null) {
             //Delete in memory
             await file.Delete();
@@ -55,7 +56,7 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
 
     public override async Task DeleteFolder(AbsoluteFolderPath folderPath) {
         //Call GetFolder() to ensure the disk state is observed
-        RamEditFolder? folder = await GetFolder(folderPath);
+        RedFolder? folder = await GetFolder(folderPath);
         if (folder is not null) {
             //Delete in memory
             await folder.Delete();
@@ -64,31 +65,31 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
 
     public override async Task<bool> FileExists(AbsoluteFilePath filePath) {
         //Call GetFile() to ensure the disk state is observed
-        RamEditFile? file = await GetFile(filePath);
+        RedFile? file = await GetFile(filePath);
         return file is not null && !file.WasDeleted;
     }
 
     public override async Task<bool> FolderExists(AbsoluteFolderPath folderPath) {
         //Call GetFolder() to ensure the disk state is observed
-        RamEditFolder? folder = await GetFolder(folderPath);
+        RedFolder? folder = await GetFolder(folderPath);
         return folder is not null && !folder.WasDeleted;
     }
 
-    public override Task<RamEditFolder> GetAppLocalStorage() {
+    public override Task<RedFolder> GetAppLocalStorage() {
         return CreateFolder(AppLocalStoragePath);
     }
 
-    public override Task<RamEditFolder> GetAppRoamingStorage() {
+    public override Task<RedFolder> GetAppRoamingStorage() {
         return CreateFolder(AppRoamingStoragePath);
     }
 
-    public override async Task<RamEditFile?> GetFile(AbsoluteFilePath filePath) {
+    public override async Task<RedFile?> GetFile(AbsoluteFilePath filePath) {
         //1. check the cache,
-        if (Files.TryGetValue(filePath, out RamEditFile? file)) {
+        if (Files.TryGetValue(filePath, out RedFile? file)) {
             return file;
         }
         //2. check disk
-        RamEditFolder? folder = await GetFolder(filePath.Parent);
+        RedFolder? folder = await GetFolder(filePath.Parent);
         if (folder is null) {
             return null;
         }
@@ -96,9 +97,9 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
         return await folder.GetFile(filePath.FileName);
     }
 
-    public override async Task<RamEditFolder?> GetFolder(AbsoluteFolderPath folderPath) {
+    public override async Task<RedFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         //1. check the cache,
-        if (Folders.TryGetValue(folderPath, out RamEditFolder? folder)) {
+        if (Folders.TryGetValue(folderPath, out RedFolder? folder)) {
             return folder;
         }
         //2. check disk
@@ -109,12 +110,12 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
         return folder;
     }
 
-    public override Task<RamEditFolder> GetTempStorage() {
+    public override Task<RedFolder> GetTempStorage() {
         return CreateFolder(TempStoragePath);
     }
 
     internal async Task<AbsoluteFilePath> MakeUnique(AbsoluteFilePath path) {
-        RamEditFolder? folder = await GetFolder(path.Parent);
+        RedFolder? folder = await GetFolder(path.Parent);
         if (folder is null) {
             throw new Exception($"Can not find folder: {path}");
         }
@@ -130,9 +131,9 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
         }
     }
 
-    private Task<RamEditFolder> EnsureFolderTree(AbsoluteFolderPath folderPath) {
+    private Task<RedFolder> EnsureFolderTree(AbsoluteFolderPath folderPath) {
         return Task.Run(() => {
-                            RamEditFolder? found = null;
+                            RedFolder? found = null;
                             //build list of paths from leaf in for evey level that is missing
                             List<AbsoluteFolderPath> missing = [folderPath];
                             while (folderPath.HasParent) {
@@ -148,11 +149,11 @@ public sealed class RamEditFileSystem : BaseFileSystem<RamEditFolder, RamEditFil
                                 folderPath = missing[0];
                                 missing.RemoveAt(0);
                                 //NB: this should be a new root
-                                found = Folders.GetOrAdd(folderPath, path => new RamEditFolder(this, path));
+                                found = Folders.GetOrAdd(folderPath, path => new RedFolder(this, path));
                             }
                             //unwrap the list
                             while (missing.Count > 0) {
-                                found = new RamEditFolder(this, missing[0]);
+                                found = new RedFolder(this, missing[0]);
                                 missing.RemoveAt(0);
                             }
                             //return
