@@ -33,6 +33,7 @@ public class FileParsingTests
     //network share
     [InlineData(@"\\server\share\filename", @"\\server\share\filename", "")]
     [InlineData(@"\\server\share\filename.ext", @"\\server\share\filename.ext", "ext")]
+    [InlineData(@"\\fully.qualified.server\share\filename.ext", @"\\fully.qualified.server\share\filename.ext", "ext")]
     //RAM
     [InlineData(@"ram:\filename", @"ram:\filename", "")]
     [InlineData(@"ram:\filename.ext", @"ram:\filename.ext", "ext")]
