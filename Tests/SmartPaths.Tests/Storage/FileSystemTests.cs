@@ -15,6 +15,11 @@ public class FileSystemTests
         return TestAllTheThings(new RamFileSystem());
     }
 
+    [Fact]
+    public Task TestAllTheThings_RedFileSystem() {
+        return TestAllTheThings(new RedFileSystem());
+    }
+
     private static async Task TestAllTheThings(IFileSystem fileSystem) {
         AbsoluteFolderPath tempPath = fileSystem.TempStoragePath.GetChildFolderPath("FileSystemTesting");
 

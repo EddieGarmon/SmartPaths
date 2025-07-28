@@ -49,11 +49,9 @@ public class RedFile : IRamFile
 
     internal byte[]? Data {
         get {
-            if (IsCached) {
-                return _data;
+            if (!IsCached) {
+                CacheData();
             }
-            _data = File.ReadAllBytes(Path);
-            IsCached = true;
             return _data;
         }
         set {
@@ -89,8 +87,37 @@ public class RedFile : IRamFile
         return Task.FromResult(_lastWrite);
     }
 
-    public Task<RedFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        throw new NotImplementedException();
+    public async Task<RedFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        if (WasDeleted) {
+            throw new Exception($"Cannot move a deleted file. {Path}");
+        }
+        if (!IsCached) {
+            CacheData();
+        }
+        RedFile? newFile = await _fileSystem.GetFile(newPath);
+        if (newFile is not null) {
+            switch (collisionStrategy) {
+                case CollisionStrategy.GenerateUniqueName:
+                    newPath = await _fileSystem.MakeUnique(newPath);
+                    break;
+                case CollisionStrategy.ReplaceExisting:
+                    await newFile.Delete();
+                    break;
+                case CollisionStrategy.FailIfExists:
+                    throw StorageExceptions.FileExists(newPath);
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(collisionStrategy));
+            }
+        }
+        Parent.Files.TryRemove(Path, out RedFile? _);
+        _fileSystem.Files.TryRemove(Path, out RedFile? _);
+
+        //Find the new parent folder, and register it there
+        RedFolder newParent = await _fileSystem.CreateFolder(newPath.Parent);
+        newFile = new RedFile(_fileSystem, newPath, Data!, DateTime.Now);
+        newParent.Files[newFile.Path] = newFile;
+        _fileSystem.Files[newFile.Path] = newFile;
+        return newFile;
     }
 
     public Task<Stream> OpenToAppend() {
@@ -122,6 +149,12 @@ public class RedFile : IRamFile
         using RamStream<RedFile> stream = new(this, true);
         stream.SetLength(0);
         _lastWrite = DateTimeOffset.Now;
+    }
+
+    private void CacheData() {
+        _data = File.ReadAllBytes(Path);
+        _lastWrite = File.GetLastWriteTime(Path);
+        IsCached = true;
     }
 
     Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {

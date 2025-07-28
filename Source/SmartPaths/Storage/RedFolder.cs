@@ -12,14 +12,22 @@ namespace SmartPaths.Storage;
 public class RedFolder : BaseFolder<RedFolder, RedFile>
 {
 
-    private readonly ConcurrentDictionary<AbsoluteFilePath, RedFile> _files = [];
     private readonly RedFileSystem _fileSystem;
-    private readonly ConcurrentDictionary<AbsoluteFolderPath, RedFolder> _folders = [];
 
     internal RedFolder(RedFileSystem fileSystem, AbsoluteFolderPath path)
         : base(path) {
         _fileSystem = fileSystem;
-        Parent = path.IsRoot ? null : _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
+        if (path.IsRoot) {
+            Parent = null;
+        } else {
+            RedFolder? result = _fileSystem.GetFolder(path.Parent).Result;
+            if (result != null) {
+                result.Folders[path] = this;
+                Parent = result;
+            } else {
+                throw new Exception($"Can not find parent {path.Parent}.");
+            }
+        }
     }
 
     public bool IsCached { get; private set; }
@@ -28,16 +36,20 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
 
     public bool WasDeleted { get; private set; }
 
+    internal ConcurrentDictionary<AbsoluteFilePath, RedFile> Files { get; } = [];
+
+    internal ConcurrentDictionary<AbsoluteFolderPath, RedFolder> Folders { get; } = [];
+
     public override async Task Delete() {
         if (WasDeleted) {
             return;
         }
-        //todo: should we always build out cache?
+        //todo: should we ever build out cache now?
         //await BuildCacheInfo();
-        foreach (RedFile file in _files.Values) {
+        foreach (RedFile file in Files.Values) {
             await file.Delete();
         }
-        foreach (RedFolder folder in _folders.Values) {
+        foreach (RedFolder folder in Folders.Values) {
             await folder.Delete();
         }
         WasDeleted = true;
@@ -49,12 +61,12 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
 
     public override async Task<IReadOnlyList<RedFile>> GetFiles() {
         await BuildCacheInfo();
-        return _files.Values.ToList();
+        return Files.Values.Where(file => !file.WasDeleted).ToList();
     }
 
     public override async Task<IReadOnlyList<RedFolder>> GetFolders() {
         await BuildCacheInfo();
-        return _folders.Values.ToList();
+        return Folders.Values.Where(folder => !folder.WasDeleted).ToList();
     }
 
     internal async Task BuildCacheInfo() {
@@ -64,20 +76,22 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         //Cache Files
         IEnumerable<IFile> files = await _fileSystem.Disk.GetFiles(Path);
         foreach (IFile fileOnDisk in files) {
-            if (_files.ContainsKey(fileOnDisk.Path)) {
+            if (Files.ContainsKey(fileOnDisk.Path)) {
                 continue;
             }
             RedFile file = new(_fileSystem, fileOnDisk.Path);
-            Register(file);
+            Files[file.Path] = file;
+            _fileSystem.Files[file.Path] = file;
         }
         //Cache Folders
         IEnumerable<IFolder> folders = await _fileSystem.Disk.GetFolders(Path);
         foreach (IFolder folderOnDisk in folders) {
-            if (_folders.ContainsKey(folderOnDisk.Path)) {
+            if (Folders.ContainsKey(folderOnDisk.Path)) {
                 continue;
             }
             RedFolder folder = new(_fileSystem, folderOnDisk.Path);
-            Register(folder);
+            Folders[folder.Path] = folder;
+            _fileSystem.Folders[folder.Path] = folder;
         }
         //Mark as cached
         IsCached = true;
@@ -91,9 +105,10 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
             await BuildCacheInfo();
         }
         //Check the cache
-        if (!_files.TryGetValue(filePath, out RedFile? file)) {
+        if (!Files.TryGetValue(filePath, out RedFile? file)) {
             file = new RedFile(_fileSystem, filePath, [], DateTimeOffset.Now);
-            Register(file);
+            Files[file.Path] = file;
+            _fileSystem.Files[file.Path] = file;
             return file;
         }
         if (file.WasDeleted) {
@@ -104,7 +119,8 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
             case CollisionStrategy.GenerateUniqueName:
                 filePath = await _fileSystem.MakeUnique(filePath);
                 file = new RedFile(_fileSystem, filePath, [], DateTimeOffset.Now);
-                Register(file);
+                Files[file.Path] = file;
+                _fileSystem.Files[file.Path] = file;
                 return file;
 
             case CollisionStrategy.ReplaceExisting:
@@ -127,7 +143,7 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
             await BuildCacheInfo();
         }
         //Check the cache
-        if (_folders.TryGetValue(folderPath, out RedFolder? folder)) {
+        if (Folders.TryGetValue(folderPath, out RedFolder? folder)) {
             if (folder.WasDeleted) {
                 folder.WasDeleted = false;
             }
@@ -135,7 +151,8 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         }
         //Build a new folder
         RedFolder newFolder = new(_fileSystem, folderPath);
-        Register(newFolder);
+        Folders[newFolder.Path] = newFolder;
+        _fileSystem.Folders[newFolder.Path] = newFolder;
         return newFolder;
     }
 
@@ -146,7 +163,7 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (!IsCached) {
             await BuildCacheInfo();
         }
-        _files.TryGetValue(filePath, out RedFile? file);
+        Files.TryGetValue(filePath, out RedFile? file);
         return file;
     }
 
@@ -157,18 +174,8 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (!IsCached) {
             await BuildCacheInfo();
         }
-        _folders.TryGetValue(folderPath, out RedFolder? folder);
+        Folders.TryGetValue(folderPath, out RedFolder? folder);
         return folder;
-    }
-
-    private void Register(RedFolder newFolder) {
-        _folders[newFolder.Path] = newFolder;
-        _fileSystem.Folders[newFolder.Path] = newFolder;
-    }
-
-    private void Register(RedFile newFile) {
-        _files[newFile.Path] = newFile;
-        _fileSystem.Files[newFile.Path] = newFile;
     }
 
 }

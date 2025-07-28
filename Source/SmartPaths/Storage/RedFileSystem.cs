@@ -86,7 +86,7 @@ public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
     public override async Task<RedFile?> GetFile(AbsoluteFilePath filePath) {
         //1. check the cache,
         if (Files.TryGetValue(filePath, out RedFile? file)) {
-            return file;
+            return file.WasDeleted ? null : file;
         }
         //2. check disk
         RedFolder? folder = await GetFolder(filePath.Parent);
@@ -100,7 +100,7 @@ public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
     public override async Task<RedFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         //1. check the cache,
         if (Folders.TryGetValue(folderPath, out RedFolder? folder)) {
-            return folder;
+            return folder.WasDeleted ? null : folder;
         }
         //2. check disk
         if (await Disk.FolderExists(folderPath)) {
@@ -154,6 +154,7 @@ public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
                             //unwrap the list
                             while (missing.Count > 0) {
                                 found = new RedFolder(this, missing[0]);
+                                Folders[found.Path] = found;
                                 missing.RemoveAt(0);
                             }
                             //return
