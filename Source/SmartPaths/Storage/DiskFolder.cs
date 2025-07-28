@@ -1,9 +1,9 @@
 ﻿using System.Diagnostics;
 
-namespace SmartPaths.Storage.Disk;
+namespace SmartPaths.Storage;
 
-[DebuggerDisplay("[Folder] {Path.ToString()}")]
-public class DiskFolder : IFolder
+[DebuggerDisplay("[Folder] {Path}")]
+public sealed class DiskFolder : IFolder
 {
 
     public DiskFolder(AbsoluteFolderPath path) {

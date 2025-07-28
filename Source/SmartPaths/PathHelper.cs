@@ -79,4 +79,41 @@ internal static class PathHelper
         return relative;
     }
 
+    public static LinkedList<string> MakeRelative(RelativePath fromHere, RelativePath adjustment) {
+        //handle root relative adjustment
+        if (adjustment.PathType == PathType.RootRelative) {
+            return new LinkedList<string>(adjustment.Parts);
+        }
+
+        //handle relative
+        LinkedList<string> result = new(fromHere.Parts);
+        bool takeRemaining = false;
+        foreach (string part in adjustment.PartsAfterRoot) {
+            if (takeRemaining) {
+                result.AddLast(part);
+                continue;
+            }
+
+            switch (part) {
+                case ".":
+                    //skip current dir
+                    break;
+                case "..":
+                    //remove named dir, or append ".."
+                    if (result.Count > 1) {
+                        result.RemoveLast();
+                    } else {
+                        takeRemaining = true;
+                        result.AddLast(part);
+                    }
+                    break;
+                default:
+                    takeRemaining = true;
+                    result.AddLast(part);
+                    break;
+            }
+        }
+        return result;
+    }
+
 }

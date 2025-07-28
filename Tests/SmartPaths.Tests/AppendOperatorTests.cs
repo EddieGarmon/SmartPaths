@@ -31,11 +31,13 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto")]
-    public void ValidFile(string absoluteDir, string relativeFile, string combinedFile) {
+    public void ValidAbsoluteFile(string absoluteDir, string relativeFile, string combinedFile) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFilePath relative = relativeFile;
         AbsoluteFilePath combined = combinedFile;
+        (absolute + relativeFile).ShouldBe(combined);
         (absolute + relative).ShouldBe(combined);
+        //The slash operator to add a typed file path is just for convenience
         (absolute / relative).ShouldBe(combined);
     }
 
@@ -45,12 +47,37 @@ public class AppendOperatorTests
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto\")]
     [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto\")]
     [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto\")]
-    public void ValidFolder(string absoluteDir, string relativeDir, string combinedDir) {
+    public void ValidAbsoluteFolder(string absoluteDir, string relativeDir, string combinedDir) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFolderPath relative = relativeDir;
         AbsoluteFolderPath combined = combinedDir;
-        (absolute + relative).ShouldBe(combined);
+        (absolute / relativeDir).ShouldBe(combined);
         (absolute / relative).ShouldBe(combined);
+    }
+
+    [Theory]
+    [InlineData(@".\start\", @".\relative", @".\start\relative")]
+    [InlineData(@".\start\", @"..\Moto", @".\Moto")]
+    [InlineData(@".\start\", @".\..\Moto", @".\Moto")]
+    public void ValidRelativeFile(string start, string relativeFile, string combinedFile) {
+        RelativeFolderPath startPath = start;
+        RelativeFilePath relative = relativeFile;
+        RelativeFilePath combined = combinedFile;
+        (startPath + relativeFile).ShouldBe(combined);
+        (startPath + relative).ShouldBe(combined);
+        (startPath / relative).ShouldBe(combined);
+    }
+
+    [Theory]
+    [InlineData(@".\start\", @".\relative", @".\start\relative\")]
+    [InlineData(@".\start\", @"..\Moto", @".\Moto\")]
+    [InlineData(@".\start\", @".\..\Moto", @".\Moto\")]
+    public void ValidRelativeFolder(string start, string relativeDir, string combinedDir) {
+        RelativeFolderPath startPath = start;
+        RelativeFolderPath relative = relativeDir;
+        RelativeFolderPath combined = combinedDir;
+        (startPath / relativeDir).ShouldBe(combined);
+        (startPath / relative).ShouldBe(combined);
     }
 
 }

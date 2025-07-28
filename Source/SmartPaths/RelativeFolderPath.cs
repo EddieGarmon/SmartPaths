@@ -35,6 +35,16 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(PathType, Parts, Parts.Count, folderName);
     }
 
+    public RelativeFolderPath ResolveRelative(RelativeFolderPath relativeFolderPath) {
+        LinkedList<string> parts = PathHelper.MakeRelative(this, relativeFolderPath);
+        return new RelativeFolderPath(PathType, parts, parts.Count);
+    }
+
+    public RelativeFilePath ResolveRelative(RelativeFilePath relativeFilePath) {
+        LinkedList<string> parts = PathHelper.MakeRelative(this, relativeFilePath);
+        return new RelativeFilePath(PathType, parts, parts.Count);
+    }
+
     public static bool TryParse(string value, [NotNullWhen(true)] out RelativeFolderPath? path) {
         try {
             path = new RelativeFolderPath(value);
@@ -43,6 +53,26 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
             path = null;
             return false;
         }
+    }
+
+    public static RelativeFilePath operator +(RelativeFolderPath start, string relativeFile) {
+        return start.ResolveRelative(new RelativeFilePath(relativeFile));
+    }
+
+    public static RelativeFilePath operator +(RelativeFolderPath start, RelativeFilePath relativeFile) {
+        return start.ResolveRelative(relativeFile);
+    }
+
+    public static RelativeFilePath operator /(RelativeFolderPath start, RelativeFilePath relativeFile) {
+        return start.ResolveRelative(relativeFile);
+    }
+
+    public static RelativeFolderPath operator /(RelativeFolderPath start, string relativeFolder) {
+        return start.ResolveRelative(new RelativeFolderPath(relativeFolder));
+    }
+
+    public static RelativeFolderPath operator /(RelativeFolderPath start, RelativeFolderPath relativeFolder) {
+        return start.ResolveRelative(relativeFolder);
     }
 
     [return: NotNullIfNotNull(nameof(path))]

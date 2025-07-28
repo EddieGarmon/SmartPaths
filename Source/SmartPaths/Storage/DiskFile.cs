@@ -1,9 +1,9 @@
 using System.Diagnostics;
 
-namespace SmartPaths.Storage.Disk;
+namespace SmartPaths.Storage;
 
-[DebuggerDisplay("[File] {Path.ToString()}")]
-public class DiskFile : IFile
+[DebuggerDisplay("[File] {Path}")]
+public sealed class DiskFile : IFile
 {
 
     public DiskFile(AbsoluteFilePath path) {

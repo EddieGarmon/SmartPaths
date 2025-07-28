@@ -59,19 +59,23 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         }
     }
 
-    public static AbsoluteFolderPath operator +(AbsoluteFolderPath root, RelativeFolderPath relative) {
-        return root.ResolveRelative(relative);
+    public static AbsoluteFilePath operator +(AbsoluteFolderPath root, string relativeFile) {
+        return root.ResolveRelative(new RelativeFilePath(relativeFile));
     }
 
     public static AbsoluteFilePath operator +(AbsoluteFolderPath root, RelativeFilePath relative) {
         return root.ResolveRelative(relative);
     }
 
-    public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, RelativeFolderPath relative) {
+    public static AbsoluteFilePath operator /(AbsoluteFolderPath root, RelativeFilePath relative) {
         return root.ResolveRelative(relative);
     }
 
-    public static AbsoluteFilePath operator /(AbsoluteFolderPath root, RelativeFilePath relative) {
+    public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, string relativeFolder) {
+        return root.ResolveRelative(new RelativeFolderPath(relativeFolder));
+    }
+
+    public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, RelativeFolderPath relative) {
         return root.ResolveRelative(relative);
     }
 

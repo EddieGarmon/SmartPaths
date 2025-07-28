@@ -1,20 +1,20 @@
 using System.Diagnostics;
 using System.Text;
 
-namespace SmartPaths.Storage.Ram;
+namespace SmartPaths.Storage;
 
-[DebuggerDisplay("[File] {Path.ToString()}")]
-public class RamFile : IFile
+[DebuggerDisplay("[File] {Path}")]
+public sealed class RamFile : IRamFile
 {
 
     private readonly RamFileSystem _fileSystem;
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
+        Parent = _fileSystem.GetFolder(path.Parent).Result!;
         Path = path;
         Data = [];
         LastWrite = lastWrite;
-        Parent = _fileSystem.GetFolder(path.Parent).Result!;
     }
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, string contents, DateTimeOffset lastWrite)
@@ -37,6 +37,11 @@ public class RamFile : IFile
     internal byte[]? Data { get; set; }
 
     internal DateTimeOffset LastWrite { get; private set; }
+
+    byte[]? IRamFile.Data {
+        get => Data;
+        set => Data = value;
+    }
 
     IFolder IFile.Parent => Parent;
 
@@ -85,22 +90,27 @@ public class RamFile : IFile
 
     public Task<Stream> OpenToAppend() {
         return Task.Run(() => {
-                            Stream stream = new RamStream(this, true);
+                            Stream stream = new RamStream<RamFile>(this, true);
                             stream.Seek(0, SeekOrigin.End);
                             return stream;
                         });
     }
 
     public Task<Stream> OpenToRead() {
-        return Task.Run(() => (Stream)new RamStream(this, false));
+        return Task.Run(Stream () => new RamStream<RamFile>(this, false));
     }
 
     public Task<Stream> OpenToWrite() {
-        return Task.Run<Stream>(() => new RamStream(this, true));
+        return Task.Run<Stream>(() => new RamStream<RamFile>(this, true));
     }
 
     public Task Touch() {
         return Task.Run(() => LastWrite = DateTimeOffset.Now);
+    }
+
+    internal void ZeroOutContent() {
+        using RamStream<RamFile> stream = new(this, true);
+        stream.SetLength(0);
     }
 
     Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {

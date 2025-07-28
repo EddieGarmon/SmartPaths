@@ -1,13 +1,14 @@
-namespace SmartPaths.Storage.Ram;
+namespace SmartPaths.Storage;
 
-internal class RamStream : Stream
+internal class RamStream<TFile> : Stream
+    where TFile : class, IRamFile
 {
 
     private readonly bool _canWrite;
-    private readonly RamFile _file;
+    private readonly TFile _file;
     private readonly MemoryStream _stream;
 
-    public RamStream(RamFile file, bool canWrite) {
+    public RamStream(TFile file, bool canWrite) {
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();

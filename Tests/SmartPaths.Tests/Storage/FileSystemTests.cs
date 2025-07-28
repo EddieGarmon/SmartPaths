@@ -1,6 +1,4 @@
 ﻿using Shouldly;
-using SmartPaths.Storage.Disk;
-using SmartPaths.Storage.Ram;
 
 namespace SmartPaths.Storage;
 
@@ -15,6 +13,11 @@ public class FileSystemTests
     [Fact]
     public Task TestAllTheThings_RamFileSystem() {
         return TestAllTheThings(new RamFileSystem());
+    }
+
+    [Fact]
+    public Task TestAllTheThings_RedFileSystem() {
+        return TestAllTheThings(new RedFileSystem());
     }
 
     private static async Task TestAllTheThings(IFileSystem fileSystem) {
