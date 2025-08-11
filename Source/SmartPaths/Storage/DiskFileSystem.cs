@@ -2,7 +2,7 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
+public sealed class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile, DiskWatcher>
 {
 
     private DiskFolder? _appLocal;
@@ -81,6 +81,13 @@ public sealed class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile>
 
     public override Task<DiskFolder> GetTempStorage() {
         return Task.FromResult(_temp ??= new DiskFolder(TempStoragePath));
+    }
+
+    public override Task<DiskWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                                 string filter = "*",
+                                                 bool includeSubFolders = false,
+                                                 NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
+        return Task.FromResult(new DiskWatcher(folderPath, filter, includeSubFolders, notifyFilter));
     }
 
     private static AbsoluteFolderPath MakeAppStoragePath(Environment.SpecialFolder specialFolder) {

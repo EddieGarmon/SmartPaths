@@ -3,8 +3,8 @@ using System.Diagnostics;
 
 namespace SmartPaths.Storage;
 
-/// <summary>Represents a folder within the RAM-based file system, providing functionality for managing
-///     files and subfolders.</summary>
+/// <summary>Represents a folder within the RED file system, providing functionality for managing files
+///     and subfolders.</summary>
 /// <remarks>This class is designed to work with the <see cref="RedFileSystem" /> and provides caching
 ///     mechanisms, support for deletion, and methods for creating, retrieving, and managing files and
 ///     folders.</remarks>
@@ -12,7 +12,9 @@ namespace SmartPaths.Storage;
 public class RedFolder : BaseFolder<RedFolder, RedFile>
 {
 
+    private readonly ConcurrentDictionary<AbsoluteFilePath, RedFile> _files = [];
     private readonly RedFileSystem _fileSystem;
+    private readonly ConcurrentDictionary<AbsoluteFolderPath, RedFolder> _folders = [];
 
     internal RedFolder(RedFileSystem fileSystem, AbsoluteFolderPath path)
         : base(path) {
@@ -20,13 +22,8 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (path.IsRoot) {
             Parent = null;
         } else {
-            RedFolder? result = _fileSystem.GetFolder(path.Parent).Result;
-            if (result != null) {
-                result.Folders[path] = this;
-                Parent = result;
-            } else {
-                throw new Exception($"Can not find parent {path.Parent}.");
-            }
+            Parent = _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
+            Parent._folders[path] = this;
         }
     }
 
@@ -36,23 +33,22 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
 
     public bool WasDeleted { get; private set; }
 
-    internal ConcurrentDictionary<AbsoluteFilePath, RedFile> Files { get; } = [];
-
-    internal ConcurrentDictionary<AbsoluteFolderPath, RedFolder> Folders { get; } = [];
-
     public override async Task Delete() {
         if (WasDeleted) {
             return;
         }
-        //todo: should we ever build out cache now?
-        //await BuildCacheInfo();
-        foreach (RedFile file in Files.Values) {
+        if (Parent is null) {
+            throw new Exception("Can not delete the root node");
+        }
+        await BuildCacheInfo();
+        foreach (RedFile file in _files.Values) {
             await file.Delete();
         }
-        foreach (RedFolder folder in Folders.Values) {
+        foreach (RedFolder folder in _folders.Values) {
             await folder.Delete();
         }
         WasDeleted = true;
+        Parent.Expunge(this);
     }
 
     public override Task<bool> Exists() {
@@ -61,12 +57,12 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
 
     public override async Task<IReadOnlyList<RedFile>> GetFiles() {
         await BuildCacheInfo();
-        return Files.Values.Where(file => !file.WasDeleted).ToList();
+        return _files.Values.Where(file => !file.WasDeleted).ToList();
     }
 
     public override async Task<IReadOnlyList<RedFolder>> GetFolders() {
         await BuildCacheInfo();
-        return Folders.Values.Where(folder => !folder.WasDeleted).ToList();
+        return _folders.Values.Where(folder => !folder.WasDeleted).ToList();
     }
 
     internal async Task BuildCacheInfo() {
@@ -76,21 +72,20 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         //Cache Files
         IEnumerable<IFile> files = await _fileSystem.Disk.GetFiles(Path);
         foreach (IFile fileOnDisk in files) {
-            if (Files.ContainsKey(fileOnDisk.Path)) {
+            if (_files.ContainsKey(fileOnDisk.Path)) {
                 continue;
             }
             RedFile file = new(_fileSystem, fileOnDisk.Path);
-            Files[file.Path] = file;
-            _fileSystem.Files[file.Path] = file;
+            Register(file, false);
         }
         //Cache Folders
         IEnumerable<IFolder> folders = await _fileSystem.Disk.GetFolders(Path);
         foreach (IFolder folderOnDisk in folders) {
-            if (Folders.ContainsKey(folderOnDisk.Path)) {
+            if (_folders.ContainsKey(folderOnDisk.Path)) {
                 continue;
             }
             RedFolder folder = new(_fileSystem, folderOnDisk.Path);
-            Folders[folder.Path] = folder;
+            _folders[folder.Path] = folder;
             _fileSystem.Folders[folder.Path] = folder;
         }
         //Mark as cached
@@ -105,26 +100,24 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
             await BuildCacheInfo();
         }
         //Check the cache
-        if (!Files.TryGetValue(filePath, out RedFile? file)) {
+        if (!_files.TryGetValue(filePath, out RedFile? file)) {
             file = new RedFile(_fileSystem, filePath, [], DateTimeOffset.Now);
-            Files[file.Path] = file;
-            _fileSystem.Files[file.Path] = file;
+            Register(file);
             return file;
         }
         if (file.WasDeleted) {
-            file.Restore();
+            file.ReCreateEmpty();
             return file;
         }
         switch (collisionStrategy) {
             case CollisionStrategy.GenerateUniqueName:
                 filePath = await _fileSystem.MakeUnique(filePath);
                 file = new RedFile(_fileSystem, filePath, [], DateTimeOffset.Now);
-                Files[file.Path] = file;
-                _fileSystem.Files[file.Path] = file;
+                Register(file);
                 return file;
 
             case CollisionStrategy.ReplaceExisting:
-                file.ZeroOutContent();
+                file.ReCreateEmpty();
                 return file;
 
             case CollisionStrategy.FailIfExists:
@@ -142,18 +135,25 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (!IsCached) {
             await BuildCacheInfo();
         }
-        //Check the cache
-        if (Folders.TryGetValue(folderPath, out RedFolder? folder)) {
-            if (folder.WasDeleted) {
-                folder.WasDeleted = false;
-            }
-            return folder;
+        RedFolder folder = _folders.GetOrAdd(folderPath,
+                                             path => {
+                                                 RedFolder newFolder = new(_fileSystem, path);
+                                                 _fileSystem.Folders[newFolder.Path] = newFolder;
+                                                 _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, path, path.FolderName));
+                                                 return newFolder;
+                                             });
+
+        if (folder.WasDeleted) {
+            folder.WasDeleted = false;
         }
-        //Build a new folder
-        RedFolder newFolder = new(_fileSystem, folderPath);
-        Folders[newFolder.Path] = newFolder;
-        _fileSystem.Folders[newFolder.Path] = newFolder;
-        return newFolder;
+        return folder;
+    }
+
+    internal void Expunge(RedFile file, bool notify) {
+        //NB: we don't actually want to delete our records
+        if (notify) {
+            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, file.Path.Folder, file.Path.FileName));
+        }
     }
 
     internal override async Task<RedFile?> GetFile(AbsoluteFilePath filePath) {
@@ -163,7 +163,7 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (!IsCached) {
             await BuildCacheInfo();
         }
-        Files.TryGetValue(filePath, out RedFile? file);
+        _files.TryGetValue(filePath, out RedFile? file);
         return file;
     }
 
@@ -174,8 +174,23 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         if (!IsCached) {
             await BuildCacheInfo();
         }
-        Folders.TryGetValue(folderPath, out RedFolder? folder);
+        _folders.TryGetValue(folderPath, out RedFolder? folder);
         return folder;
+    }
+
+    internal void Register(RedFile file, bool notify = true) {
+        _files[file.Path] = file;
+        _fileSystem.Files[file.Path] = file;
+        if (notify) {
+            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, file.Path.Folder, file.Path.FileName));
+        }
+    }
+
+    private void Expunge(RedFolder folder, bool notify = true) {
+        //NB: we don't actually want to delete our records
+        if (notify) {
+            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, folder.Path, folder.Name));
+        }
     }
 
 }

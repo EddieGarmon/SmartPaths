@@ -10,13 +10,13 @@ public sealed class DiskFile : IFile
         Path = path;
     }
 
-    public string Name => Path.FileName;
+    public DiskFolder Folder => new(Path.Parent);
 
-    public DiskFolder Parent => new(Path.Parent);
+    public string Name => Path.FileName;
 
     public AbsoluteFilePath Path { get; }
 
-    IFolder IFile.Parent => Parent;
+    IFolder IFile.Parent => Folder;
 
     public Task Delete() {
         return Task.Run(() => File.Delete(Path));
