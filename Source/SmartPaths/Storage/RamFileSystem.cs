@@ -2,8 +2,10 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
+public sealed class RamFileSystem : BaseFileSystem<RamFolder, RamFile, RamWatcher>
 {
+
+    private readonly WeakCollection<RamWatcher> _watchers = [];
 
     public RamFileSystem() {
         WorkingDirectory = RootPath;
@@ -83,6 +85,15 @@ public sealed class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
         return Root.CreateFolder(TempStoragePath);
     }
 
+    public override Task<RamWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                                string filter = "*",
+                                                bool includeSubFolders = false,
+                                                NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
+        RamWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
+        _watchers.Add(watcher);
+        return Task.FromResult(watcher);
+    }
+
     internal AbsoluteFilePath MakeUnique(AbsoluteFilePath path) {
         int extra = 2;
         while (true) {
@@ -91,6 +102,24 @@ public sealed class RamFileSystem : BaseFileSystem<RamFolder, RamFile>
                 return alternatePath;
             }
             extra++;
+        }
+    }
+
+    internal void ProcessErrorEvent(ErrorEventArgs args) {
+        foreach (RamWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessErrorEvent(args);
+        }
+    }
+
+    internal void ProcessStorageEvent(FileSystemEventArgs args) {
+        foreach (RamWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessStorageEvent(args);
+        }
+    }
+
+    internal void ProcessStorageEvent(RenamedEventArgs args) {
+        foreach (RamWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessStorageEvent(args);
         }
     }
 

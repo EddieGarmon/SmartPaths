@@ -1,8 +1,9 @@
 ﻿namespace SmartPaths.Storage;
 
-public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
+public abstract class BaseFileSystem<TFolder, TFile, TWatcher> : IFileSystem
     where TFolder : IFolder
     where TFile : IFile
+    where TWatcher : IFileSystemWatcher
 {
 
     public abstract AbsoluteFolderPath AppLocalStoragePath { get; }
@@ -67,6 +68,11 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
 
     public abstract Task<TFolder> GetTempStorage();
 
+    public abstract Task<TWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                              string filter = "*",
+                                              bool includeSubFolders = false,
+                                              NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite);
+
     protected AbsoluteFilePath UpdateName(AbsoluteFilePath source, int uniqueness) {
         return source.GetSiblingFilePath($"{source.FileNameWithoutExtension} ({uniqueness}).{source.FileExtension}");
     }
@@ -113,6 +119,10 @@ public abstract class BaseFileSystem<TFolder, TFile> : IFileSystem
 
     Task<IFolder> IFileSystem.GetTempStorage() {
         return GetTempStorage().ContinueWith(task => (IFolder)task.Result, ContinuationOptions);
+    }
+
+    Task<IFileSystemWatcher> IFileSystem.GetWatcher(AbsoluteFolderPath folderPath, string filter, bool includeSubFolders, NotifyFilters notifyFilter) {
+        return GetWatcher(folderPath, filter, includeSubFolders, notifyFilter).ContinueWith(task => (IFileSystemWatcher)task.Result, ContinuationOptions);
     }
 
     private const TaskContinuationOptions ContinuationOptions = TaskContinuationOptions.ExecuteSynchronously;

@@ -49,4 +49,9 @@ public interface IFileSystem
 
     Task<IFolder> GetTempStorage();
 
+    Task<IFileSystemWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                        string filter = "*",
+                                        bool includeSubFolders = false,
+                                        NotifyFilters notifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName);
+
 }

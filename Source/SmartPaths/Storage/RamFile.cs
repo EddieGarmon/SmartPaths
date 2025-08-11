@@ -8,13 +8,15 @@ public sealed class RamFile : IRamFile
 {
 
     private readonly RamFileSystem _fileSystem;
+    private byte[] _data;
+    private DateTimeOffset _lastWrite;
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
-        Parent = _fileSystem.GetFolder(path.Parent).Result!;
+        Folder = _fileSystem.GetFolder(path.Parent).Result!;
         Path = path;
-        Data = [];
-        LastWrite = lastWrite;
+        _data = [];
+        _lastWrite = lastWrite;
     }
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, string contents, DateTimeOffset lastWrite)
@@ -22,42 +24,45 @@ public sealed class RamFile : IRamFile
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite) {
         _fileSystem = fileSystem;
+        Folder = _fileSystem.GetFolder(path.Parent).Result!;
         Path = path;
-        Data = data;
-        LastWrite = lastWrite;
-        Parent = _fileSystem.GetFolder(path.Parent).Result!;
+        _data = data;
+        _lastWrite = lastWrite;
     }
+
+    public RamFolder Folder { get; }
 
     public string Name => Path.FileName;
 
-    public RamFolder Parent { get; }
-
     public AbsoluteFilePath Path { get; }
 
-    internal byte[]? Data { get; set; }
+    public bool WasDeleted { get; private set; }
 
-    internal DateTimeOffset LastWrite { get; private set; }
+    private byte[] Data {
+        get => _data;
+        set {
+            _data = value;
+            _lastWrite = DateTimeOffset.Now;
+        }
+    }
 
     byte[]? IRamFile.Data {
         get => Data;
-        set => Data = value;
+        set => Data = value ?? [];
     }
 
-    IFolder IFile.Parent => Parent;
+    IFolder IFile.Parent => Folder;
 
     public Task Delete() {
-        Data = null;
-        LastWrite = DateTimeOffset.Now;
-        Parent.ExpungeFile(this);
-        return Task.CompletedTask;
+        return Delete(true);
     }
 
     public Task<bool> Exists() {
-        return Task.FromResult(Data is not null);
+        return Task.FromResult(!WasDeleted);
     }
 
     public Task<DateTimeOffset> GetLastWriteTime() {
-        return Task.FromResult(LastWrite);
+        return Task.FromResult(_lastWrite);
     }
 
     public async Task<RamFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
@@ -79,38 +84,53 @@ public sealed class RamFile : IRamFile
                     throw new ArgumentOutOfRangeException(nameof(collisionStrategy));
             }
         }
-        Parent.ExpungeFile(this);
 
         //Find the new parent folder, and register it there
         RamFolder newFolder = await _fileSystem.CreateFolder(newPath.Parent);
         RamFile newFile = new(_fileSystem, newPath, Data, DateTime.Now);
-        newFolder.Register(newFile);
+        newFolder.Register(newFile, false);
+
+        //delete this record
+        await Delete(false);
+
+        _fileSystem.ProcessStorageEvent(new RenamedEventArgs(WatcherChangeTypes.Changed, Path.Folder, newPath, Path));
+
         return newFile;
     }
 
     public Task<Stream> OpenToAppend() {
         return Task.Run(() => {
-                            Stream stream = new RamStream<RamFile>(this, true);
+                            Stream stream = new SmartStream<RamFile>(this, true);
                             stream.Seek(0, SeekOrigin.End);
                             return stream;
                         });
     }
 
     public Task<Stream> OpenToRead() {
-        return Task.Run(Stream () => new RamStream<RamFile>(this, false));
+        return Task.Run(Stream () => new SmartStream<RamFile>(this, false));
     }
 
     public Task<Stream> OpenToWrite() {
-        return Task.Run<Stream>(() => new RamStream<RamFile>(this, true));
+        return Task.Run<Stream>(() => new SmartStream<RamFile>(this, true));
     }
 
     public Task Touch() {
-        return Task.Run(() => LastWrite = DateTimeOffset.Now);
+        return Task.Run(() => {
+                            _lastWrite = DateTimeOffset.Now;
+                            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.Folder, Path.FileName));
+                        });
     }
 
-    internal void ZeroOutContent() {
-        using RamStream<RamFile> stream = new(this, true);
-        stream.SetLength(0);
+    internal void ReCreateEmpty() {
+        Data = [];
+        _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, Path.Folder, Path.FileName));
+    }
+
+    private Task Delete(bool notify) {
+        WasDeleted = true;
+        Data = [];
+        Folder.Expunge(this, notify);
+        return Task.CompletedTask;
     }
 
     Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {

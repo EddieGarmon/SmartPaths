@@ -11,8 +11,10 @@ namespace SmartPaths.Storage;
 ///     It allows creating, deleting, and querying files and folders, while maintaining a cache of the
 ///     current state. This class is particularly useful for scenarios where a temporary or mock file
 ///     system is needed, such as testing or prototyping.</remarks>
-public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
+public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile, RedWatcher>
 {
+
+    private readonly WeakCollection<RedWatcher> _watchers = [];
 
     public override AbsoluteFolderPath AppLocalStoragePath => Disk.AppLocalStoragePath;
 
@@ -114,6 +116,15 @@ public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
         return CreateFolder(TempStoragePath);
     }
 
+    public override Task<RedWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                                string filter = "*",
+                                                bool includeSubFolders = false,
+                                                NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
+        RedWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
+        _watchers.Add(watcher);
+        return Task.FromResult(watcher);
+    }
+
     internal async Task<AbsoluteFilePath> MakeUnique(AbsoluteFilePath path) {
         RedFolder? folder = await GetFolder(path.Parent);
         if (folder is null) {
@@ -128,6 +139,24 @@ public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile>
                 return alternatePath;
             }
             extra++;
+        }
+    }
+
+    internal void ProcessErrorEvent(ErrorEventArgs args) {
+        foreach (RedWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessErrorEvent(args);
+        }
+    }
+
+    internal void ProcessStorageEvent(FileSystemEventArgs args) {
+        foreach (RedWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessStorageEvent(args);
+        }
+    }
+
+    internal void ProcessStorageEvent(RenamedEventArgs args) {
+        foreach (RedWatcher watcher in _watchers.LiveList) {
+            watcher.ProcessStorageEvent(args);
         }
     }
 

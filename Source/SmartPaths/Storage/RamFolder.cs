@@ -3,6 +3,8 @@ using System.Diagnostics;
 
 namespace SmartPaths.Storage;
 
+/// <summary>Represents a folder within the RAM-based file system, providing functionality for managing
+///     files and subfolders.</summary>
 [DebuggerDisplay("[Folder] {Path}")]
 public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
 {
@@ -14,13 +16,30 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
     internal RamFolder(RamFileSystem fileSystem, AbsoluteFolderPath path)
         : base(path) {
         _fileSystem = fileSystem;
-        Parent = path.IsRoot ? null : _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
+        if (path.IsRoot) {
+            Parent = null;
+        } else {
+            Parent = _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
+            Parent._folders[path] = this;
+        }
     }
 
     public override RamFolder? Parent { get; }
 
-    public override Task Delete() {
-        return Task.Run(() => DeleteFolderAndChildren(this));
+    public override async Task Delete() {
+        if (Parent is null) {
+            throw new Exception("Can not delete the root node");
+        }
+        //NB: use ToList() to copy the data as the collections will be changing under us
+        foreach (RamFile file in _files.Values.ToList()) {
+            //delete files on the way down
+            await file.Delete();
+        }
+        foreach (RamFolder child in _folders.Values.ToList()) {
+            await child.Delete();
+        }
+        //delete folders on the way back up
+        Parent.Expunge(this);
     }
 
     public override Task<bool> Exists() {
@@ -36,6 +55,9 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
     }
 
     internal override Task<RamFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy) {
+        if (filePath.Parent != Path) {
+            throw new Exception($"Expected paths don't match.\nThis Folder: {Path}\nNew File: {filePath}");
+        }
         if (!_files.TryGetValue(filePath, out RamFile? file)) {
             file = new RamFile(_fileSystem, filePath, [], DateTimeOffset.Now);
             Register(file);
@@ -49,7 +71,7 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
                 return Task.FromResult(file);
 
             case CollisionStrategy.ReplaceExisting:
-                file.ZeroOutContent();
+                file.ReCreateEmpty();
                 return Task.FromResult(file);
 
             case CollisionStrategy.FailIfExists:
@@ -61,10 +83,14 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
     }
 
     internal override Task<RamFolder> CreateFolder(AbsoluteFolderPath folderPath) {
+        if (folderPath.Parent != Path) {
+            throw new Exception($"Expected paths don't match.\nThis Folder: {Path}\nNew Folder: {folderPath}");
+        }
         RamFolder folder = _folders.GetOrAdd(folderPath,
                                              path => {
                                                  RamFolder newFolder = new(_fileSystem, path);
                                                  _fileSystem.Folders[newFolder.Path] = newFolder;
+                                                 _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, path, path.FolderName));
                                                  return newFolder;
                                              });
         return Task.FromResult(folder);
@@ -83,14 +109,12 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
         return folder;
     }
 
-    internal void ExpungeFile(RamFile file) {
+    internal void Expunge(RamFile file, bool notify = true) {
         _files.TryRemove(file.Path, out _);
         _fileSystem.Files.TryRemove(file.Path, out _);
-    }
-
-    internal void ExpungeFolder(RamFolder folder) {
-        _folders.TryRemove(folder.Path, out _);
-        _fileSystem.Folders.TryRemove(folder.Path, out _);
+        if (notify) {
+            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, file.Path.Folder, file.Path.FileName));
+        }
     }
 
     internal override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
@@ -103,26 +127,18 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
         return Task.FromResult<RamFolder?>(folder);
     }
 
-    internal void Register(RamFile newFile) {
+    internal void Register(RamFile newFile, bool notify = true) {
         _files[newFile.Path] = newFile;
         _fileSystem.Files[newFile.Path] = newFile;
+        if (notify) {
+            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, newFile.Path.Folder, newFile.Path.FileName));
+        }
     }
 
-    private static async Task DeleteFolderAndChildren(RamFolder folder) {
-        if (folder.Parent is null) {
-            throw new Exception("Can not delete the root node");
-        }
-        //NB: use ToList() to copy the data as the collections will be changing under us
-        //delete files on the way down
-        foreach (RamFile file in folder._files.Values.ToList()) {
-            folder.ExpungeFile(file);
-        }
-        //recurse
-        foreach (RamFolder child in folder._folders.Values.ToList()) {
-            await DeleteFolderAndChildren(child);
-        }
-        //delete folders on the way back up
-        folder.Parent.ExpungeFolder(folder);
+    private void Expunge(RamFolder folder) {
+        _folders.TryRemove(folder.Path, out _);
+        _fileSystem.Folders.TryRemove(folder.Path, out _);
+        _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, folder.Path, folder.Name));
     }
 
 }

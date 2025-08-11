@@ -1,14 +1,15 @@
 namespace SmartPaths.Storage;
 
-internal class RamStream<TFile> : Stream
+internal class SmartStream<TFile> : Stream
     where TFile : class, IRamFile
 {
 
     private readonly bool _canWrite;
     private readonly TFile _file;
     private readonly MemoryStream _stream;
+    private bool _wasModified;
 
-    public RamStream(TFile file, bool canWrite) {
+    public SmartStream(TFile file, bool canWrite) {
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();
@@ -51,6 +52,7 @@ internal class RamStream<TFile> : Stream
             throw new Exception("File not opened for writing." + _file.Path);
         }
         _stream.SetLength(value);
+        _wasModified = true;
     }
 
     public override void Write(byte[] buffer, int offset, int count) {
@@ -58,10 +60,11 @@ internal class RamStream<TFile> : Stream
             throw new Exception("File not opened for writing." + _file.Path);
         }
         _stream.Write(buffer, offset, count);
+        _wasModified = true;
     }
 
     protected override void Dispose(bool disposing) {
-        if (_canWrite) {
+        if (_canWrite && _wasModified) {
             _file.Data = _stream.ToArray();
             _file.Touch();
         }
