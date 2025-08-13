@@ -2,10 +2,10 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, RamWatcher>
+public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, SmartWatcher>
 {
 
-    private readonly WeakCollection<RamWatcher> _watchers = [];
+    private readonly WeakCollection<SmartWatcher> _watchers = [];
 
     public RamFileSystem() {
         WorkingDirectory = RootPath;
@@ -85,11 +85,11 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, RamWatch
         return Root.CreateFolder(TempStoragePath);
     }
 
-    public override Task<RamWatcher> GetWatcher(AbsoluteFolderPath folderPath,
-                                                string filter = "*",
-                                                bool includeSubFolders = false,
-                                                NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
-        RamWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
+    public override Task<SmartWatcher> GetWatcher(AbsoluteFolderPath folderPath,
+                                                  string filter = "*",
+                                                  bool includeSubFolders = false,
+                                                  NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
+        SmartWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
         _watchers.Add(watcher);
         return Task.FromResult(watcher);
     }
@@ -106,19 +106,19 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, RamWatch
     }
 
     internal void ProcessErrorEvent(ErrorEventArgs args) {
-        foreach (RamWatcher watcher in _watchers.LiveList) {
+        foreach (SmartWatcher watcher in _watchers.LiveList) {
             watcher.ProcessErrorEvent(args);
         }
     }
 
     internal void ProcessStorageEvent(FileSystemEventArgs args) {
-        foreach (RamWatcher watcher in _watchers.LiveList) {
+        foreach (SmartWatcher watcher in _watchers.LiveList) {
             watcher.ProcessStorageEvent(args);
         }
     }
 
     internal void ProcessStorageEvent(RenamedEventArgs args) {
-        foreach (RamWatcher watcher in _watchers.LiveList) {
+        foreach (SmartWatcher watcher in _watchers.LiveList) {
             watcher.ProcessStorageEvent(args);
         }
     }

@@ -5,7 +5,7 @@ namespace SmartPaths.Storage;
 public abstract class SmartFileSystem<TFolder, TFile, TWatcher> : IFileSystem
     where TFolder : SmartFolder<TFolder, TFile>
     where TFile : SmartFile<TFolder, TFile>
-    where TWatcher : IFileSystemWatcher
+    where TWatcher : class, IFileSystemWatcher
 {
 
     public abstract AbsoluteFolderPath AppLocalStoragePath { get; }

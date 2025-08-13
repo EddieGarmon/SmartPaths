@@ -2,29 +2,30 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class RedWatcher : IFileSystemWatcher
+public class SmartWatcher : IFileSystemWatcher
 {
 
     private readonly FilterCollection _filters = [];
 
-    internal RedWatcher(AbsoluteFolderPath folderPath, string? filter, bool includeSubFolders, NotifyFilters notifyFilter) {
-        ArgumentNullException.ThrowIfNull(folderPath);
+    internal SmartWatcher(AbsoluteFolderPath path, string? filter, bool includeSubdirectories, NotifyFilters notifyFilter) {
+        ArgumentNullException.ThrowIfNull(path);
 
-        Path = folderPath;
-        Filter = filter ?? "*";
-        IncludeSubdirectories = includeSubFolders;
+        Path = path;
+        Filter = filter ?? DefaultFilter;
+        IncludeSubdirectories = includeSubdirectories;
         NotifyFilter = notifyFilter;
     }
 
     public bool EnableRaisingEvents { get; set; }
 
-    /// <summary>Used to specify a single name pattern. for more than one filter use the Filters</summary>
+    /// <summary>Used to specify a single name pattern. for more than one filter use <see cref="Filters" />
+    ///     .</summary>
     public string Filter {
-        get => Filters.Count == 0 ? DefaultFilter : Filters[0];
+        get => _filters.Count == 0 ? DefaultFilter : _filters[0];
         set {
-            Filters.Clear();
+            _filters.Clear();
             if (!string.IsNullOrEmpty(value)) {
-                Filters.Add(value);
+                _filters.Add(value);
             }
         }
     }
@@ -58,12 +59,40 @@ public sealed class RedWatcher : IFileSystemWatcher
         if (!EnableRaisingEvents) {
             return;
         }
-        if (!ShouldHandle(args.FullPath)) {
+        IPath path = SmartPath.Parse(args.FullPath);
+        AbsoluteFolderPath parent;
+        string name;
+        switch (path) {
+            case AbsoluteFolderPath folderPath:
+                parent = folderPath.Parent;
+                name = folderPath.FolderName;
+                break;
+
+            case AbsoluteFilePath filePath:
+                parent = filePath.Folder;
+                name = filePath.FileName;
+                break;
+
+            case RelativeFolderPath:
+            case RelativeFilePath:
+                return;
+
+            default:
+                throw new ArgumentOutOfRangeException(nameof(path));
+        }
+        //need to check if path is a direct child of watch path
+        if (parent != Path) {
+            //also check subdirectories
+            if (!IncludeSubdirectories || !path.ToString().StartsWith(Path.ToString())) {
+                return;
+            }
+        }
+        //paths match, now check Filters
+        if (!_filters.IsMatch(name)) {
             return;
         }
         switch (args.ChangeType) {
             case WatcherChangeTypes.Changed:
-                //todo: maybe: if (NotifyFilter.HasFlag)
                 Changed?.Invoke(this, args);
                 break;
             case WatcherChangeTypes.Created:
@@ -79,15 +108,10 @@ public sealed class RedWatcher : IFileSystemWatcher
         if (!EnableRaisingEvents) {
             return;
         }
-        if (ShouldHandle(args.FullPath) || ShouldHandle(args.OldFullPath)) {
+        //todo: finish
+        if (_filters.IsMatch(args.FullPath) || _filters.IsMatch(args.OldFullPath)) {
             Renamed?.Invoke(this, args);
         }
-    }
-
-    private bool ShouldHandle(string name) {
-        string filter = "*";
-        //todo FileSystemName.MatchesSimpleExpression(filter, name);
-        return false;
     }
 
     public const string DefaultFilter = "*";
