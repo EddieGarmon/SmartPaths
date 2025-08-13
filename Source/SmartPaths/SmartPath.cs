@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text.RegularExpressions;
 
 namespace SmartPaths;
 
@@ -41,6 +42,20 @@ public static class SmartPath
             throw new Exception($"Path [{path}] is absolute.");
         }
         return path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new RelativeFolderPath(path) : new RelativeFilePath(path);
+    }
+
+    public static bool TryParse(string? path, [NotNullWhen(true)] out IPath? smartPath) {
+        if (path is null) {
+            smartPath = null;
+            return false;
+        }
+        try {
+            smartPath = Parse(path);
+            return true;
+        } catch (Exception) {
+            smartPath = null;
+            return false;
+        }
     }
 
 }
