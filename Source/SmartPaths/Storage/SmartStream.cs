@@ -1,15 +1,16 @@
 namespace SmartPaths.Storage;
 
-internal class SmartStream<TFile> : Stream
-    where TFile : class, IRamFile
+internal class SmartStream<TFolder, TFile> : Stream
+    where TFolder : SmartFolder<TFolder, TFile>
+    where TFile : SmartFile<TFolder, TFile>
 {
 
     private readonly bool _canWrite;
-    private readonly TFile _file;
+    private readonly SmartFile<TFolder, TFile> _file;
     private readonly MemoryStream _stream;
     private bool _wasModified;
 
-    public SmartStream(TFile file, bool canWrite) {
+    public SmartStream(SmartFile<TFolder, TFile> file, bool canWrite) {
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();

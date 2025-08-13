@@ -2,7 +2,7 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class RamFileSystem : BaseFileSystem<RamFolder, RamFile, RamWatcher>
+public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, RamWatcher>
 {
 
     private readonly WeakCollection<RamWatcher> _watchers = [];

@@ -11,7 +11,7 @@ namespace SmartPaths.Storage;
 ///     It allows creating, deleting, and querying files and folders, while maintaining a cache of the
 ///     current state. This class is particularly useful for scenarios where a temporary or mock file
 ///     system is needed, such as testing or prototyping.</remarks>
-public sealed class RedFileSystem : BaseFileSystem<RedFolder, RedFile, RedWatcher>
+public sealed class RedFileSystem : SmartFileSystem<RedFolder, RedFile, RedWatcher>
 {
 
     private readonly WeakCollection<RedWatcher> _watchers = [];

@@ -80,4 +80,9 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return path is null ? null : new RelativeFolderPath(path);
     }
 
+    [return: NotNullIfNotNull(nameof(path))]
+    public static implicit operator string?(RelativeFolderPath? path) {
+        return path?.ToString();
+    }
+
 }

@@ -8,80 +8,57 @@ namespace SmartPaths.Storage;
 /// <remarks>The <see cref="RedFile" /> class supports operations such as reading, writing, deleting,
 ///     and moving files. It also provides caching capabilities to optimize file access and tracks
 ///     metadata such as the last write time.</remarks>
-[DebuggerDisplay("[RedFile:{IsCached}] {Path}")]
-public class RedFile : IRamFile
+[DebuggerDisplay("[XFile:{IsCached}] {Path}")]
+public sealed class RedFile : SmartFile<RedFolder, RedFile>
 {
 
     private readonly RedFileSystem _fileSystem;
-    private byte[]? _data;
-    private DateTimeOffset _lastWrite;
 
-    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path) {
+    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path)
+        : base(path) {
         _fileSystem = fileSystem;
         Folder = _fileSystem.GetFolder(path.Parent).Result!;
-        Path = path;
-        _data = null;
+
+        //don't do this until necessary
         DiskFile? onDisk = fileSystem.Disk.GetFile(path).Result;
-        _lastWrite = onDisk is not null ? onDisk.GetLastWriteTime().Result : DateTimeOffset.MinValue;
+        LastWrite = onDisk is not null ? onDisk.GetLastWriteTime().Result : DateTimeOffset.MinValue;
     }
 
-    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite) {
+    internal RedFile(RedFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite)
+        : base(path, data, lastWrite) {
         _fileSystem = fileSystem;
         Folder = _fileSystem.GetFolder(path.Parent).Result!;
-        Path = path;
-        Data = data;
-        IsCached = true;
-        _lastWrite = lastWrite;
     }
 
-    public RedFolder Folder { get; }
+    public bool IsCached => Data is not null;
 
-    public bool IsCached { get; private set; }
-
-    public string Name => Path.FileName;
-
-    public AbsoluteFilePath Path { get; }
-
-    public bool WasDeleted { get; private set; }
-
-    private byte[] Data {
+    private byte[] CachedData {
         get {
             if (!IsCached) {
                 CacheData().Wait();
             }
-            return _data!;
+            return Data!;
         }
         set {
-            _data = value;
-            IsCached = true;
-            _lastWrite = DateTimeOffset.Now;
+            ArgumentNullException.ThrowIfNull(value);
+            Data = value;
+            LastWrite = DateTimeOffset.Now;
         }
     }
 
-    byte[]? IRamFile.Data {
-        get => Data;
-        set => Data = value ?? [];
-    }
-
-    IFolder IFile.Parent => Folder;
-
-    public Task Delete() {
-        return Delete(true);
-    }
-
-    public Task<bool> Exists() {
+    public override Task<bool> Exists() {
         return IsCached ? Task.FromResult(!WasDeleted) : _fileSystem.Disk.FileExists(Path);
     }
 
-    public async Task<DateTimeOffset> GetLastWriteTime() {
+    public override async Task<DateTimeOffset> GetLastWriteTime() {
         if (!IsCached) {
             DiskFile? onDisk = await _fileSystem.Disk.GetFile(Path);
-            _lastWrite = onDisk is not null ? onDisk.GetLastWriteTime().Result : DateTimeOffset.MinValue;
+            LastWrite = onDisk is not null ? onDisk.GetLastWriteTime().Result : DateTimeOffset.MinValue;
         }
-        return _lastWrite;
+        return LastWrite;
     }
 
-    public async Task<RedFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override async Task<RedFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(newPath);
         if (WasDeleted) {
             throw new Exception($"Cannot move a deleted file. {Path}");
@@ -89,14 +66,20 @@ public class RedFile : IRamFile
         if (!IsCached) {
             await CacheData();
         }
+        if (Data is null) {
+            throw StorageExceptions.FileMissing(Path);
+        }
         RedFile? newFile = await _fileSystem.GetFile(newPath);
         if (newFile is not null) {
             switch (collisionStrategy) {
                 case CollisionStrategy.GenerateUniqueName:
+                    newFile = null;
                     newPath = await _fileSystem.MakeUnique(newPath);
                     break;
                 case CollisionStrategy.ReplaceExisting:
-                    await newFile.Delete();
+                    newFile.WasDeleted = false;
+                    newFile.CachedData = CachedData;
+                    newFile.LastWrite = DateTimeOffset.Now;
                     break;
                 case CollisionStrategy.FailIfExists:
                     throw StorageExceptions.FileExists(newPath);
@@ -105,10 +88,12 @@ public class RedFile : IRamFile
             }
         }
 
-        //Find the new parent folder, and register it there
-        RedFolder newParent = await _fileSystem.CreateFolder(newPath.Parent);
-        newFile = new RedFile(_fileSystem, newPath, Data!, DateTime.Now);
-        newParent.Register(newFile, false);
+        if (newFile is null) {
+            //Find the new parent folder, and register it there
+            RedFolder newParent = await _fileSystem.CreateFolder(newPath.Parent);
+            newFile = new RedFile(_fileSystem, newPath, CachedData, DateTime.Now);
+            newParent.Register(newFile, false);
+        }
 
         //delete this record
         await Delete(false);
@@ -118,25 +103,9 @@ public class RedFile : IRamFile
         return newFile;
     }
 
-    public Task<Stream> OpenToAppend() {
+    public override Task Touch() {
         return Task.Run(() => {
-                            Stream stream = new SmartStream<RedFile>(this, true);
-                            stream.Seek(0, SeekOrigin.End);
-                            return stream;
-                        });
-    }
-
-    public Task<Stream> OpenToRead() {
-        return Task.Run(Stream () => new SmartStream<RedFile>(this, false));
-    }
-
-    public Task<Stream> OpenToWrite() {
-        return Task.Run<Stream>(() => new SmartStream<RedFile>(this, true));
-    }
-
-    public Task Touch() {
-        return Task.Run(() => {
-                            _lastWrite = DateTimeOffset.Now;
+                            LastWrite = DateTimeOffset.Now;
                             _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.Folder, Path.FileName));
                         });
     }
@@ -150,24 +119,12 @@ public class RedFile : IRamFile
     private async Task CacheData() {
         DiskFile? onDisk = await _fileSystem.Disk.GetFile(Path);
         if (onDisk is not null) {
-            _data = await onDisk.ReadAllBytes();
-            _lastWrite = await onDisk.GetLastWriteTime();
+            Data = await onDisk.ReadAllBytes();
+            LastWrite = await onDisk.GetLastWriteTime();
         } else {
-            _data = [];
-            _lastWrite = DateTimeOffset.MinValue;
+            Data = [];
+            LastWrite = DateTimeOffset.MinValue;
         }
-        IsCached = true;
-    }
-
-    private Task Delete(bool notify) {
-        WasDeleted = true;
-        Data = [];
-        Folder.Expunge(this, notify);
-        return Task.CompletedTask;
-    }
-
-    Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {
-        return Move(newPath, collisionStrategy).ContinueWith(IFile (task) => task.Result);
     }
 
 }

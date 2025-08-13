@@ -13,6 +13,8 @@ public class AppendOperatorTests
         RelativeFilePath relative = relativeFile;
         Should.Throw<Exception>(() => absolute + relative);
         Should.Throw<Exception>(() => absolute / relative);
+        Should.Throw<Exception>(() => absolute + relativeFile);
+        Should.Throw<Exception>(() => absolute / relativeFile);
     }
 
     [Theory]

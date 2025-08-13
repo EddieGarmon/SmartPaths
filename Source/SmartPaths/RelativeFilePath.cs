@@ -73,4 +73,9 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
         return path is null ? null : new RelativeFilePath(path);
     }
 
+    [return: NotNullIfNotNull(nameof(path))]
+    public static implicit operator string?(RelativeFilePath? path) {
+        return path?.ToString();
+    }
+
 }

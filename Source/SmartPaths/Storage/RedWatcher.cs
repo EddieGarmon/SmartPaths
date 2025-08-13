@@ -1,7 +1,11 @@
-﻿namespace SmartPaths.Storage;
+﻿using System.Collections.ObjectModel;
 
-public class RedWatcher : IFileSystemWatcher
+namespace SmartPaths.Storage;
+
+public sealed class RedWatcher : IFileSystemWatcher
 {
+
+    private readonly FilterCollection _filters = [];
 
     internal RedWatcher(AbsoluteFolderPath folderPath, string? filter, bool includeSubFolders, NotifyFilters notifyFilter) {
         ArgumentNullException.ThrowIfNull(folderPath);
@@ -14,7 +18,18 @@ public class RedWatcher : IFileSystemWatcher
 
     public bool EnableRaisingEvents { get; set; }
 
-    public string Filter { get; set; }
+    /// <summary>Used to specify a single name pattern. for more than one filter use the Filters</summary>
+    public string Filter {
+        get => Filters.Count == 0 ? DefaultFilter : Filters[0];
+        set {
+            Filters.Clear();
+            if (!string.IsNullOrEmpty(value)) {
+                Filters.Add(value);
+            }
+        }
+    }
+
+    public Collection<string> Filters => _filters;
 
     public bool IncludeSubdirectories { get; set; }
 
@@ -48,6 +63,7 @@ public class RedWatcher : IFileSystemWatcher
         }
         switch (args.ChangeType) {
             case WatcherChangeTypes.Changed:
+                //todo: maybe: if (NotifyFilter.HasFlag)
                 Changed?.Invoke(this, args);
                 break;
             case WatcherChangeTypes.Created:
@@ -68,9 +84,12 @@ public class RedWatcher : IFileSystemWatcher
         }
     }
 
-    private bool ShouldHandle(string fullPath) {
-        // return Path.IsSubPathOf(fullPath);
+    private bool ShouldHandle(string name) {
+        string filter = "*";
+        //todo FileSystemName.MatchesSimpleExpression(filter, name);
         return false;
     }
+
+    public const string DefaultFilter = "*";
 
 }
