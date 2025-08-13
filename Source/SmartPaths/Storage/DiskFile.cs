@@ -3,42 +3,31 @@ using System.Diagnostics;
 namespace SmartPaths.Storage;
 
 [DebuggerDisplay("[File] {Path}")]
-public sealed class DiskFile : IFile
+public sealed class DiskFile : SmartFile<DiskFolder, DiskFile>
 {
 
-    public DiskFile(AbsoluteFilePath path) {
-        Path = path;
+    public DiskFile(AbsoluteFilePath path)
+        : base(path) {
+        Folder = new DiskFolder(path.Parent);
     }
 
-    public DiskFolder Folder => new(Path.Parent);
-
-    public string Name => Path.FileName;
-
-    public AbsoluteFilePath Path { get; }
-
-    IFolder IFile.Parent => Folder;
-
-    public Task Delete() {
-        return Task.Run(() => File.Delete(Path));
-    }
-
-    public Task<bool> Exists() {
+    public override Task<bool> Exists() {
         return Task.Run(() => File.Exists(Path));
     }
 
-    public Task<DateTimeOffset> GetLastWriteTime() {
+    public override Task<DateTimeOffset> GetLastWriteTime() {
         AssertExists();
         return Task.Run(() => new DateTimeOffset(File.GetLastWriteTime(Path)));
     }
 
-    public Task<DiskFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override Task<DiskFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         ArgumentNullException.ThrowIfNull(newPath);
         AssertExists();
 
         if (File.Exists(newPath)) {
             switch (collisionStrategy) {
                 case CollisionStrategy.GenerateUniqueName:
-                    newPath = MakeUnique(newPath);
+                    newPath = Folder.MakeUnique(newPath);
                     break;
                 case CollisionStrategy.ReplaceExisting:
                     File.Delete(newPath);
@@ -54,22 +43,22 @@ public sealed class DiskFile : IFile
         return Task.FromResult(new DiskFile(newPath));
     }
 
-    public Task<Stream> OpenToAppend() {
+    public new Task<Stream> OpenToAppend() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Append));
     }
 
-    public Task<Stream> OpenToRead() {
+    public new Task<Stream> OpenToRead() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Open, FileAccess.Read));
     }
 
-    public Task<Stream> OpenToWrite() {
+    public new Task<Stream> OpenToWrite() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Open, FileAccess.ReadWrite));
     }
 
-    public Task Touch() {
+    public override Task Touch() {
         AssertExists();
         return Task.Run(() => File.SetLastWriteTime(Path, DateTime.Now));
     }
@@ -77,23 +66,6 @@ public sealed class DiskFile : IFile
     private void AssertExists() {
         if (!File.Exists(Path)) {
             throw StorageExceptions.FileMissing(Path);
-        }
-    }
-
-    Task<IFile> IFile.Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy) {
-        return Move(newPath, collisionStrategy).ContinueWith(task => (IFile)task.Result);
-    }
-
-    internal static AbsoluteFilePath MakeUnique(AbsoluteFilePath path) {
-        int extra = 2;
-        while (true) {
-            string alternateName = string.Format("{0} ({1}).{2}", path.FileNameWithoutExtension, extra, path.FileExtension);
-            AbsoluteFilePath alternatePath = path.GetSiblingFilePath(alternateName);
-            if (!File.Exists(alternatePath)) {
-                return alternatePath;
-            }
-
-            extra++;
         }
     }
 

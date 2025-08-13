@@ -2,7 +2,7 @@
 
 namespace SmartPaths.Storage;
 
-public sealed class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile, DiskWatcher>
+public sealed class DiskFileSystem : SmartFileSystem<DiskFolder, DiskFile, DiskWatcher>
 {
 
     private DiskFolder? _appLocal;
@@ -20,16 +20,9 @@ public sealed class DiskFileSystem : BaseFileSystem<DiskFolder, DiskFile, DiskWa
         set => Environment.CurrentDirectory = value;
     }
 
-    public override Task<DiskFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
-        return Task.Run(() => {
-                            if (!File.Exists(filePath)) {
-                                Directory.CreateDirectory(filePath.Folder);
-                                using FileStream? _ = File.Create(filePath);
-                                return new DiskFile(filePath);
-                            }
-                            //todo: support collisions
-                            throw new NotImplementedException("DiskFileSystem.CreateFile - with collision");
-                        });
+    public override async Task<DiskFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        DiskFolder folder = await CreateFolder(filePath.Folder);
+        return await folder.CreateFile(filePath, collisionStrategy);
     }
 
     public override Task<DiskFolder> CreateFolder(AbsoluteFolderPath folderPath) {

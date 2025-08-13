@@ -1,30 +1,48 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace SmartPaths.Storage;
 
 [DebuggerDisplay("[Folder] {Path}")]
-public sealed class DiskFolder : IFolder
+public sealed class DiskFolder : SmartFolder<DiskFolder, DiskFile>
 {
 
-    public DiskFolder(AbsoluteFolderPath path) {
-        Path = path;
+    internal DiskFolder(AbsoluteFolderPath path)
+        : base(path) {
+        Parent = IsRoot ? null : _cache.GetOrAdd(Path.Parent, p => new DiskFolder(p));
     }
 
-    public string Name => Path.FolderName;
+    public override Task Delete() {
+        return Task.Run(() => {
+                            if (Directory.Exists(Path)) {
+                                Directory.Delete(Path, true);
+                            }
+                        });
+    }
 
-    public DiskFolder Parent => new(Path.Parent);
+    public override Task<bool> Exists() {
+        return Task.FromResult(Directory.Exists(Path));
+    }
 
-    public AbsoluteFolderPath Path { get; }
-
-    IFolder IFolder.Parent => Parent;
-
-    public Task<DiskFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+    public override Task<IReadOnlyList<DiskFile>> GetFiles() {
         AssertExists();
-        AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
+        IReadOnlyList<DiskFile> result = Directory.GetFiles(Path).Select(filePath => new DiskFile(filePath)).ToList().AsReadOnly();
+        return Task.FromResult(result);
+    }
+
+    public override Task<IReadOnlyList<DiskFolder>> GetFolders() {
+        AssertExists();
+        IReadOnlyList<DiskFolder> result = Directory.GetDirectories(Path).Select(child => new DiskFolder(child)).ToList().AsReadOnly();
+        return Task.FromResult(result);
+    }
+
+    //todo: this should be the sole implementation of collision strategy for Disk
+    internal override Task<DiskFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy) {
+        AssertExists();
         if (File.Exists(filePath)) {
             switch (collisionStrategy) {
                 case CollisionStrategy.GenerateUniqueName:
-                    filePath = DiskFile.MakeUnique(filePath);
+                    filePath = MakeUnique(filePath);
                     break;
                 case CollisionStrategy.ReplaceExisting:
                     File.Delete(filePath);
@@ -39,69 +57,52 @@ public sealed class DiskFolder : IFolder
         return Task.FromResult(new DiskFile(filePath));
     }
 
-    public Task<DiskFolder> CreateFolder(string folderName) {
+    internal override Task<DiskFolder> CreateFolder(AbsoluteFolderPath folderPath) {
+        if (folderPath.Parent != Path) {
+            throw new Exception($"Expected paths don't match.\nThis Folder: {Path}\nNew Folder: {folderPath}");
+        }
+
         AssertExists();
-        AbsoluteFolderPath child = Path.GetChildFolderPath(folderName);
-        Directory.CreateDirectory(child);
-        return Task.FromResult(new DiskFolder(child));
+        Directory.CreateDirectory(folderPath);
+        DiskFolder? folder = _cache.GetOrAdd(folderPath, path => new DiskFolder(path));
+        return Task.FromResult(folder);
     }
 
-    public Task Delete() {
-        return Task.Run(() => Directory.Delete(Path, true));
+    internal override void Expunge(SmartFile<DiskFolder, DiskFile> file, bool notify) {
+        if (File.Exists(file.Path)) {
+            File.Delete(file.Path);
+        }
     }
 
-    public Task DeleteFile(string fileName) {
-        AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
-        return Task.Run(() => {
-                            if (File.Exists(filePath)) {
-                                File.Delete(filePath);
-                            }
-                        });
-    }
-
-    public Task DeleteFolder(string folderName) {
-        AbsoluteFolderPath folderPath = Path.GetChildFolderPath(folderName);
-        return Task.Run(() => {
-                            if (Directory.Exists(folderPath)) {
-                                Directory.Delete(folderPath, true);
-                            }
-                        });
-    }
-
-    public Task<bool> Exists() {
-        return Task.FromResult(Directory.Exists(Path));
-    }
-
-    public Task<DiskFile?> GetFile(string fileName) {
+    internal override Task<DiskFile?> GetFile(AbsoluteFilePath filePath) {
         AssertExists();
         DiskFile? result = null;
-        AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
         if (File.Exists(filePath)) {
             result = new DiskFile(filePath);
         }
         return Task.FromResult(result);
     }
 
-    public Task<IReadOnlyList<DiskFile>> GetFiles() {
-        AssertExists();
-        IReadOnlyList<DiskFile> result = Directory.GetFiles(Path).Select(filePath => new DiskFile(filePath)).ToList().AsReadOnly();
-        return Task.FromResult(result);
-    }
-
-    public Task<DiskFolder?> GetFolder(string folderName) {
+    internal override Task<DiskFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         AssertExists();
         DiskFolder? result = null;
-        AbsoluteFolderPath child = Path.GetChildFolderPath(folderName);
-        if (Directory.Exists(child)) {
-            result = new DiskFolder(child);
+        if (Directory.Exists(folderPath)) {
+            result = new DiskFolder(folderPath);
         }
         return Task.FromResult(result);
     }
 
-    public Task<IReadOnlyList<DiskFolder>> GetFolders() {
-        AssertExists();
-        IReadOnlyList<DiskFolder> result = Directory.GetDirectories(Path).Select(child => new DiskFolder(child)).ToList().AsReadOnly();
-        return Task.FromResult(result);
+    internal AbsoluteFilePath MakeUnique(AbsoluteFilePath filePath) {
+        int extra = 2;
+        while (true) {
+            string alternateName = $"{filePath.FileNameWithoutExtension} ({extra}).{filePath.FileExtension}";
+            AbsoluteFilePath alternatePath = Path.GetSiblingFilePath(alternateName);
+            if (!File.Exists(alternatePath)) {
+                return alternatePath;
+            }
+
+            extra++;
+        }
     }
 
     private void AssertExists() {
@@ -110,32 +111,6 @@ public sealed class DiskFolder : IFolder
         }
     }
 
-    Task<IFile> IFolder.CreateFile(string fileName, CollisionStrategy collisionStrategy) {
-        return CreateFile(fileName, collisionStrategy).ContinueWith(task => (IFile)task.Result);
-    }
-
-    Task<IFolder> IFolder.CreateFolder(string folderName) {
-        return CreateFolder(folderName).ContinueWith(task => (IFolder)task.Result);
-    }
-
-    Task<IFile?> IFolder.GetFile(string fileName) {
-        return GetFile(fileName).ContinueWith(task => (IFile?)task.Result);
-    }
-
-    Task<IReadOnlyList<IFile>> IFolder.GetFiles() {
-        AssertExists();
-        IReadOnlyList<IFile> result = Directory.GetFiles(Path).Select(filePath => new DiskFile(filePath)).ToList<IFile>().AsReadOnly();
-        return Task.FromResult(result);
-    }
-
-    Task<IFolder?> IFolder.GetFolder(string folderName) {
-        return GetFolder(folderName).ContinueWith(task => (IFolder?)task.Result);
-    }
-
-    Task<IReadOnlyList<IFolder>> IFolder.GetFolders() {
-        AssertExists();
-        IReadOnlyList<IFolder> result = Directory.GetDirectories(Path).Select(child => new DiskFolder(child)).ToList<IFolder>().AsReadOnly();
-        return Task.FromResult(result);
-    }
+    private static readonly ConcurrentDictionary<AbsoluteFolderPath, DiskFolder> _cache = [];
 
 }

@@ -1,11 +1,11 @@
 ﻿namespace SmartPaths.Storage;
 
-public abstract class BaseFolder<TFolder, TFile> : IFolder
-    where TFolder : IFolder
-    where TFile : IFile
+public abstract class SmartFolder<TFolder, TFile> : IFolder
+    where TFolder : SmartFolder<TFolder, TFile>
+    where TFile : SmartFile<TFolder, TFile>
 {
 
-    protected BaseFolder(AbsoluteFolderPath path) {
+    protected SmartFolder(AbsoluteFolderPath path) {
         Path = path;
     }
 
@@ -13,7 +13,7 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
 
     public string Name => Path.FolderName;
 
-    public abstract TFolder? Parent { get; }
+    public TFolder? Parent { get; protected init; }
 
     public AbsoluteFolderPath Path { get; }
 
@@ -68,6 +68,10 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
 
     public abstract Task<IReadOnlyList<TFile>> GetFiles();
 
+    public Task<IReadOnlyList<TFile>> GetFiles(string searchPattern) {
+        throw new NotImplementedException();
+    }
+
     public Task<TFolder?> GetFolder(string folderName) {
         AbsoluteFolderPath folderPath = Path.GetChildFolderPath(folderName);
         return GetFolder(folderPath);
@@ -75,9 +79,15 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
 
     public abstract Task<IReadOnlyList<TFolder>> GetFolders();
 
+    public Task<IReadOnlyList<TFolder>> GetFolders(string searchPattern) {
+        throw new NotImplementedException();
+    }
+
     internal abstract Task<TFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy);
 
     internal abstract Task<TFolder> CreateFolder(AbsoluteFolderPath folderPath);
+
+    internal abstract void Expunge(SmartFile<TFolder, TFile> file, bool notify);
 
     internal abstract Task<TFile?> GetFile(AbsoluteFilePath filePath);
 
@@ -96,7 +106,11 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
     }
 
     Task<IReadOnlyList<IFile>> IFolder.GetFiles() {
-        return GetFiles().ContinueWith(task => (IReadOnlyList<IFile>)task.Result);
+        return GetFiles().ContinueWith(IReadOnlyList<IFile> (task) => task.Result);
+    }
+
+    Task<IReadOnlyList<IFile>> IFolder.GetFiles(string searchPattern) {
+        return GetFiles(searchPattern).ContinueWith(IReadOnlyList<IFile> (task) => task.Result);
     }
 
     Task<IFolder?> IFolder.GetFolder(string folderName) {
@@ -104,7 +118,11 @@ public abstract class BaseFolder<TFolder, TFile> : IFolder
     }
 
     Task<IReadOnlyList<IFolder>> IFolder.GetFolders() {
-        return GetFolders().ContinueWith(task => (IReadOnlyList<IFolder>)task.Result);
+        return GetFolders().ContinueWith(IReadOnlyList<IFolder> (task) => task.Result);
+    }
+
+    Task<IReadOnlyList<IFolder>> IFolder.GetFolders(string searchPattern) {
+        return GetFolders(searchPattern).ContinueWith(IReadOnlyList<IFolder> (task) => task.Result);
     }
 
 }

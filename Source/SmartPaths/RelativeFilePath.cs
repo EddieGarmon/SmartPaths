@@ -48,9 +48,34 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
         }
     }
 
+    public static RelativeFilePath operator +(RelativeFilePath file, string relativeFile) {
+        return file.Folder!.ResolveRelative(new RelativeFilePath(relativeFile));
+    }
+
+    public static RelativeFilePath operator +(RelativeFilePath file, RelativeFilePath relativeFile) {
+        return file.Folder!.ResolveRelative(relativeFile);
+    }
+
+    public static RelativeFolderPath operator /(RelativeFilePath file, string relativeFolder) {
+        return file.Folder!.ResolveRelative(new RelativeFolderPath(relativeFolder));
+    }
+
+    public static RelativeFolderPath operator /(RelativeFilePath file, RelativeFolderPath relativeFolder) {
+        return file.Folder!.ResolveRelative(relativeFolder);
+    }
+
+    public static RelativeFilePath operator /(RelativeFilePath file, RelativeFilePath relative) {
+        return file.Folder!.ResolveRelative(relative);
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator RelativeFilePath?(string? path) {
         return path is null ? null : new RelativeFilePath(path);
+    }
+
+    [return: NotNullIfNotNull(nameof(path))]
+    public static implicit operator string?(RelativeFilePath? path) {
+        return path?.ToString();
     }
 
 }

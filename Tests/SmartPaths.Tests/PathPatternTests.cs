@@ -3,7 +3,7 @@ using Shouldly;
 
 namespace SmartPaths;
 
-public class PatternTests
+public class PathPatternTests
 {
 
     [Theory]

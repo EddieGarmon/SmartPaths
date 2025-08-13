@@ -73,6 +73,11 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return path is null ? null : new AbsoluteFilePath(path);
     }
 
+    [return: NotNullIfNotNull(nameof(path))]
+    public static implicit operator string?(AbsoluteFilePath? path) {
+        return path?.ToString();
+    }
+
     public static RelativeFolderPath operator >> (AbsoluteFilePath fromFile, AbsoluteFolderPath toDir) {
         return fromFile.Parent.MakeRelative(toDir);
     }

@@ -59,15 +59,19 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         }
     }
 
-    public static AbsoluteFilePath operator +(AbsoluteFolderPath root, string relativeFile) {
-        return root.ResolveRelative(new RelativeFilePath(relativeFile));
-    }
-
     public static AbsoluteFilePath operator +(AbsoluteFolderPath root, RelativeFilePath relative) {
         return root.ResolveRelative(relative);
     }
 
+    public static AbsoluteFilePath operator +(AbsoluteFolderPath root, string relativeFile) {
+        return root.ResolveRelative(new RelativeFilePath(relativeFile));
+    }
+
     public static AbsoluteFilePath operator /(AbsoluteFolderPath root, RelativeFilePath relative) {
+        return root.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, RelativeFolderPath relative) {
         return root.ResolveRelative(relative);
     }
 
@@ -75,13 +79,14 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return root.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static AbsoluteFolderPath operator /(AbsoluteFolderPath root, RelativeFolderPath relative) {
-        return root.ResolveRelative(relative);
-    }
-
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFolderPath?(string? path) {
         return path is null ? null : new AbsoluteFolderPath(path);
+    }
+
+    [return: NotNullIfNotNull(nameof(path))]
+    public static implicit operator string?(AbsoluteFolderPath? path) {
+        return path?.ToString();
     }
 
     public static RelativeFolderPath operator >> (AbsoluteFolderPath fromDir, AbsoluteFolderPath toDir) {

@@ -25,8 +25,12 @@ public interface IFolder
 
     Task<IReadOnlyList<IFile>> GetFiles();
 
+    Task<IReadOnlyList<IFile>> GetFiles(string searchPattern);
+
     Task<IFolder?> GetFolder(string folderName);
 
     Task<IReadOnlyList<IFolder>> GetFolders();
+
+    Task<IReadOnlyList<IFolder>> GetFolders(string searchPattern);
 
 }

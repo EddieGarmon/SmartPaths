@@ -289,13 +289,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         return Equals(left, right);
     }
 
-    /// <summary>Performs an implicit conversion from <see cref="BasePath" /> to <see cref="string" />.</summary>
-    /// <param name="path">The path.</param>
-    /// <returns>The result of the conversion.</returns>
-    public static implicit operator string(BasePath path) {
-        return path.ToString();
-    }
-
     public static bool operator !=(BasePath? left, BasePath? right) {
         return !Equals(left, right);
     }

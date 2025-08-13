@@ -9,7 +9,7 @@ namespace SmartPaths.Storage;
 ///     mechanisms, support for deletion, and methods for creating, retrieving, and managing files and
 ///     folders.</remarks>
 [DebuggerDisplay("[XFolder:{IsCached}] {Path}")]
-public class RedFolder : BaseFolder<RedFolder, RedFile>
+public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
 {
 
     private readonly ConcurrentDictionary<AbsoluteFilePath, RedFile> _files = [];
@@ -19,7 +19,7 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
     internal RedFolder(RedFileSystem fileSystem, AbsoluteFolderPath path)
         : base(path) {
         _fileSystem = fileSystem;
-        if (path.IsRoot) {
+        if (IsRoot) {
             Parent = null;
         } else {
             Parent = _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
@@ -28,8 +28,6 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
     }
 
     public bool IsCached { get; private set; }
-
-    public override RedFolder? Parent { get; }
 
     public bool WasDeleted { get; private set; }
 
@@ -149,7 +147,7 @@ public class RedFolder : BaseFolder<RedFolder, RedFile>
         return folder;
     }
 
-    internal void Expunge(RedFile file, bool notify) {
+    internal override void Expunge(SmartFile<RedFolder, RedFile> file, bool notify) {
         //NB: we don't actually want to delete our records
         if (notify) {
             _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, file.Path.Folder, file.Path.FileName));

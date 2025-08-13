@@ -6,7 +6,7 @@ namespace SmartPaths.Storage;
 /// <summary>Represents a folder within the RAM-based file system, providing functionality for managing
 ///     files and subfolders.</summary>
 [DebuggerDisplay("[Folder] {Path}")]
-public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
+public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
 {
 
     private readonly ConcurrentDictionary<AbsoluteFilePath, RamFile> _files = [];
@@ -16,15 +16,13 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
     internal RamFolder(RamFileSystem fileSystem, AbsoluteFolderPath path)
         : base(path) {
         _fileSystem = fileSystem;
-        if (path.IsRoot) {
+        if (IsRoot) {
             Parent = null;
         } else {
             Parent = _fileSystem.GetFolder(path.Parent).Result ?? throw new Exception($"Can not find parent {path.Parent}.");
             Parent._folders[path] = this;
         }
     }
-
-    public override RamFolder? Parent { get; }
 
     public override async Task Delete() {
         if (Parent is null) {
@@ -109,7 +107,7 @@ public sealed class RamFolder : BaseFolder<RamFolder, RamFile>
         return folder;
     }
 
-    internal void Expunge(RamFile file, bool notify = true) {
+    internal override void Expunge(SmartFile<RamFolder, RamFile> file, bool notify) {
         _files.TryRemove(file.Path, out _);
         _fileSystem.Files.TryRemove(file.Path, out _);
         if (notify) {
