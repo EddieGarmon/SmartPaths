@@ -1,4 +1,6 @@
-﻿namespace SmartPaths.Storage;
+﻿using System.Text;
+
+namespace SmartPaths.Storage;
 
 public interface IFolder
 {
@@ -10,6 +12,12 @@ public interface IFolder
     AbsoluteFolderPath Path { get; }
 
     Task<IFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+
+    Task<IFile> CreateFile(string fileName, byte[] data, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+
+    Task<IFile> CreateFile(string filename, string content, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
+
+    Task<IFile> CreateFile(string filename, string content, Encoding encoding, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
     Task<IFolder> CreateFolder(string folderName);
 
@@ -32,5 +40,9 @@ public interface IFolder
     Task<IReadOnlyList<IFolder>> GetFolders();
 
     Task<IReadOnlyList<IFolder>> GetFolders(string searchPattern);
+
+    Task<IFileSystemWatcher> GetWatcher(string filter = "*",
+                                        bool includeSubFolders = false,
+                                        NotifyFilters notifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName);
 
 }

@@ -63,6 +63,12 @@ public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
         return _folders.Values.Where(folder => !folder.WasDeleted).ToList();
     }
 
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
+                                                        bool includeSubFolders = false,
+                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
+        return _fileSystem.GetWatcher(Path, filter, includeSubFolders, notifyFilter).ContinueWith(IFileSystemWatcher (task) => task.Result);
+    }
+
     internal async Task BuildCacheInfo() {
         if (IsCached) {
             return;
