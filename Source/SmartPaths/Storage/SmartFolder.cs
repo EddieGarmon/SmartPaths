@@ -1,4 +1,6 @@
-﻿namespace SmartPaths.Storage;
+﻿using System.Text;
+
+namespace SmartPaths.Storage;
 
 public abstract class SmartFolder<TFolder, TFile> : IFolder
     where TFolder : SmartFolder<TFolder, TFile>
@@ -22,6 +24,22 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
     public Task<TFile> CreateFile(string fileName, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         AbsoluteFilePath filePath = Path.GetChildFilePath(fileName);
         return CreateFile(filePath, collisionStrategy);
+    }
+
+    public async Task<TFile> CreateFile(string fileName, byte[] data, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        TFile file = await CreateFile(fileName, collisionStrategy);
+        using Stream stream = await file.OpenToWrite();
+        await stream.WriteAsync(data, 0, data.Length);
+        return file;
+    }
+
+    public Task<TFile> CreateFile(string filename, string content, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        return CreateFile(filename, content, Encoding.Default, collisionStrategy);
+    }
+
+    public Task<TFile> CreateFile(string fileName, string content, Encoding encoding, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        byte[] data = encoding.GetBytes(content);
+        return CreateFile(fileName, data, collisionStrategy);
     }
 
     public Task<TFolder> CreateFolder(string folderName) {
@@ -96,6 +114,18 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
     internal abstract Task<TFile?> GetFile(AbsoluteFilePath filePath);
 
     internal abstract Task<TFolder?> GetFolder(AbsoluteFolderPath folderPath);
+
+    Task<IFile> IFolder.CreateFile(string filename, string content, Encoding encoding, CollisionStrategy collisionStrategy) {
+        return CreateFile(filename, content, encoding, collisionStrategy).ContinueWith(task => (IFile)task.Result);
+    }
+
+    Task<IFile> IFolder.CreateFile(string filename, string content, CollisionStrategy collisionStrategy) {
+        return CreateFile(filename, content, collisionStrategy).ContinueWith(IFile (task) => task.Result);
+    }
+
+    Task<IFile> IFolder.CreateFile(string fileName, byte[] data, CollisionStrategy collisionStrategy) {
+        return CreateFile(fileName, data, collisionStrategy).ContinueWith(IFile (task) => task.Result);
+    }
 
     Task<IFile> IFolder.CreateFile(string fileName, CollisionStrategy collisionStrategy) {
         return CreateFile(fileName, collisionStrategy).ContinueWith(IFile (task) => task.Result);
