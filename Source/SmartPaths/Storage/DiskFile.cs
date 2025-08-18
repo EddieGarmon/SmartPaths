@@ -11,6 +11,8 @@ public sealed class DiskFile : SmartFile<DiskFolder, DiskFile>
         Folder = new DiskFolder(path.Parent);
     }
 
+    public override DiskFolder Folder { get; }
+
     public override Task<bool> Exists() {
         return Task.Run(() => File.Exists(Path));
     }

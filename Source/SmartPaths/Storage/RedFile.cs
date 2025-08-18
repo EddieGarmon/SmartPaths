@@ -30,6 +30,8 @@ public sealed class RedFile : SmartFile<RedFolder, RedFile>
         Folder = _fileSystem.GetFolder(path.Parent).Result!;
     }
 
+    public override RedFolder Folder { get; }
+
     public bool IsCached => Data is not null;
 
     private byte[] CachedData {

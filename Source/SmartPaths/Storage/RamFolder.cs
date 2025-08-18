@@ -52,6 +52,12 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
         return Task.FromResult<IReadOnlyList<RamFolder>>(_folders.Values.ToList());
     }
 
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
+                                                        bool includeSubFolders = false,
+                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
+        return _fileSystem.GetWatcher(Path, filter, includeSubFolders, notifyFilter).ContinueWith(IFileSystemWatcher (task) => task.Result);
+    }
+
     internal override Task<RamFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy) {
         if (filePath.Parent != Path) {
             throw new Exception($"Expected paths don't match.\nThis Folder: {Path}\nNew File: {filePath}");

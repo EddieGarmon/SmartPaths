@@ -36,8 +36,15 @@ public sealed class DiskFolder : SmartFolder<DiskFolder, DiskFile>
         return Task.FromResult(result);
     }
 
-    //todo: this should be the sole implementation of collision strategy for Disk
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
+                                                        bool includeSubFolders = false,
+                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
+        DiskWatcher watcher = new(Path, filter, includeSubFolders, notifyFilter);
+        return Task.FromResult<IFileSystemWatcher>(watcher);
+    }
+
     internal override Task<DiskFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy) {
+        //todo: this should be the sole implementation of collision strategy for Disk
         AssertExists();
         if (File.Exists(filePath)) {
             switch (collisionStrategy) {

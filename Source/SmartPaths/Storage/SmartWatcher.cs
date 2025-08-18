@@ -83,7 +83,7 @@ public class SmartWatcher : IFileSystemWatcher
         //need to check if path is a direct child of watch path
         if (parent != Path) {
             //also check subdirectories
-            if (!IncludeSubdirectories || !path.ToString().StartsWith(Path.ToString())) {
+            if (!IncludeSubdirectories || !path.ToString()!.StartsWith(Path.ToString())) {
                 return;
             }
         }

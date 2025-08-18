@@ -83,6 +83,10 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
         throw new NotImplementedException();
     }
 
+    public abstract Task<IFileSystemWatcher> GetWatcher(string filter = "*",
+                                                        bool includeSubFolders = false,
+                                                        NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite);
+
     internal abstract Task<TFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy);
 
     internal abstract Task<TFolder> CreateFolder(AbsoluteFolderPath folderPath);

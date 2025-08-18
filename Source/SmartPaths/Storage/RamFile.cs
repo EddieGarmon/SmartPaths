@@ -20,6 +20,8 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
         Folder = _fileSystem.GetFolder(path.Parent).Result!;
     }
 
+    public override RamFolder Folder { get; }
+
     public override Task<bool> Exists() {
         return Task.FromResult(!WasDeleted);
     }

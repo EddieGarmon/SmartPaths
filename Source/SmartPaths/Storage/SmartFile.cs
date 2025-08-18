@@ -14,7 +14,7 @@ public abstract class SmartFile<TFolder, TFile> : IFile
         LastWrite = lastWrite;
     }
 
-    public TFolder Folder { get; protected set; }
+    public abstract TFolder Folder { get; }
 
     public string Name => Path.FileName;
 
