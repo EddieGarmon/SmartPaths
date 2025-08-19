@@ -66,13 +66,24 @@ public static class IFileSystemExtensions
         return await folder.GetOrCreateFile(path.FileName);
     }
 
-    public static Task<bool> MoveFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, AbsoluteFilePath targetPath, bool overwriteIfExists = false) {
-        throw new NotImplementedException();
+    public static async Task<bool> MoveFile(this IFileSystem fileSystem,
+                                            AbsoluteFilePath sourcePath,
+                                            AbsoluteFilePath targetPath,
+                                            CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
+        IFile? source = await fileSystem.GetFile(sourcePath);
+        if (source is null) {
+            return false;
+        }
+        await source.Move(targetPath);
+        return true;
     }
 
-    public static Task<bool> MoveFile(this IFileSystem fileSystem, AbsoluteFilePath sourcePath, RelativeFilePath targetPath, bool overwriteIfExists = false) {
+    public static Task<bool> MoveFile(this IFileSystem fileSystem,
+                                      AbsoluteFilePath sourcePath,
+                                      RelativeFilePath targetPath,
+                                      CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists) {
         AbsoluteFilePath absoluteTargetPath = sourcePath.Folder + targetPath;
-        return fileSystem.MoveFile(sourcePath, absoluteTargetPath, overwriteIfExists);
+        return fileSystem.MoveFile(sourcePath, absoluteTargetPath, collisionStrategy);
     }
 
 }

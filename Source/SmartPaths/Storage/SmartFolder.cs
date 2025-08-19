@@ -87,7 +87,12 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
     public abstract Task<IReadOnlyList<TFile>> GetFiles();
 
     public Task<IReadOnlyList<TFile>> GetFiles(string searchPattern) {
-        throw new NotImplementedException();
+        FilterCollection filter = [searchPattern];
+        return GetFiles()
+            .ContinueWith<IReadOnlyList<TFile>>(task => {
+                                                    IReadOnlyList<TFile> files = task.Result;
+                                                    return files.Where(file => filter.IsMatch(file.Name)).ToList();
+                                                });
     }
 
     public Task<TFolder?> GetFolder(string folderName) {
@@ -98,7 +103,12 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
     public abstract Task<IReadOnlyList<TFolder>> GetFolders();
 
     public Task<IReadOnlyList<TFolder>> GetFolders(string searchPattern) {
-        throw new NotImplementedException();
+        FilterCollection filter = [searchPattern];
+        return GetFolders()
+            .ContinueWith<IReadOnlyList<TFolder>>(task => {
+                                                      IReadOnlyList<TFolder> folders = task.Result;
+                                                      return folders.Where(folder => filter.IsMatch(folder.Name)).ToList();
+                                                  });
     }
 
     public abstract Task<IFileSystemWatcher> GetWatcher(string filter = "*",
