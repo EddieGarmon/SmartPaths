@@ -1,0 +1,25 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <RootNamespace>SmartPaths</RootNamespace>
+
+        <PackageId>Verify.SmartPaths</PackageId>
+        <Title>SmartPaths Extension for Verify</Title>
+        <PackageTags>Verify;File;Folder;Directory;Absolute;Relative;Path;Paths</PackageTags>
+        <!--<PackageReadmeFile>ReadMe.md</PackageReadmeFile>-->
+    </PropertyGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Verify" Version="30.7.3" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\SmartPaths\SmartPaths.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Storage\" />
+    </ItemGroup>
+
+</Project>

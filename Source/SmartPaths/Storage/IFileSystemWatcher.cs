@@ -9,18 +9,20 @@ public interface IFileSystemWatcher
 
     bool IncludeSubdirectories { get; set; }
 
-    NotifyFilters NotifyFilter { get; set; }
-
     AbsoluteFolderPath Path { get; set; }
 
-    event FileSystemEventHandler? Changed;
+    event Action<FileEventRecord>? FileCreated;
 
-    event FileSystemEventHandler? Created;
+    event Action<FileEventRecord>? FileDeleted;
 
-    event FileSystemEventHandler? Deleted;
+    event Action<FileEventRecord>? FileEdited;
 
-    event ErrorEventHandler? Error;
+    event Action<FileEventRecord>? FileMoved;
 
-    event RenamedEventHandler? Renamed;
+    event Action<FolderEventRecord>? FolderCreated;
+
+    event Action<FolderEventRecord>? FolderDeleted;
+
+    event Action<FolderEventRecord>? FolderMoved;
 
 }

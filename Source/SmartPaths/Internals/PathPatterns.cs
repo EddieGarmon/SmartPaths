@@ -15,9 +15,6 @@ internal static partial class PathPatterns
     public const string NetworkSharePattern = @"(\\\\[a-zA-Z0-9\.\-_]{1,}\\[a-zA-Z0-9\-_]{1,})(?:\\?$|\\(.*))$";
 
     // language=regex
-    public const string RamDrivePattern = @"^[Rr][Aa][Mm]:(\\?$|\\(.*)$)";
-
-    // language=regex
     public const string RootRelativePattern = @"^[\\/](.*)$";
 
     // language=regex
@@ -32,19 +29,15 @@ internal static partial class PathPatterns
         if (match.Success) {
             return (PathType.DriveLetter, match);
         }
-        match = RamDriveRegex().Match(path);
-        if (match.Success) {
-            return (PathType.RamDrive, match);
-        }
         match = NetworkShareRegex().Match(path);
         if (match.Success) {
             return (PathType.NetworkShare, match);
         }
-        //otherwise attempt to match a relative path
         match = RootRelativeRegex().Match(path);
         if (match.Success) {
             return (PathType.RootRelative, match);
         }
+        //otherwise attempt to match a relative path
         match = SpecialRelativeRegex().Match(path);
         if (match.Success) {
             return (PathType.Relative, match);
@@ -64,9 +57,6 @@ internal static partial class PathPatterns
     [GeneratedRegex(NetworkSharePattern)]
     public static partial Regex NetworkShareRegex();
 
-    [GeneratedRegex(RamDrivePattern)]
-    public static partial Regex RamDriveRegex();
-
     [GeneratedRegex(RootRelativePattern)]
     public static partial Regex RootRelativeRegex();
 
@@ -85,10 +75,6 @@ internal static partial class PathPatterns
 
     public static Regex NetworkShareRegex() {
         return new Regex(NetworkSharePattern);
-    }
-
-    public static Regex RamDriveRegex() {
-        return new Regex(RamDrivePattern);
     }
 
     public static Regex RootRelativeRegex() {

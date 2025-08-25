@@ -5,13 +5,8 @@ public abstract class SmartFile<TFolder, TFile> : IFile
     where TFile : SmartFile<TFolder, TFile>
 {
 
-    protected SmartFile(AbsoluteFilePath filePath)
-        : this(filePath, null, DateTimeOffset.MinValue) { }
-
-    protected SmartFile(AbsoluteFilePath filePath, byte[]? data, DateTimeOffset lastWrite) {
+    protected SmartFile(AbsoluteFilePath filePath) {
         Path = filePath;
-        Data = data;
-        LastWrite = lastWrite;
     }
 
     public abstract TFolder Folder { get; }
@@ -26,8 +21,6 @@ public abstract class SmartFile<TFolder, TFile> : IFile
 
     IFolder IFile.Parent => Folder;
 
-    protected internal byte[]? Data { get; set; }
-
     public Task Delete() {
         return Delete(true);
     }
@@ -38,7 +31,7 @@ public abstract class SmartFile<TFolder, TFile> : IFile
 
     public abstract Task<TFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
-    public Task<Stream> OpenToAppend() {
+    public virtual Task<Stream> OpenToAppend() {
         return Task.Run(() => {
                             Stream stream = new SmartStream<TFolder, TFile>(this, true);
                             stream.Seek(0, SeekOrigin.End);
@@ -46,15 +39,19 @@ public abstract class SmartFile<TFolder, TFile> : IFile
                         });
     }
 
-    public Task<Stream> OpenToRead() {
+    public virtual Task<Stream> OpenToRead() {
         return Task.Run(Stream () => new SmartStream<TFolder, TFile>(this, false));
     }
 
-    public Task<Stream> OpenToWrite() {
+    public virtual Task<Stream> OpenToWrite() {
         return Task.Run<Stream>(() => new SmartStream<TFolder, TFile>(this, true));
     }
 
     public abstract Task Touch();
+
+    internal abstract byte[] GetData();
+
+    internal abstract void SetData(byte[] value);
 
     protected Task Delete(bool notify) {
         WasDeleted = true;

@@ -49,10 +49,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
                 Parts.AddFirst($@"{match.Groups[1].Value}:\");
                 path = match.Groups[2].Value;
                 break;
-            case PathType.RamDrive:
-                Parts.AddFirst(@"ram:\");
-                path = match.Groups[2].Value;
-                break;
             case PathType.NetworkShare:
                 Parts.AddFirst($@"{match.Groups[1].Value}\");
                 path = match.Groups[2].Value;
@@ -120,10 +116,9 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
                 case PathType.Relative:
                     return false;
 
-                case PathType.RootRelative:
                 case PathType.Absolute:
+                case PathType.RootRelative:
                 case PathType.DriveLetter:
-                case PathType.RamDrive:
                 case PathType.NetworkShare:
                     return true;
 

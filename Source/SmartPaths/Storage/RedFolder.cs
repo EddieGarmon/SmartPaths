@@ -63,10 +63,8 @@ public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
         return _folders.Values.Where(folder => !folder.WasDeleted).ToList();
     }
 
-    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
-                                                        bool includeSubFolders = false,
-                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
-        return _fileSystem.GetWatcher(Path, filter, includeSubFolders, notifyFilter).ContinueWith(IFileSystemWatcher (task) => task.Result);
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*", bool includeSubFolders = false) {
+        return _fileSystem.GetWatcher(Path, filter, includeSubFolders).ContinueWith(IFileSystemWatcher (task) => task.Result);
     }
 
     internal async Task BuildCacheInfo() {
@@ -143,7 +141,7 @@ public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
                                              path => {
                                                  RedFolder newFolder = new(_fileSystem, path);
                                                  _fileSystem.Folders[newFolder.Path] = newFolder;
-                                                 _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, path, path.FolderName));
+                                                 _fileSystem.ProcessStorageEvent(new FolderEventRecord(LedgerAction.FolderCreated, path, null));
                                                  return newFolder;
                                              });
 
@@ -156,7 +154,7 @@ public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
     internal override void Expunge(SmartFile<RedFolder, RedFile> file, bool notify) {
         //NB: we don't actually want to delete our records
         if (notify) {
-            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, file.Path.Folder, file.Path.FileName));
+            _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileDeleted, null, file.Path));
         }
     }
 
@@ -186,14 +184,14 @@ public sealed class RedFolder : SmartFolder<RedFolder, RedFile>
         _files[file.Path] = file;
         _fileSystem.Files[file.Path] = file;
         if (notify) {
-            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, file.Path.Folder, file.Path.FileName));
+            _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileCreated, file.Path, null));
         }
     }
 
     private void Expunge(RedFolder folder, bool notify = true) {
         //NB: we don't actually want to delete our records
         if (notify) {
-            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, folder.Path, folder.Name));
+            _fileSystem.ProcessStorageEvent(new FolderEventRecord(LedgerAction.FolderDeleted, null, folder.Path));
         }
     }
 

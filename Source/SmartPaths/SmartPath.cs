@@ -16,6 +16,7 @@ public static class SmartPath
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
         return pathType switch {
             PathType.Absolute => path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new AbsoluteFolderPath(path) : new AbsoluteFilePath(path),
+            PathType.RootRelative => path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new AbsoluteFolderPath(path) : new AbsoluteFilePath(path),
             _ => throw new Exception($"Path [{path}] is {pathType} not Absolute.")
         };
     }

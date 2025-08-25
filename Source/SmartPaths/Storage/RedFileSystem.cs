@@ -116,13 +116,14 @@ public sealed class RedFileSystem : SmartFileSystem<RedFolder, RedFile, SmartWat
         return CreateFolder(TempStoragePath);
     }
 
-    public override Task<SmartWatcher> GetWatcher(AbsoluteFolderPath folderPath,
-                                                  string filter = "*",
-                                                  bool includeSubFolders = false,
-                                                  NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
-        SmartWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
+    public override Task<SmartWatcher> GetWatcher(AbsoluteFolderPath folderPath, string filter = "*", bool includeSubFolders = false) {
+        SmartWatcher watcher = new(folderPath, filter, includeSubFolders);
         _watchers.Add(watcher);
         return Task.FromResult(watcher);
+    }
+
+    public Task<Ledger> StartLedger(AbsoluteFolderPath ledgerRoot) {
+        return StartNewLedger(ledgerRoot);
     }
 
     internal async Task<AbsoluteFilePath> MakeUnique(AbsoluteFilePath path) {
@@ -142,21 +143,15 @@ public sealed class RedFileSystem : SmartFileSystem<RedFolder, RedFile, SmartWat
         }
     }
 
-    internal void ProcessErrorEvent(ErrorEventArgs args) {
+    internal void ProcessStorageEvent(FolderEventRecord record) {
         foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessErrorEvent(args);
+            watcher.ProcessStorageEvent(record);
         }
     }
 
-    internal void ProcessStorageEvent(FileSystemEventArgs args) {
+    internal void ProcessStorageEvent(FileEventRecord record) {
         foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessStorageEvent(args);
-        }
-    }
-
-    internal void ProcessStorageEvent(RenamedEventArgs args) {
-        foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessStorageEvent(args);
+            watcher.ProcessStorageEvent(record);
         }
     }
 

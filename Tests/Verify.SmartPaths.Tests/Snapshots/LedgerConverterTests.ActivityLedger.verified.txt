@@ -1,0 +1,10 @@
+﻿[
+  {
+    Action: FolderCreated,
+    ResultPath: \activity\
+  },
+  {
+    Action: FileCreated,
+    ResultPath: \activity\file1.txt
+  }
+]

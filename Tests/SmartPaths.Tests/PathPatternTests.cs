@@ -55,20 +55,6 @@ public class PathPatternTests
     }
 
     [Theory]
-    [InlineData(@"ram:")]
-    [InlineData(@"ram:\")]
-    [InlineData(@"ram:\hello")]
-    [InlineData(@"ram:\hello\world")]
-    [InlineData(@"ram:\hello.world")]
-    [InlineData(@"ram:\.hello")]
-    [InlineData(@"ram:\..hello")]
-    public void ValidRamDrivePaths(string value) {
-        (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
-        pathType.ShouldBe(PathType.RamDrive);
-        match.Success.ShouldBeTrue();
-    }
-
-    [Theory]
     [InlineData(@"hello")]
     [InlineData(@"hello.world")]
     [InlineData(@".hello")]
@@ -81,27 +67,6 @@ public class PathPatternTests
     public void ValidRelative_GeneralPaths(string value) {
         (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
         pathType.ShouldBe(PathType.Relative);
-        match.Success.ShouldBeTrue();
-    }
-
-    [Theory]
-    //windows
-    [InlineData(@"\")]
-    [InlineData(@"\hello")]
-    [InlineData(@"\hello\world")]
-    [InlineData(@"\hello.world")]
-    [InlineData(@"\.hello")]
-    [InlineData(@"\..hello")]
-    //linux
-    [InlineData(@"/")]
-    [InlineData(@"/hello")]
-    [InlineData(@"/hello/world")]
-    [InlineData(@"/hello.world")]
-    [InlineData(@"/.hello")]
-    [InlineData(@"/..hello")]
-    public void ValidRelative_RootedPaths(string value) {
-        (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
-        pathType.ShouldBe(PathType.RootRelative);
         match.Success.ShouldBeTrue();
     }
 
@@ -137,6 +102,27 @@ public class PathPatternTests
     public void ValidRelative_SpecialPaths(string value) {
         (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
         pathType.ShouldBe(PathType.Relative);
+        match.Success.ShouldBeTrue();
+    }
+
+    [Theory]
+    //windows
+    [InlineData(@"\")]
+    [InlineData(@"\hello")]
+    [InlineData(@"\hello\world")]
+    [InlineData(@"\hello.world")]
+    [InlineData(@"\.hello")]
+    [InlineData(@"\..hello")]
+    //linux
+    [InlineData(@"/")]
+    [InlineData(@"/hello")]
+    [InlineData(@"/hello/world")]
+    [InlineData(@"/hello.world")]
+    [InlineData(@"/.hello")]
+    [InlineData(@"/..hello")]
+    public void ValidRootedPaths(string value) {
+        (PathType pathType, Match? match) = PathPatterns.DeterminePathType(value);
+        pathType.ShouldBe(PathType.RootRelative);
         match.Success.ShouldBeTrue();
     }
 

@@ -13,13 +13,13 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, SmartWat
         Folders[RootPath] = Root;
     }
 
-    public override AbsoluteFolderPath AppLocalStoragePath { get; } = @"ram:\LocalStorage\";
+    public override AbsoluteFolderPath AppLocalStoragePath { get; } = @"\LocalStorage\";
 
-    public override AbsoluteFolderPath AppRoamingStoragePath { get; } = @"ram:\RoamingStorage\";
+    public override AbsoluteFolderPath AppRoamingStoragePath { get; } = @"\RoamingStorage\";
 
     public RamFolder Root { get; }
 
-    public override AbsoluteFolderPath TempStoragePath { get; } = @"ram:\Temp\";
+    public override AbsoluteFolderPath TempStoragePath { get; } = @"\Temp\";
 
     public override AbsoluteFolderPath WorkingDirectory { get; set; }
 
@@ -72,26 +72,27 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, SmartWat
     public override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
         EnsureIsRamPath(filePath);
         Files.TryGetValue(filePath, out RamFile? file);
-        return Task.FromResult<RamFile?>(file);
+        return Task.FromResult(file);
     }
 
     public override Task<RamFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         EnsureIsRamPath(folderPath);
         Folders.TryGetValue(folderPath, out RamFolder? folder);
-        return Task.FromResult<RamFolder?>(folder);
+        return Task.FromResult(folder);
     }
 
     public override Task<RamFolder> GetTempStorage() {
         return Root.CreateFolder(TempStoragePath);
     }
 
-    public override Task<SmartWatcher> GetWatcher(AbsoluteFolderPath folderPath,
-                                                  string filter = "*",
-                                                  bool includeSubFolders = false,
-                                                  NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
-        SmartWatcher watcher = new(folderPath, filter, includeSubFolders, notifyFilter);
+    public override Task<SmartWatcher> GetWatcher(AbsoluteFolderPath folderPath, string filter = "*", bool includeSubFolders = false) {
+        SmartWatcher watcher = new(folderPath, filter, includeSubFolders);
         _watchers.Add(watcher);
         return Task.FromResult(watcher);
+    }
+
+    public Task<Ledger> StartLedger() {
+        return StartNewLedger(RootPath);
     }
 
     internal AbsoluteFilePath MakeUnique(AbsoluteFilePath path) {
@@ -105,29 +106,23 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, SmartWat
         }
     }
 
-    internal void ProcessErrorEvent(ErrorEventArgs args) {
+    internal void ProcessStorageEvent(FolderEventRecord record) {
         foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessErrorEvent(args);
+            watcher.ProcessStorageEvent(record);
         }
     }
 
-    internal void ProcessStorageEvent(FileSystemEventArgs args) {
+    internal void ProcessStorageEvent(FileEventRecord record) {
         foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessStorageEvent(args);
+            watcher.ProcessStorageEvent(record);
         }
     }
 
-    internal void ProcessStorageEvent(RenamedEventArgs args) {
-        foreach (SmartWatcher watcher in _watchers.LiveList) {
-            watcher.ProcessStorageEvent(args);
-        }
-    }
-
-    public static AbsoluteFolderPath RootPath { get; } = @"ram:\";
+    public static AbsoluteFolderPath RootPath { get; } = @"\";
 
     private static void EnsureIsRamPath(AbsolutePath filePath) {
-        if (filePath.RootValue != "ram:\\") {
-            throw new Exception($"Only 'ram:\\' rooted paths allowed. ({filePath})");
+        if (filePath.PathType != PathType.RootRelative) {
+            throw new Exception($"Only root relative paths allowed. ({filePath})");
         }
     }
 

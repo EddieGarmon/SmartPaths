@@ -76,11 +76,12 @@ public sealed class DiskFileSystem : SmartFileSystem<DiskFolder, DiskFile, DiskW
         return Task.FromResult(_temp ??= new DiskFolder(TempStoragePath));
     }
 
-    public override Task<DiskWatcher> GetWatcher(AbsoluteFolderPath folderPath,
-                                                 string filter = "*",
-                                                 bool includeSubFolders = false,
-                                                 NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite) {
-        return Task.FromResult(new DiskWatcher(folderPath, filter, includeSubFolders, notifyFilter));
+    public override Task<DiskWatcher> GetWatcher(AbsoluteFolderPath folderPath, string filter = "*", bool includeSubFolders = false) {
+        return Task.FromResult(new DiskWatcher(folderPath, filter, includeSubFolders));
+    }
+
+    public Task<Ledger> StartLedger(AbsoluteFolderPath ledgerRoot) {
+        return StartNewLedger(ledgerRoot);
     }
 
     private static AbsoluteFolderPath MakeAppStoragePath(Environment.SpecialFolder specialFolder) {

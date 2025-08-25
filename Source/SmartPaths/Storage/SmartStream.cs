@@ -14,9 +14,8 @@ internal class SmartStream<TFolder, TFile> : Stream
         _file = file;
         _canWrite = canWrite;
         _stream = new MemoryStream();
-        if (file.Data is not null) {
-            _stream.Write(file.Data, 0, file.Data.Length);
-        }
+        byte[] data = file.GetData();
+        _stream.Write(data, 0, data.Length);
         _stream.Seek(0, SeekOrigin.Begin);
     }
 
@@ -66,7 +65,7 @@ internal class SmartStream<TFolder, TFile> : Stream
 
     protected override void Dispose(bool disposing) {
         if (_canWrite && _wasModified) {
-            _file.Data = _stream.ToArray();
+            _file.SetData(_stream.ToArray());
             _file.Touch();
         }
         _stream.Dispose();
