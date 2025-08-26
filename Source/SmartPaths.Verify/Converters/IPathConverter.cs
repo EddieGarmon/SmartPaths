@@ -1,6 +1,6 @@
 ﻿namespace SmartPaths.Converters;
 
-public class IPathConverter : WriteOnlyJsonConverter<IPath>
+internal class IPathConverter : WriteOnlyJsonConverter<IPath>
 {
 
     public override void Write(VerifyJsonWriter writer, IPath value) {

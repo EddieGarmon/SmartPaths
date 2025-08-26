@@ -4,7 +4,7 @@
         <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
         <RootNamespace>SmartPaths</RootNamespace>
 
-        <PackageId>Verify.SmartPaths</PackageId>
+        <PackageId>SmartPaths.Verify</PackageId>
         <Title>SmartPaths Extension for Verify</Title>
         <PackageTags>Verify;File;Folder;Directory;Absolute;Relative;Path;Paths</PackageTags>
         <!--<PackageReadmeFile>ReadMe.md</PackageReadmeFile>-->
