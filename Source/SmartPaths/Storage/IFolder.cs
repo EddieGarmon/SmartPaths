@@ -41,8 +41,6 @@ public interface IFolder
 
     Task<IReadOnlyList<IFolder>> GetFolders(string searchPattern);
 
-    Task<IFileSystemWatcher> GetWatcher(string filter = "*",
-                                        bool includeSubFolders = false,
-                                        NotifyFilters notifyFilter = NotifyFilters.LastWrite | NotifyFilters.FileName | NotifyFilters.DirectoryName);
+    Task<IFileSystemWatcher> GetWatcher(string filter = "*", bool includeSubFolders = false);
 
 }

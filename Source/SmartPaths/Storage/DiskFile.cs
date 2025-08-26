@@ -6,7 +6,7 @@ namespace SmartPaths.Storage;
 public sealed class DiskFile : SmartFile<DiskFolder, DiskFile>
 {
 
-    public DiskFile(AbsoluteFilePath path)
+    internal DiskFile(AbsoluteFilePath path)
         : base(path) {
         Folder = new DiskFolder(path.Parent);
     }
@@ -45,17 +45,17 @@ public sealed class DiskFile : SmartFile<DiskFolder, DiskFile>
         return Task.FromResult(new DiskFile(newPath));
     }
 
-    public new Task<Stream> OpenToAppend() {
+    public override Task<Stream> OpenToAppend() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Append));
     }
 
-    public new Task<Stream> OpenToRead() {
+    public override Task<Stream> OpenToRead() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Open, FileAccess.Read));
     }
 
-    public new Task<Stream> OpenToWrite() {
+    public override Task<Stream> OpenToWrite() {
         AssertExists();
         return Task.Run<Stream>(() => File.Open(Path, FileMode.Open, FileAccess.ReadWrite));
     }
@@ -63,6 +63,17 @@ public sealed class DiskFile : SmartFile<DiskFolder, DiskFile>
     public override Task Touch() {
         AssertExists();
         return Task.Run(() => File.SetLastWriteTime(Path, DateTime.Now));
+    }
+
+    internal override byte[] GetData() {
+        AssertExists();
+        return File.ReadAllBytes(Path);
+    }
+
+    internal override void SetData(byte[] value) {
+        ArgumentNullException.ThrowIfNull(value);
+        File.WriteAllBytes(Path, value);
+        LastWrite = DateTimeOffset.Now;
     }
 
     private void AssertExists() {

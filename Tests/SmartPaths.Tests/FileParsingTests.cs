@@ -34,9 +34,10 @@ public class FileParsingTests
     [InlineData(@"\\server\share\filename", @"\\server\share\filename", "")]
     [InlineData(@"\\server\share\filename.ext", @"\\server\share\filename.ext", "ext")]
     [InlineData(@"\\fully.qualified.server\share\filename.ext", @"\\fully.qualified.server\share\filename.ext", "ext")]
-    //RAM
-    [InlineData(@"ram:\filename", @"ram:\filename", "")]
-    [InlineData(@"ram:\filename.ext", @"ram:\filename.ext", "ext")]
+    //Root Relative
+    [InlineData(@"\filename", @"\filename", "")]
+    [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
+    [InlineData(@"\folder\filename.ext", @"\folder\filename.ext", "ext")]
     public void ValidAbsoluteFile(string source, string clean, string extension) {
         AbsoluteFilePath file = source;
         file.ToString().ShouldBe(clean);
@@ -55,9 +56,6 @@ public class FileParsingTests
     //current directory
     [InlineData(@"filename", @".\filename", "")]
     [InlineData(@"filename.ext", @".\filename.ext", "ext")]
-    //Root Relative
-    [InlineData(@"\filename", @"\filename", "")]
-    [InlineData(@"\filename.ext", @"\filename.ext", "ext")]
     public void ValidRelativeFile(string source, string clean, string extension) {
         RelativeFilePath file = source;
         file.ToString().ShouldBe(clean);

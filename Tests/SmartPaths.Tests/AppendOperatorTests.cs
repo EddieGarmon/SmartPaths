@@ -31,8 +31,6 @@ public class AppendOperatorTests
     [InlineData(@"c:\", @".\relative", @"c:\relative")]
     [InlineData(@"c:\Hello\World", @"..\Moto", @"c:\Hello\Moto")]
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto")]
-    [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto")]
-    [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto")]
     public void ValidAbsoluteFile(string absoluteDir, string relativeFile, string combinedFile) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFilePath relative = relativeFile;
@@ -47,8 +45,6 @@ public class AppendOperatorTests
     [InlineData(@"c:\", @".\relative", @"c:\relative\")]
     [InlineData(@"c:\Hello\World", @"..\Moto", @"c:\Hello\Moto\")]
     [InlineData(@"c:\Hello\World", @".\..\Moto", @"c:\Hello\Moto\")]
-    [InlineData(@"c:\Hello\World", @"\Moto", @"c:\Moto\")]
-    [InlineData(@"ram:\Hello\World", @"\Moto", @"ram:\Moto\")]
     public void ValidAbsoluteFolder(string absoluteDir, string relativeDir, string combinedDir) {
         AbsoluteFolderPath absolute = absoluteDir;
         RelativeFolderPath relative = relativeDir;

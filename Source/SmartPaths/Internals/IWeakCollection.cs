@@ -4,7 +4,7 @@
 ///     <see cref="ICollection{T}" /> implementations are understood to work on all the objects of the
 ///     collection (both dead and alive), and do not implicitly cause purges.</summary>
 /// <typeparam name="T">The type of objects to hold weak references to.</typeparam>
-public interface IWeakCollection<T> : ICollection<T>, IDisposable
+internal interface IWeakCollection<T> : ICollection<T>, IDisposable
 {
 
     /// <summary>Gets a sequence of live objects from the collection, causing a purge. The purge may occur

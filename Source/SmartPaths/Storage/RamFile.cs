@@ -7,6 +7,7 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
 {
 
     private readonly RamFileSystem _fileSystem;
+    private byte[] _data = [];
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path)
         : base(path) {
@@ -15,9 +16,10 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
     }
 
     internal RamFile(RamFileSystem fileSystem, AbsoluteFilePath path, byte[] data, DateTimeOffset lastWrite)
-        : base(path, data, lastWrite) {
-        _fileSystem = fileSystem;
-        Folder = _fileSystem.GetFolder(path.Parent).Result!;
+        : this(fileSystem, path) {
+        ArgumentNullException.ThrowIfNull(data);
+        SetData(data);
+        LastWrite = lastWrite;
     }
 
     public override RamFolder Folder { get; }
@@ -35,9 +37,6 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
         if (WasDeleted) {
             throw new Exception($"Cannot move a deleted file. {Path}");
         }
-        if (Data is null) {
-            throw StorageExceptions.FileMissing(Path);
-        }
         RamFile? newFile = await _fileSystem.GetFile(newPath);
         if (newFile is not null) {
             switch (collisionStrategy) {
@@ -47,7 +46,7 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
                     break;
                 case CollisionStrategy.ReplaceExisting:
                     newFile.WasDeleted = false;
-                    newFile.Data = Data;
+                    newFile.SetData(GetData());
                     newFile.LastWrite = DateTimeOffset.Now;
                     break;
                 case CollisionStrategy.FailIfExists:
@@ -59,15 +58,15 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
 
         if (newFile is null) {
             //Find the new parent folder, and register it there
-            RamFolder newFolder = await _fileSystem.CreateFolder(newPath.Parent);
-            newFile = new RamFile(_fileSystem, newPath, Data, DateTime.Now);
-            newFolder.Register(newFile, false);
+            RamFolder newParent = await _fileSystem.CreateFolder(newPath.Parent);
+            newFile = new RamFile(_fileSystem, newPath, GetData(), DateTimeOffset.Now);
+            newParent.Register(newFile, false);
         }
 
         //delete this record
         await Delete(false);
 
-        _fileSystem.ProcessStorageEvent(new RenamedEventArgs(WatcherChangeTypes.Changed, Path.Folder, newPath, Path));
+        _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileMoved, newPath, Path));
 
         return newFile;
     }
@@ -75,14 +74,24 @@ public sealed class RamFile : SmartFile<RamFolder, RamFile>
     public override Task Touch() {
         return Task.Run(() => {
                             LastWrite = DateTimeOffset.Now;
-                            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Changed, Path.Folder, Path.FileName));
+                            _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileEdited, Path, Path));
                         });
+    }
+
+    internal override byte[] GetData() {
+        return _data;
     }
 
     internal void ReCreateEmpty() {
         WasDeleted = false;
-        Data = [];
-        _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, Path.Folder, Path.FileName));
+        _data = [];
+        _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileCreated, Path, null));
+    }
+
+    internal override void SetData(byte[] value) {
+        ArgumentNullException.ThrowIfNull(value);
+        _data = value;
+        LastWrite = DateTimeOffset.Now;
     }
 
 }

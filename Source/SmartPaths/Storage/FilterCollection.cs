@@ -12,7 +12,10 @@ internal sealed class FilterCollection : Collection<string>
     internal FilterCollection()
         : base(new ImmutableStringList()) { }
 
-    internal bool IsMatch(string name) {
+    internal bool IsMatch(string? name) {
+        if (name is null) {
+            return false;
+        }
         return Items.Count == 0 || Items.Select(filter => _patterns[filter]).Any(isMatch => isMatch(name));
     }
 

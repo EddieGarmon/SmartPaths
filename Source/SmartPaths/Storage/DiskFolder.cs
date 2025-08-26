@@ -36,10 +36,8 @@ public sealed class DiskFolder : SmartFolder<DiskFolder, DiskFile>
         return Task.FromResult(result);
     }
 
-    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
-                                                        bool includeSubFolders = false,
-                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
-        DiskWatcher watcher = new(Path, filter, includeSubFolders, notifyFilter);
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*", bool includeSubFolders = false) {
+        DiskWatcher watcher = new(Path, filter, includeSubFolders);
         return Task.FromResult<IFileSystemWatcher>(watcher);
     }
 

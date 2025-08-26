@@ -111,9 +111,7 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
                                                   });
     }
 
-    public abstract Task<IFileSystemWatcher> GetWatcher(string filter = "*",
-                                                        bool includeSubFolders = false,
-                                                        NotifyFilters notifyFilter = NotifyFilters.DirectoryName | NotifyFilters.FileName | NotifyFilters.LastWrite);
+    public abstract Task<IFileSystemWatcher> GetWatcher(string filter = "*", bool includeSubFolders = false);
 
     internal abstract Task<TFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy);
 
@@ -126,7 +124,7 @@ public abstract class SmartFolder<TFolder, TFile> : IFolder
     internal abstract Task<TFolder?> GetFolder(AbsoluteFolderPath folderPath);
 
     Task<IFile> IFolder.CreateFile(string filename, string content, Encoding encoding, CollisionStrategy collisionStrategy) {
-        return CreateFile(filename, content, encoding, collisionStrategy).ContinueWith(task => (IFile)task.Result);
+        return CreateFile(filename, content, encoding, collisionStrategy).ContinueWith(IFile (task) => task.Result);
     }
 
     Task<IFile> IFolder.CreateFile(string filename, string content, CollisionStrategy collisionStrategy) {

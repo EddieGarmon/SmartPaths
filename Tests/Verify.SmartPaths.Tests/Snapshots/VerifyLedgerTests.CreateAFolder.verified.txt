@@ -1,0 +1,6 @@
+﻿[
+  {
+    Action: FolderCreated,
+    ResultPath: \activity\
+  }
+]

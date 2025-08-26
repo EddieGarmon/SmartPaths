@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 namespace SmartPaths;
 
 /// <summary>Directories will always end with a 'PathSeparator' and files will not.</summary>
-[DebuggerDisplay("[Path] {ToString()}")]
+[DebuggerDisplay("{ToString()}")]
 public abstract class BasePath : IPath, IEquatable<BasePath>
 {
 
@@ -47,10 +47,6 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
                 break;
             case PathType.DriveLetter:
                 Parts.AddFirst($@"{match.Groups[1].Value}:\");
-                path = match.Groups[2].Value;
-                break;
-            case PathType.RamDrive:
-                Parts.AddFirst(@"ram:\");
                 path = match.Groups[2].Value;
                 break;
             case PathType.NetworkShare:
@@ -120,10 +116,9 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
                 case PathType.Relative:
                     return false;
 
-                case PathType.RootRelative:
                 case PathType.Absolute:
+                case PathType.RootRelative:
                 case PathType.DriveLetter:
-                case PathType.RamDrive:
                 case PathType.NetworkShare:
                     return true;
 

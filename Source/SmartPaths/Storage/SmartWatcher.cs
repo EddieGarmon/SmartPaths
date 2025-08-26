@@ -7,13 +7,12 @@ public class SmartWatcher : IFileSystemWatcher
 
     private readonly FilterCollection _filters = [];
 
-    internal SmartWatcher(AbsoluteFolderPath path, string? filter, bool includeSubdirectories, NotifyFilters notifyFilter) {
+    internal SmartWatcher(AbsoluteFolderPath path, string? filter, bool includeSubdirectories) {
         ArgumentNullException.ThrowIfNull(path);
 
         Path = path;
         Filter = filter ?? DefaultFilter;
         IncludeSubdirectories = includeSubdirectories;
-        NotifyFilter = notifyFilter;
     }
 
     public bool EnableRaisingEvents { get; set; }
@@ -34,84 +33,91 @@ public class SmartWatcher : IFileSystemWatcher
 
     public bool IncludeSubdirectories { get; set; }
 
-    public NotifyFilters NotifyFilter { get; set; }
-
     public AbsoluteFolderPath Path { get; set; }
 
-    public event FileSystemEventHandler? Changed;
+    public event Action<FileEventRecord>? FileCreated;
 
-    public event FileSystemEventHandler? Created;
+    public event Action<FileEventRecord>? FileDeleted;
 
-    public event FileSystemEventHandler? Deleted;
+    public event Action<FileEventRecord>? FileEdited;
 
-    public event ErrorEventHandler? Error;
+    public event Action<FileEventRecord>? FileMoved;
 
-    public event RenamedEventHandler? Renamed;
+    public event Action<FolderEventRecord>? FolderCreated;
 
-    internal void ProcessErrorEvent(ErrorEventArgs args) {
+    public event Action<FolderEventRecord>? FolderDeleted;
+
+    public event Action<FolderEventRecord>? FolderMoved;
+
+    internal void ProcessStorageEvent(FolderEventRecord record) {
+        ArgumentNullException.ThrowIfNull(record);
         if (!EnableRaisingEvents) {
             return;
-        }
-        Error?.Invoke(this, args);
-    }
-
-    internal void ProcessStorageEvent(FileSystemEventArgs args) {
-        if (!EnableRaisingEvents) {
-            return;
-        }
-        IPath path = SmartPath.Parse(args.FullPath);
-        AbsoluteFolderPath parent;
-        string name;
-        switch (path) {
-            case AbsoluteFolderPath folderPath:
-                parent = folderPath.Parent;
-                name = folderPath.FolderName;
-                break;
-
-            case AbsoluteFilePath filePath:
-                parent = filePath.Folder;
-                name = filePath.FileName;
-                break;
-
-            case RelativeFolderPath:
-            case RelativeFilePath:
-                return;
-
-            default:
-                throw new ArgumentOutOfRangeException(nameof(path));
         }
         //need to check if path is a direct child of watch path
-        if (parent != Path) {
-            //also check subdirectories
-            if (!IncludeSubdirectories || !path.ToString()!.StartsWith(Path.ToString())) {
-                return;
-            }
-        }
-        //paths match, now check Filters
-        if (!_filters.IsMatch(name)) {
+        if (!IsWatchedFolder(record.InitialPath) && !IsWatchedFolder(record.ResultPath)) {
             return;
         }
-        switch (args.ChangeType) {
-            case WatcherChangeTypes.Changed:
-                Changed?.Invoke(this, args);
+        //paths match, now check Filters
+        if (!_filters.IsMatch(record.InitialPath?.FolderName) && !_filters.IsMatch(record.ResultPath?.FolderName)) {
+            return;
+        }
+        //pump the appropriate events
+        switch (record.Action) {
+            case LedgerAction.FolderCreated:
+                FolderCreated?.Invoke(record);
                 break;
-            case WatcherChangeTypes.Created:
-                Created?.Invoke(this, args);
+            case LedgerAction.FolderMoved:
+                FolderMoved?.Invoke(record);
                 break;
-            case WatcherChangeTypes.Deleted:
-                Deleted?.Invoke(this, args);
+            case LedgerAction.FolderDeleted:
+                FolderDeleted?.Invoke(record);
                 break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
 
-    internal void ProcessStorageEvent(RenamedEventArgs args) {
+    internal void ProcessStorageEvent(FileEventRecord record) {
+        ArgumentNullException.ThrowIfNull(record);
         if (!EnableRaisingEvents) {
             return;
         }
-        //todo: finish
-        if (_filters.IsMatch(args.FullPath) || _filters.IsMatch(args.OldFullPath)) {
-            Renamed?.Invoke(this, args);
+        //need to check if path is a direct child of watch path
+        if (!IsWatchedFolder(record.InitialPath?.Folder) && !IsWatchedFolder(record.ResultPath?.Folder)) {
+            return;
         }
+        //paths match, now check Filters
+        if (!_filters.IsMatch(record.InitialPath?.FileName) && !_filters.IsMatch(record.ResultPath?.FileName)) {
+            return;
+        }
+        //pump the appropriate events
+        switch (record.Action) {
+            case LedgerAction.FileCreated:
+                FileCreated?.Invoke(record);
+                break;
+            case LedgerAction.FileEdited:
+                FileEdited?.Invoke(record);
+                break;
+            case LedgerAction.FileMoved:
+                FileMoved?.Invoke(record);
+                break;
+            case LedgerAction.FileDeleted:
+                FileDeleted?.Invoke(record);
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
+    }
+
+    private bool IsWatchedFolder(AbsoluteFolderPath? folder) {
+        if (folder is null) {
+            return false;
+        }
+        if (folder == Path) {
+            return true;
+        }
+        return IncludeSubdirectories && folder.ToString().StartsWith(Path.ToString());
     }
 
     public const string DefaultFilter = "*";

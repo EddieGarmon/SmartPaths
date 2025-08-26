@@ -1,0 +1,6 @@
+﻿[
+  {
+    Action: FileDeleted,
+    InitialPath: \activity\file1.txt
+  }
+]

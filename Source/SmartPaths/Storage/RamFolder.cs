@@ -52,10 +52,8 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
         return Task.FromResult<IReadOnlyList<RamFolder>>(_folders.Values.ToList());
     }
 
-    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*",
-                                                        bool includeSubFolders = false,
-                                                        NotifyFilters notifyFilter = NotifyFilters.FileName | NotifyFilters.DirectoryName | NotifyFilters.LastWrite) {
-        return _fileSystem.GetWatcher(Path, filter, includeSubFolders, notifyFilter).ContinueWith(IFileSystemWatcher (task) => task.Result);
+    public override Task<IFileSystemWatcher> GetWatcher(string filter = "*", bool includeSubFolders = false) {
+        return _fileSystem.GetWatcher(Path, filter, includeSubFolders).ContinueWith(IFileSystemWatcher (task) => task.Result);
     }
 
     internal override Task<RamFile> CreateFile(AbsoluteFilePath filePath, CollisionStrategy collisionStrategy) {
@@ -94,7 +92,7 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
                                              path => {
                                                  RamFolder newFolder = new(_fileSystem, path);
                                                  _fileSystem.Folders[newFolder.Path] = newFolder;
-                                                 _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, path, path.FolderName));
+                                                 _fileSystem.ProcessStorageEvent(new FolderEventRecord(LedgerAction.FolderCreated, newFolder.Path, null));
                                                  return newFolder;
                                              });
         return Task.FromResult(folder);
@@ -117,7 +115,7 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
         _files.TryRemove(file.Path, out _);
         _fileSystem.Files.TryRemove(file.Path, out _);
         if (notify) {
-            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, file.Path.Folder, file.Path.FileName));
+            _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileDeleted, null, file.Path));
         }
     }
 
@@ -135,14 +133,14 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
         _files[newFile.Path] = newFile;
         _fileSystem.Files[newFile.Path] = newFile;
         if (notify) {
-            _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Created, newFile.Path.Folder, newFile.Path.FileName));
+            _fileSystem.ProcessStorageEvent(new FileEventRecord(LedgerAction.FileCreated, newFile.Path, null));
         }
     }
 
     private void Expunge(RamFolder folder) {
         _folders.TryRemove(folder.Path, out _);
         _fileSystem.Folders.TryRemove(folder.Path, out _);
-        _fileSystem.ProcessStorageEvent(new FileSystemEventArgs(WatcherChangeTypes.Deleted, folder.Path, folder.Name));
+        _fileSystem.ProcessStorageEvent(new FolderEventRecord(LedgerAction.FolderDeleted, null, folder.Path));
     }
 
 }
