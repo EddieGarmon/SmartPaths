@@ -4,7 +4,6 @@
       <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 	  <OutputType>Exe</OutputType>
       <RootNamespace>SmartPaths</RootNamespace>
-      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
 
   <ItemGroup>
