@@ -4,9 +4,14 @@
       <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 	  <OutputType>Exe</OutputType>
       <RootNamespace>SmartPaths</RootNamespace>
-      <IsPackable>false</IsPackable>
-      <IsTestProject>true</IsTestProject>
+      <TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="xunit.runner.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.4">
@@ -25,7 +30,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\Source\SmartPaths\SmartPaths.csproj" />
-    <ProjectReference Include="..\..\Source\Verify.SmartPaths\Verify.SmartPaths.csproj" />
   </ItemGroup>
 
   <ItemGroup>
