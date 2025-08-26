@@ -1,0 +1,7 @@
+﻿[
+  {
+    Action: FileMoved,
+    ResultPath: \activity\movedFile1.txt,
+    InitialPath: \activity\file1.txt
+  }
+]

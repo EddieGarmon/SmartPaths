@@ -8,6 +8,8 @@ internal class SmartStream<TFolder, TFile> : Stream
     private readonly bool _canWrite;
     private readonly SmartFile<TFolder, TFile> _file;
     private readonly MemoryStream _stream;
+
+    private bool _isDisposed;
     private bool _wasModified;
 
     public SmartStream(SmartFile<TFolder, TFile> file, bool canWrite) {
@@ -64,6 +66,10 @@ internal class SmartStream<TFolder, TFile> : Stream
     }
 
     protected override void Dispose(bool disposing) {
+        if (_isDisposed) {
+            return;
+        }
+        _isDisposed = true;
         if (_canWrite && _wasModified) {
             _file.SetData(_stream.ToArray());
             _file.Touch();

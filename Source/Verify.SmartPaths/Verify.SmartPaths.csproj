@@ -18,8 +18,4 @@
         <ProjectReference Include="..\SmartPaths\SmartPaths.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Storage\" />
-    </ItemGroup>
-
 </Project>

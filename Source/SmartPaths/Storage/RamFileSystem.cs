@@ -72,13 +72,13 @@ public sealed class RamFileSystem : SmartFileSystem<RamFolder, RamFile, SmartWat
     public override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
         EnsureIsRamPath(filePath);
         Files.TryGetValue(filePath, out RamFile? file);
-        return Task.FromResult(file);
+        return Task.FromResult<RamFile?>(file);
     }
 
     public override Task<RamFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         EnsureIsRamPath(folderPath);
         Folders.TryGetValue(folderPath, out RamFolder? folder);
-        return Task.FromResult(folder);
+        return Task.FromResult<RamFolder?>(folder);
     }
 
     public override Task<RamFolder> GetTempStorage() {

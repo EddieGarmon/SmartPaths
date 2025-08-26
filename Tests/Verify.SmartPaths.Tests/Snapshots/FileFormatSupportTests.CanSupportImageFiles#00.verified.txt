@@ -1,0 +1,14 @@
+﻿[
+  {
+    Action: FolderCreated,
+    ResultPath: \activity\
+  },
+  {
+    Action: FileCreated,
+    ResultPath: \activity\icon.png
+  },
+  {
+    Action: FileEdited,
+    ResultPath: \activity\icon.png
+  }
+]

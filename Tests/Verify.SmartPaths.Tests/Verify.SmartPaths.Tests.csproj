@@ -1,13 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
-
+        <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
+        <OutputType>Exe</OutputType>
+        <RootNamespace>SmartPaths</RootNamespace>
         <IsPackable>false</IsPackable>
         <IsTestProject>true</IsTestProject>
-        <RootNamespace>SmartPaths</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -42,6 +40,14 @@
     <ItemGroup>
         <Compile Remove="Snapshots\**" />
         <EmbeddedResource Remove="Snapshots\**" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="..\..\Docs\icon.png" Link="Files\icon.png" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <EmbeddedResource Include="..\..\Docs\example.pdf" Link="Files\example.pdf" />
     </ItemGroup>
 
 

@@ -14,37 +14,40 @@ public static class SmartPath
 
     public static AbsolutePath ParseAbsolute(string path) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        return pathType switch {
-            PathType.Absolute => path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new AbsoluteFolderPath(path) : new AbsoluteFilePath(path),
-            PathType.RootRelative => path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new AbsoluteFolderPath(path) : new AbsoluteFilePath(path),
-            _ => throw new Exception($"Path [{path}] is {pathType} not Absolute.")
-        };
+        if (pathType.HasFlag(PathType.Absolute)) {
+            return path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new AbsoluteFolderPath(path) : new AbsoluteFilePath(path);
+        }
+        throw new Exception($"Path [{path}] is {pathType} not Absolute.");
     }
 
     public static IFilePath ParseFile(string path) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        return pathType switch {
-            PathType.Relative => new RelativeFilePath(path),
-            PathType.Absolute => new AbsoluteFilePath(path),
-            _ => throw new Exception($"Invalid path for file: {path}")
-        };
+        if (pathType.HasFlag(PathType.Relative)) {
+            return new RelativeFilePath(path);
+        }
+        if (pathType.HasFlag(PathType.Absolute)) {
+            return new AbsoluteFilePath(path);
+        }
+        throw new Exception($"Invalid path for file: {path}");
     }
 
     public static IFolderPath ParseFolder(string path) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        return pathType switch {
-            PathType.Relative => new RelativeFolderPath(path),
-            PathType.Absolute => new AbsoluteFolderPath(path),
-            _ => throw new Exception($"Invalid path for folder: {path}")
-        };
+        if (pathType.HasFlag(PathType.Relative)) {
+            return new RelativeFolderPath(path);
+        }
+        if (pathType.HasFlag(PathType.Absolute)) {
+            return new AbsoluteFolderPath(path);
+        }
+        throw new Exception($"Invalid path for folder: {path}");
     }
 
     public static RelativePath ParseRelative(string path) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        return pathType switch {
-            PathType.Relative => path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new RelativeFolderPath(path) : new RelativeFilePath(path),
-            _ => throw new Exception($"Path [{path}] is {pathType} not Relative.")
-        };
+        if (pathType.HasFlag(PathType.Relative)) {
+            return path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? new RelativeFolderPath(path) : new RelativeFilePath(path);
+        }
+        throw new Exception($"Path [{path}] is {pathType} not Relative.");
     }
 
     public static bool TryParse(string path, [NotNullWhen(true)] out IPath? smartPath) {

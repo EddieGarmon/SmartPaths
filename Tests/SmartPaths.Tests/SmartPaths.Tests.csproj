@@ -3,8 +3,8 @@
   <PropertyGroup>
       <TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 	  <OutputType>Exe</OutputType>
-      <AssemblyName>SmartPaths.Tests</AssemblyName>
       <RootNamespace>SmartPaths</RootNamespace>
+      <IsPackable>false</IsPackable>
       <IsTestProject>true</IsTestProject>
   </PropertyGroup>
 

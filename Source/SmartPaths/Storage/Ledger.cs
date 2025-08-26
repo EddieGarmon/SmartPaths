@@ -34,6 +34,17 @@ public class Ledger : IDisposable
 
     public int RecordCount => _records.Count;
 
+    public async Task<string> GetAllText(AbsoluteFilePath path) {
+        ArgumentNullException.ThrowIfNull(path);
+        IFile? file = await _fileSystem.GetFile(path);
+        if (file is null) {
+            return string.Empty;
+        }
+        using Stream stream = await file.OpenToRead();
+        using StreamReader reader = new(stream);
+        return await reader.ReadToEndAsync();
+    }
+
     public async Task<Stream> GetFileStream(AbsoluteFilePath path) {
         ArgumentNullException.ThrowIfNull(path);
         IFile? file = await _fileSystem.GetFile(path);

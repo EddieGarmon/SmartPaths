@@ -5,7 +5,7 @@ namespace SmartPaths.Storage;
 public class FileSystemTests
 {
 
-    [Fact(Skip = "temporary")]
+    [Fact]
     public Task TestAllTheThings_DiskFileSystem() {
         return TestAllTheThings(new DiskFileSystem());
     }
@@ -21,6 +21,8 @@ public class FileSystemTests
     }
 
     private static async Task TestAllTheThings(IFileSystem fileSystem) {
+        DateTimeOffset startTime = DateTimeOffset.Now;
+
         AbsoluteFolderPath tempPath = fileSystem.TempStoragePath.GetChildFolderPath("FileSystemTesting");
 
         await fileSystem.DeleteFolder(tempPath);
@@ -35,35 +37,27 @@ public class FileSystemTests
         IFile tempFile = await tempFolder.CreateFile("file1.txt");
         (await tempFolder.GetFiles()).Count.ShouldBe(1);
 
-        DateTime timestamp = DateTime.Now;
         await using (StreamWriter writer = new(await tempFile.OpenToWrite())) {
-            await Task.Delay(100);
             await writer.WriteAsync("Hello World");
         }
-        await Task.Delay(200); //let the stream close
-        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
+        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(startTime);
 
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
-            (await reader.ReadToEndAsync()).ShouldBe("Hello World");
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World");
         }
-        timestamp = DateTime.Now;
         await using (StreamWriter writer = new(await tempFile.OpenToAppend())) {
-            await Task.Delay(100);
             await writer.WriteAsync(" - PASS");
         }
-        await Task.Delay(200); //let the stream close
-        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(timestamp);
+        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(startTime);
 
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
-            (await reader.ReadToEndAsync()).ShouldBe("Hello World - PASS");
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World - PASS");
         }
-        await Task.Delay(200); //let the stream close
 
         tempFile = await tempFile.Rename("moved1.txt");
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
-            (await reader.ReadToEndAsync()).ShouldBe("Hello World - PASS");
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World - PASS");
         }
-        await Task.Delay(200); //let the stream close
 
         tempFile = await tempFolder.CreateFile("file 2.txt");
         (await tempFolder.GetFiles()).Count.ShouldBe(2);
@@ -71,6 +65,9 @@ public class FileSystemTests
         (await tempFolder.GetFiles()).Count.ShouldBe(1);
         await tempFolder.Delete();
         (await fileSystem.GetFolder(tempPath)).ShouldBeNull();
+
+        ////temp hack to keep this test from Red/Disk hitting each other
+        await Task.Delay(200, CancellationToken.None);
     }
 
 }

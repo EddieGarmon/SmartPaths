@@ -1,0 +1,14 @@
+﻿[
+  {
+    Action: FolderCreated,
+    ResultPath: \activity\
+  },
+  {
+    Action: FileCreated,
+    ResultPath: \activity\example.pdf
+  },
+  {
+    Action: FileEdited,
+    ResultPath: \activity\example.pdf
+  }
+]

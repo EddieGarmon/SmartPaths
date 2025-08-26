@@ -1,0 +1,14 @@
+﻿[
+  {
+    Action: FolderCreated,
+    ResultPath: \activity\
+  },
+  {
+    Action: FileCreated,
+    ResultPath: \activity\simple.txt
+  },
+  {
+    Action: FileEdited,
+    ResultPath: \activity\simple.txt
+  }
+]

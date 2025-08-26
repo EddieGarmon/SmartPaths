@@ -43,8 +43,6 @@ internal static class PathHelper
     }
 
     public static LinkedList<string> MakeRelative(AbsolutePath fromHere, AbsolutePath toHere) {
-        //todo: need to handle root relative paths
-
         if (fromHere.RootValue != toHere.RootValue && fromHere.PathType != PathType.RootRelative && toHere.PathType != PathType.RootRelative) {
             throw new Exception("No shared root between: " + fromHere + " -> " + toHere);
         }

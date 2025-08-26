@@ -1,4 +1,5 @@
 ﻿using Argon;
+using EmptyFiles;
 using SmartPaths.Converters;
 using SmartPaths.Storage;
 
@@ -72,12 +73,16 @@ public static class VerifySmartPaths
 
         List<Target> targets = [];
         //create targets for each type of change
-        //foreach (AbsoluteFilePath delete in deletes) {
-        //    targets.Add(new Target(delete.FileExtension, "** FILE DELETED **", delete.FileNameWithoutExtension));
-        //}
-        //foreach (AbsoluteFilePath edit in edits) {
-        //    targets.Add(new Target(edit.FileExtension, ledger.GetFileStream(edit).Result, edit.FileNameWithoutExtension));
-        //}
+        foreach (AbsoluteFilePath delete in deletes) {
+            targets.Add(new Target(delete.FileExtension, "** FILE DELETED **", delete.FileNameWithoutExtension));
+        }
+        foreach (AbsoluteFilePath edit in edits) {
+            if (FileExtensions.IsTextExtension(edit.FileExtension)) {
+                targets.Add(new Target(edit.FileExtension, ledger.GetAllText(edit).Result, edit.FileNameWithoutExtension));
+            } else {
+                targets.Add(new Target(edit.FileExtension, ledger.GetFileStream(edit).Result, edit.FileNameWithoutExtension));
+            }
+        }
 
         return new ConversionResult(ledger, targets);
     }
