@@ -22,7 +22,7 @@ public class FileFormatSupportTests
         }
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -42,7 +42,7 @@ public class FileFormatSupportTests
 
         //verify ledger
         //todo: add a PDF plugin and see we pipe to it.
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -58,7 +58,7 @@ public class FileFormatSupportTests
         }
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
 }
