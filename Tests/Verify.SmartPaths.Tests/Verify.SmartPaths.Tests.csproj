@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<OutputType>Exe</OutputType>
-		<RootNamespace>SmartPaths</RootNamespace>
+		<RootNamespace>VerifySmartPaths</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -41,7 +41,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <ProjectReference Include="..\..\Source\SmartPaths.Verify\SmartPaths.Verify.csproj" />
+	  <ProjectReference Include="..\..\Source\Verify.SmartPaths\Verify.SmartPaths.csproj" />
 	</ItemGroup>
 
 </Project>

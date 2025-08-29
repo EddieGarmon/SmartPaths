@@ -1,7 +1,7 @@
 using System.Reflection;
 using SmartPaths.Storage;
 
-namespace SmartPaths;
+namespace VerifySmartPaths;
 
 public class FileFormatSupportTests
 {
@@ -12,7 +12,7 @@ public class FileFormatSupportTests
         Ledger ledger = await fileSystem.StartLedger();
 
         //manipulate file system
-        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("SmartPaths.Files.icon.png");
+        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifySmartPaths.Files.icon.png");
         if (resourceStream is null) {
             Assert.Fail("Cant find test resource: icon.png");
         }
@@ -22,6 +22,7 @@ public class FileFormatSupportTests
         }
 
         //verify ledger
+        //NB: we are using Verify.ImageSharp - Should see picture delta
         await Verify(ledger).UseDirectory(@"Snapshots");
     }
 
@@ -31,7 +32,7 @@ public class FileFormatSupportTests
         Ledger ledger = await fileSystem.StartLedger();
 
         //manipulate file system
-        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("SmartPaths.Files.example.pdf");
+        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifySmartPaths.Files.example.pdf");
         if (resourceStream is null) {
             Assert.Fail("Cant find test resource: example.pdf");
         }
