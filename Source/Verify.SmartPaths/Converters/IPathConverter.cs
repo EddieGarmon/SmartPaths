@@ -1,4 +1,6 @@
-﻿namespace SmartPaths.Converters;
+﻿using SmartPaths;
+
+namespace VerifyTests.Converters;
 
 internal class IPathConverter : WriteOnlyJsonConverter<IPath>
 {

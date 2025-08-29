@@ -1,21 +1,22 @@
 ﻿using Argon;
 using EmptyFiles;
-using SmartPaths.Converters;
+using SmartPaths;
 using SmartPaths.Storage;
+using VerifyTests.Converters;
 
-namespace SmartPaths;
+namespace VerifyTests;
 
 public static class VerifySmartPaths
 {
 
-    public static bool IsInitialized { get; private set; }
+    public static bool Initialized { get; private set; }
 
     public static void Initialize() {
-        if (IsInitialized) {
+        if (Initialized) {
             throw new Exception("Already Initialized");
         }
 
-        IsInitialized = true;
+        Initialized = true;
 
         InnerVerifier.ThrowIfVerifyHasBeenRun();
         VerifierSettings.AddExtraSettings(serializer => {

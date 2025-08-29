@@ -1,6 +1,6 @@
 ﻿using SmartPaths.Storage;
 
-namespace SmartPaths.Converters;
+namespace VerifyTests.Converters;
 
 internal class LedgerConverter : WriteOnlyJsonConverter<Ledger>
 {

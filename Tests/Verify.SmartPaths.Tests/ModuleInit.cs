@@ -1,14 +1,13 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace SmartPaths;
+namespace VerifySmartPaths;
 
 public static class ModuleInit
 {
 
     [ModuleInitializer]
     public static void Init() {
-        VerifyImageSharp.Initialize();
-        VerifySmartPaths.Initialize();
+        VerifierSettings.InitializePlugins();
     }
 
 }
