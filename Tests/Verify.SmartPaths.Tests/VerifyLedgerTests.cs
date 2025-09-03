@@ -1,6 +1,6 @@
 ﻿using SmartPaths.Storage;
 
-namespace VerifySmartPaths;
+namespace VerifyTests.SmartPathsTests;
 
 public class VerifyLedgerTests
 {
@@ -14,7 +14,7 @@ public class VerifyLedgerTests
         RamFile newFile = await fileSystem.CreateFile("/activity/file1.txt", "File 1 Content");
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -26,7 +26,7 @@ public class VerifyLedgerTests
         RamFolder newFolder = await fileSystem.CreateFolder("/activity/");
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -39,7 +39,7 @@ public class VerifyLedgerTests
         await fileSystem.DeleteFile("/activity/file1.txt");
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -52,7 +52,7 @@ public class VerifyLedgerTests
         await fileSystem.DeleteFolder("/activity/");
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -69,14 +69,14 @@ public class VerifyLedgerTests
         }
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
     public async Task EmptyLedger() {
         RamFileSystem fileSystem = new();
         Ledger ledger = await fileSystem.StartLedger();
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -89,7 +89,7 @@ public class VerifyLedgerTests
         RamFile movedFile = await ramFile.Move("/activity/movedFile1.txt");
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
 }

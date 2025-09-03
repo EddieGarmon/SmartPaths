@@ -1,7 +1,7 @@
 using System.Reflection;
 using SmartPaths.Storage;
 
-namespace VerifySmartPaths;
+namespace VerifyTests.SmartPathsTests;
 
 public class FileFormatSupportTests
 {
@@ -12,7 +12,7 @@ public class FileFormatSupportTests
         Ledger ledger = await fileSystem.StartLedger();
 
         //manipulate file system
-        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifySmartPaths.Files.icon.png");
+        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifyTests.SmartPathsTests.Files.icon.png");
         if (resourceStream is null) {
             Assert.Fail("Cant find test resource: icon.png");
         }
@@ -23,7 +23,7 @@ public class FileFormatSupportTests
 
         //verify ledger
         //NB: we are using Verify.ImageSharp - Should see picture delta
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -32,7 +32,7 @@ public class FileFormatSupportTests
         Ledger ledger = await fileSystem.StartLedger();
 
         //manipulate file system
-        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifySmartPaths.Files.example.pdf");
+        await using Stream? resourceStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("VerifyTests.SmartPathsTests.Files.example.pdf");
         if (resourceStream is null) {
             Assert.Fail("Cant find test resource: example.pdf");
         }
@@ -43,7 +43,7 @@ public class FileFormatSupportTests
 
         //verify ledger
         //todo: add a PDF plugin and see we pipe to it.
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
     [Fact]
@@ -59,7 +59,7 @@ public class FileFormatSupportTests
         }
 
         //verify ledger
-        await Verify(ledger).UseDirectory(@"Snapshots");
+        await Verify(ledger);
     }
 
 }
