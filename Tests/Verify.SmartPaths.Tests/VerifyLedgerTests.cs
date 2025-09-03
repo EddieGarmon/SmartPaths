@@ -1,6 +1,6 @@
 ﻿using SmartPaths.Storage;
 
-namespace VerifySmartPaths;
+namespace VerifyTests.SmartPathsTests;
 
 public class VerifyLedgerTests
 {

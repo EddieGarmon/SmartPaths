@@ -1,6 +1,6 @@
 ﻿using System.Runtime.CompilerServices;
 
-namespace VerifySmartPaths;
+namespace VerifyTests.SmartPathsTests;
 
 public static class ModuleInit
 {

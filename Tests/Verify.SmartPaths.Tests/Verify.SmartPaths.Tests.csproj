@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>net8.0;net9.0</TargetFrameworks>
 		<OutputType>Exe</OutputType>
-		<RootNamespace>VerifySmartPaths</RootNamespace>
+		<RootNamespace>VerifyTests.SmartPathsTests</RootNamespace>
 	</PropertyGroup>
 
 	<ItemGroup>
