@@ -12,13 +12,25 @@ internal class SmartStream<TFolder, TFile> : Stream
     private bool _isDisposed;
     private bool _wasModified;
 
-    public SmartStream(SmartFile<TFolder, TFile> file, bool canWrite) {
+    public SmartStream(SmartFile<TFolder, TFile> file, SmartStreamMode mode) {
         _file = file;
-        _canWrite = canWrite;
         _stream = new MemoryStream();
-        byte[] data = file.GetData();
-        _stream.Write(data, 0, data.Length);
-        _stream.Seek(0, SeekOrigin.Begin);
+        switch (mode) {
+            case SmartStreamMode.Read:
+                _canWrite = false;
+                LoadStream();
+                break;
+            case SmartStreamMode.Write:
+                _canWrite = true;
+                LoadStream();
+                break;
+            case SmartStreamMode.New:
+                _canWrite = true;
+                //leave stream empty
+                break;
+            default:
+                throw new ArgumentOutOfRangeException(nameof(mode), mode, null);
+        }
     }
 
     public override bool CanRead => true;
@@ -76,6 +88,12 @@ internal class SmartStream<TFolder, TFile> : Stream
         }
         _stream.Dispose();
         base.Dispose(disposing);
+    }
+
+    private void LoadStream() {
+        byte[] data = _file.GetData();
+        _stream.Write(data, 0, data.Length);
+        _stream.Seek(0, SeekOrigin.Begin);
     }
 
 }

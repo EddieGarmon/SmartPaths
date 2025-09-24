@@ -31,20 +31,24 @@ public abstract class SmartFile<TFolder, TFile> : IFile
 
     public abstract Task<TFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
+    public virtual Task<Stream> OpenNew() {
+        return Task.Run(Stream () => new SmartStream<TFolder, TFile>(this, SmartStreamMode.New));
+    }
+
     public virtual Task<Stream> OpenToAppend() {
         return Task.Run(() => {
-                            Stream stream = new SmartStream<TFolder, TFile>(this, true);
+                            Stream stream = new SmartStream<TFolder, TFile>(this, SmartStreamMode.Write);
                             stream.Seek(0, SeekOrigin.End);
                             return stream;
                         });
     }
 
     public virtual Task<Stream> OpenToRead() {
-        return Task.Run(Stream () => new SmartStream<TFolder, TFile>(this, false));
+        return Task.Run(Stream () => new SmartStream<TFolder, TFile>(this, SmartStreamMode.Read));
     }
 
     public virtual Task<Stream> OpenToWrite() {
-        return Task.Run<Stream>(() => new SmartStream<TFolder, TFile>(this, true));
+        return Task.Run<Stream>(() => new SmartStream<TFolder, TFile>(this, SmartStreamMode.Write));
     }
 
     public abstract Task Touch();
