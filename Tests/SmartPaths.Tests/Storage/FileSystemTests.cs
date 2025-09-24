@@ -21,7 +21,7 @@ public class FileSystemTests
     }
 
     private static async Task TestAllTheThings(IFileSystem fileSystem) {
-        DateTimeOffset startTime = DateTimeOffset.Now;
+        DateTimeOffset timestampA = DateTimeOffset.Now;
 
         AbsoluteFolderPath tempPath = fileSystem.TempStoragePath.GetChildFolderPath("FileSystemTesting");
 
@@ -40,23 +40,36 @@ public class FileSystemTests
         await using (StreamWriter writer = new(await tempFile.OpenToWrite())) {
             await writer.WriteAsync("Hello World");
         }
-        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(startTime);
-
+        DateTimeOffset timestampB = await tempFile.GetLastWriteTime();
+        timestampB.ShouldBeGreaterThanOrEqualTo(timestampA);
+        timestampA = timestampB;
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
             (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World");
         }
+
+        await using (StreamWriter writer = new(await tempFile.OpenNew())) {
+            await writer.WriteAsync("Hello");
+        }
+        timestampB = await tempFile.GetLastWriteTime();
+        timestampB.ShouldBeGreaterThanOrEqualTo(timestampA);
+        timestampA = timestampB;
+        using (StreamReader reader = new(await tempFile.OpenToRead())) {
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello");
+        }
+
         await using (StreamWriter writer = new(await tempFile.OpenToAppend())) {
             await writer.WriteAsync(" - PASS");
         }
-        (await tempFile.GetLastWriteTime()).ShouldBeGreaterThanOrEqualTo(startTime);
+        timestampB = await tempFile.GetLastWriteTime();
+        timestampB.ShouldBeGreaterThanOrEqualTo(timestampA);
 
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
-            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World - PASS");
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello - PASS");
         }
 
         tempFile = await tempFile.Rename("moved1.txt");
         using (StreamReader reader = new(await tempFile.OpenToRead())) {
-            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello World - PASS");
+            (await reader.ReadToEndAsync(CancellationToken.None)).ShouldBe("Hello - PASS");
         }
 
         tempFile = await tempFolder.CreateFile("file 2.txt");

@@ -17,6 +17,8 @@ public interface IFile
 
     Task<IFile> Move(AbsoluteFilePath newPath, CollisionStrategy collisionStrategy = CollisionStrategy.FailIfExists);
 
+    Task<Stream> OpenNew();
+
     Task<Stream> OpenToAppend();
 
     Task<Stream> OpenToRead();
