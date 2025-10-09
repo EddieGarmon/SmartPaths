@@ -64,40 +64,38 @@ public static class SmartPath
         }
     }
 
-    public static bool TryParseFile(string path, [NotNullWhen(true)] out IPath? filePath) {
+    public static bool TryParseFile(string path, [NotNullWhen(true)] out IFilePath? filePath) {
         filePath = null;
         if (string.IsNullOrWhiteSpace(path)) {
             return false;
         }
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        switch (pathType) {
-            case PathType.Relative:
-                filePath = new RelativeFilePath(path);
-                return true;
-            case PathType.Absolute:
-                filePath = new AbsoluteFilePath(path);
-                return true;
-            default:
-                return false;
+        if (pathType.HasFlag(PathType.Relative)) {
+            filePath = new RelativeFilePath(path);
+            return true;
         }
+        if (pathType.HasFlag(PathType.Absolute)) {
+            filePath = new AbsoluteFilePath(path);
+            return true;
+        }
+        return false;
     }
 
-    public static bool TryParseFolder(string path, [NotNullWhen(true)] out IPath? folderPath) {
+    public static bool TryParseFolder(string path, [NotNullWhen(true)] out IFolderPath? folderPath) {
         folderPath = null;
         if (string.IsNullOrWhiteSpace(path)) {
             return false;
         }
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(path);
-        switch (pathType) {
-            case PathType.Relative:
-                folderPath = new RelativeFolderPath(path);
-                return true;
-            case PathType.Absolute:
-                folderPath = new AbsoluteFolderPath(path);
-                return true;
-            default:
-                return false;
+        if (pathType.HasFlag(PathType.Relative)) {
+            folderPath = new RelativeFolderPath(path);
+            return true;
         }
+        if (pathType.HasFlag(PathType.Absolute)) {
+            folderPath = new AbsoluteFolderPath(path);
+            return true;
+        }
+        return false;
     }
 
 }
