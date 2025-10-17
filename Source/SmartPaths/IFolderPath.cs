@@ -5,6 +5,10 @@ public interface IFolderPath : IPath
 
     string FolderName { get; }
 
+#if !NETSTANDARD2_0
+    static abstract IPath operator /(IFolderPath start, IRelativePath relative);
+#endif
+
 }
 
 public interface IFolderPath<out TFolderPath, out TFilePath> : IFolderPath
