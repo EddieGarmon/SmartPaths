@@ -97,4 +97,10 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return fromDir.MakeRelative(toFile);
     }
 
+#if !NETSTANDARD2_0
+    static IPath IFolderPath.operator /(IFolderPath start, IRelativePath relative) {
+        return SmartPath.Combine(start, relative);
+    }
+#endif
+
 }

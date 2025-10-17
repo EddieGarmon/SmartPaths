@@ -8,6 +8,22 @@ namespace SmartPaths;
 public static class SmartPath
 {
 
+    public static IPath Combine(IFolderPath start, IRelativePath relative) {
+        return start switch {
+            AbsoluteFolderPath absoluteStart => relative switch {
+                RelativeFolderPath folderPath => absoluteStart.ResolveRelative(folderPath),
+                RelativeFilePath filePath => absoluteStart.ResolveRelative(filePath),
+                _ => throw new ArgumentOutOfRangeException(nameof(relative))
+            },
+            RelativeFolderPath relativeStart => relative switch {
+                RelativeFolderPath folderPath => relativeStart.ResolveRelative(folderPath),
+                RelativeFilePath filePath => relativeStart.ResolveRelative(filePath),
+                _ => throw new ArgumentOutOfRangeException(nameof(relative))
+            },
+            _ => throw new ArgumentOutOfRangeException(nameof(start))
+        };
+    }
+
     public static IPath Parse(string path) {
         return path.LastIndexOfAny(['\\', '/']) == path.Length - 1 ? ParseFolder(path) : ParseFile(path);
     }

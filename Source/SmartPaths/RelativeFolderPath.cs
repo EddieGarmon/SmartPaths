@@ -85,4 +85,10 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return path?.ToString();
     }
 
+#if !NETSTANDARD2_0
+    static IPath IFolderPath.operator /(IFolderPath start, IRelativePath relative) {
+        return SmartPath.Combine(start, relative);
+    }
+#endif
+
 }
