@@ -26,13 +26,13 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
 
     public abstract bool HasParent { get; }
 
-    public bool IsAbsolutePath => Core.IsAbsolutePath;
+    public bool IsAbsolutePath => Core.IsAbsolute;
 
     public bool IsFilePath => !IsFolderPath;
 
     public bool IsFolderPath { get; }
 
-    public bool IsRelativePath => Core.IsRelativePath;
+    public bool IsRelativePath => Core.IsRelative;
 
     public PathType PathType => Core.PathType;
 
@@ -73,7 +73,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
     private void EnsureFileNameExists() {
         // ensure filename on file path
         if (IsFilePath &&
-            ((Core.IsAbsolutePath && Core.Parts.Count == 1) ||
+            ((Core.IsAbsolute && Core.Parts.Count == 1) ||
              (PathType == PathType.RootRelative && Core.Parts.Count == 1) ||
              (PathType == PathType.Relative && Core.Parts.Count == 2))) {
             throw new Exception("No file name specified.");

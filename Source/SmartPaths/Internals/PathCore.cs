@@ -86,11 +86,11 @@ internal class PathCore : IEquatable<PathCore>
 
     /// <summary>Gets a value indicating whether this instance is an absolute path.</summary>
     /// <value><c>true</c> if this instance is absolute path; otherwise, <c>false</c>.</value>
-    public bool IsAbsolutePath => PathType.HasFlag(PathType.Absolute);
+    public bool IsAbsolute => PathType.HasFlag(PathType.Absolute);
 
-    public bool IsRelativePath => PathType.HasFlag(PathType.Relative);
+    public bool IsRelative => PathType.HasFlag(PathType.Relative);
 
-    public bool IsRootedPath {
+    public bool IsRooted {
         get {
             switch (PathType) {
                 case PathType.Relative:
@@ -174,7 +174,7 @@ internal class PathCore : IEquatable<PathCore>
 
     private void CleanUpRoute() {
         if (Parts.Count == 1) {
-            if (IsRootedPath) {
+            if (IsRooted) {
                 //a single root is allowed.
                 return;
             }
@@ -227,11 +227,11 @@ internal class PathCore : IEquatable<PathCore>
 
         // re-validate cleaned up input
         // .\ and ..\ illegal for all rooted paths @ Parts[1]
-        if (IsRootedPath && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+        if (IsRooted && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
             throw new Exception("Not a valid rooted path.");
         }
         // .\ and ..\ required for non-rooted relative paths @ Parts[1]
-        if (IsRelativePath && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+        if (IsRelative && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
             //normalize to current directory relative
             Parts.AddAfter(Parts.First, ".");
         }
