@@ -13,7 +13,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
 
     public string FolderName => ItemName;
 
-    internal bool IsRoot => Parts.Count == 1;
+    internal bool IsRoot => Core.Parts.Count == 1;
 
     public AbsoluteFilePath GetChildFilePath(string name, string extension) {
         return GetChildFilePath($"{name}.{extension}");
@@ -21,12 +21,12 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
 
     public AbsoluteFilePath GetChildFilePath(string fileName) {
         NameHelper.EnsureOnlyValidCharacters(fileName);
-        return new AbsoluteFilePath(PathType, Parts, Parts.Count, fileName);
+        return new AbsoluteFilePath(PathType, Core.Parts, Core.Parts.Count, fileName);
     }
 
     public AbsoluteFolderPath GetChildFolderPath(string folderName) {
         NameHelper.EnsureOnlyValidCharacters(folderName);
-        return new AbsoluteFolderPath(PathType, Parts, Parts.Count, folderName);
+        return new AbsoluteFolderPath(PathType, Core.Parts, Core.Parts.Count, folderName);
     }
 
     public RelativeFilePath MakeRelative(AbsoluteFilePath target) {

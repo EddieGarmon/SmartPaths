@@ -23,7 +23,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
             throw new Exception("Invalid filename: " + fileNameWithExtension);
         }
 
-        return new RelativeFilePath(PathType, Parts, Parts.Count, fileNameWithExtension);
+        return new RelativeFilePath(PathType, Core.Parts, Core.Parts.Count, fileNameWithExtension);
     }
 
     public RelativeFolderPath GetChildFolderPath(string folderName) {
@@ -32,7 +32,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
             throw new Exception("Invalid folder name: " + folderName);
         }
 
-        return new RelativeFolderPath(PathType, Parts, Parts.Count, folderName);
+        return new RelativeFolderPath(PathType, Core.Parts, Core.Parts.Count, folderName);
     }
 
     public RelativeFolderPath ResolveRelative(RelativeFolderPath relativeFolderPath) {

@@ -14,15 +14,15 @@ internal static class PathHelper
         if (adjustment.PathType == PathType.RootRelative) {
             result = [];
             result.AddFirst(fromHere.RootValue);
-            foreach (string part in adjustment.PartsAfterRoot) {
+            foreach (string part in adjustment.Core.PartsAfterRoot) {
                 result.AddLast(part);
             }
             return result;
         }
 
         //handle Relative
-        result = new LinkedList<string>(fromHere.Parts);
-        foreach (string part in adjustment.PartsAfterRoot) {
+        result = new LinkedList<string>(fromHere.Core.Parts);
+        foreach (string part in adjustment.Core.PartsAfterRoot) {
             switch (part) {
                 case ".":
                     break;
@@ -48,8 +48,8 @@ internal static class PathHelper
         }
 
         //start build relative paths after the root
-        LinkedListNode<string>? fromNode = fromHere.Parts.First!.Next;
-        LinkedListNode<string>? toNode = toHere.Parts.First!.Next;
+        LinkedListNode<string>? fromNode = fromHere.Core.Parts.First!.Next;
+        LinkedListNode<string>? toNode = toHere.Core.Parts.First!.Next;
 
         while (fromNode is not null && toNode is not null && fromNode.Value == toNode.Value) {
             if (fromHere.IsFilePath && fromNode.Next is null) {
@@ -83,13 +83,13 @@ internal static class PathHelper
     public static LinkedList<string> MakeRelative(RelativePath fromHere, RelativePath adjustment) {
         //handle root relative adjustment
         if (adjustment.PathType == PathType.RootRelative) {
-            return new LinkedList<string>(adjustment.Parts);
+            return new LinkedList<string>(adjustment.Core.Parts);
         }
 
         //handle relative
-        LinkedList<string> result = new(fromHere.Parts);
+        LinkedList<string> result = new(fromHere.Core.Parts);
         bool takeRemaining = false;
-        foreach (string part in adjustment.PartsAfterRoot) {
+        foreach (string part in adjustment.Core.PartsAfterRoot) {
             if (takeRemaining) {
                 result.AddLast(part);
                 continue;
