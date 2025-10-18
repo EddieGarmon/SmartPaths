@@ -1,9 +1,12 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Collections.Concurrent;
+using System.Text.RegularExpressions;
 
 namespace SmartPaths;
 
 internal static partial class PathPatterns
 {
+
+    private static readonly ConcurrentDictionary<string, (PathType, Match)> _cache = [];
 
     //https://learn.microsoft.com/en-us/dotnet/standard/io/file-path-formats
     //https://unix.stackexchange.com/questions/125522/path-syntax-rules
@@ -24,32 +27,50 @@ internal static partial class PathPatterns
     public const string GeneralRelativePattern = @"^\S.*$";
 
     public static (PathType, Match) DeterminePathType(string path) {
-        //First attempt to match an absolute path
+        //First attempt to get from cache
+        if (_cache.TryGetValue(path, out (PathType, Match) result)) {
+            return result;
+        }
+
+        //Second attempt to match an absolute path
         Match match = DriveLetterRegex().Match(path);
         if (match.Success) {
-            return (PathType.DriveLetter, match);
+            result = (PathType.DriveLetter, match);
+            _cache[path] = result;
+            return result;
         }
         match = NetworkShareRegex().Match(path);
         if (match.Success) {
-            return (PathType.NetworkShare, match);
+            result = (PathType.NetworkShare, match);
+            _cache[path] = result;
+            return result;
         }
         match = RootRelativeRegex().Match(path);
         if (match.Success) {
-            return (PathType.RootRelative, match);
+            result = (PathType.RootRelative, match);
+            _cache[path] = result;
+            return result;
         }
-        //otherwise attempt to match a relative path
+
+        //Finally attempt to match a relative path
         match = SpecialRelativeRegex().Match(path);
         if (match.Success) {
-            return (PathType.Relative, match);
+            result = (PathType.Relative, match);
+            _cache[path] = result;
+            return result;
         }
         match = GeneralRelativeRegex().Match(path);
         if (match.Success) {
-            return (PathType.Relative, match);
+            result = (PathType.Relative, match);
+            _cache[path] = result;
+            return result;
         }
-        return (PathType.Unknown, Match.Empty);
+        result = (PathType.Unknown, Match.Empty);
+        _cache[path] = result;
+        return result;
     }
 
-#if NET7_0_OR_GREATER
+#if NET8_0_OR_GREATER
     //compiler generated
     [GeneratedRegex(DriveLetterPattern)]
     public static partial Regex DriveLetterRegex();
@@ -67,7 +88,7 @@ internal static partial class PathPatterns
     public static partial Regex GeneralRelativeRegex();
 #endif
 
-#if NETSTANDARD2_0 || NET6_0
+#if NETSTANDARD2_0
     //runtime generated
     public static Regex DriveLetterRegex() {
         return new Regex(DriveLetterPattern);
