@@ -8,6 +8,9 @@ namespace SmartPaths;
 internal class PathCore : IEquatable<PathCore>
 {
 
+    public PathCore(string path)
+        : this(PathType.Unknown, path) { }
+
     public PathCore(PathType pathType, string path) {
         path = path.Trim();
         ArgumentException.ThrowIfNullOrEmpty(path);

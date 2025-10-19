@@ -8,7 +8,6 @@ public abstract class BaseQuery : IPathQuery, IEquatable<BaseQuery>
 
     protected BaseQuery(PathType pathType, string query) {
         Core = new PathCore(pathType, query);
-        Core = new PathCore(PathType.Unknown, query);
     }
 
     public bool IsAbsoluteQuery => Core.IsAbsolute;
