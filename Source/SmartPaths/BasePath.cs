@@ -7,6 +7,11 @@ namespace SmartPaths;
 public abstract class BasePath : IPath, IEquatable<BasePath>
 {
 
+    internal BasePath(bool isFolder, PathCore core) {
+        IsFolderPath = isFolder;
+        Core = core;
+    }
+
     protected BasePath(PathType pathType, bool isFolder, string path) {
         if (!isFolder) {
             if (path.LastIndexOfAny(['\\', '/']) == path.Length - 1) {
@@ -18,13 +23,7 @@ public abstract class BasePath : IPath, IEquatable<BasePath>
         EnsureFileNameExists();
     }
 
-    protected BasePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null) {
-        IsFolderPath = isFolder;
-        Core = new PathCore(pathType, parts, partsLength, newItemName);
-        EnsureFileNameExists();
-    }
-
-    public abstract bool HasParent { get; }
+    public bool HasParent => Core.HasParent;
 
     public bool IsAbsolutePath => Core.IsAbsolute;
 

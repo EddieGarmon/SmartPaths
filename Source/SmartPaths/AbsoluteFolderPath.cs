@@ -8,12 +8,27 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
     public AbsoluteFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFolderPath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, true, parts, partsLength, newItemName) { }
+    internal AbsoluteFolderPath(PathCore core)
+        : base(true, core) { }
 
     public string FolderName => ItemName;
 
     internal bool IsRoot => Core.Parts.Count == 1;
+
+    public RelativeFilePath ComputeRelative(AbsoluteFilePath target) {
+        PathCore core = Core.ComputeRelative(false, target.Core);
+        return new RelativeFilePath(core);
+    }
+
+    public RelativeFolderPath ComputeRelative(AbsoluteFolderPath target) {
+        PathCore core = Core.ComputeRelative(false, target.Core);
+        return new RelativeFolderPath(core);
+    }
+
+    public RelativeQueryPath ComputeRelative(AbsoluteQueryPath target) {
+        PathCore core = Core.ComputeRelative(false, target.Core);
+        return new RelativeQueryPath(core);
+    }
 
     public AbsoluteFilePath GetChildFilePath(string name, string extension) {
         return GetChildFilePath($"{name}.{extension}");
@@ -21,32 +36,27 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
 
     public AbsoluteFilePath GetChildFilePath(string fileName) {
         NameHelper.EnsureOnlyValidCharacters(fileName);
-        return new AbsoluteFilePath(PathType, Core.Parts, Core.Parts.Count, fileName);
+        return new AbsoluteFilePath(Core.GetChild(fileName));
     }
 
     public AbsoluteFolderPath GetChildFolderPath(string folderName) {
         NameHelper.EnsureOnlyValidCharacters(folderName);
-        return new AbsoluteFolderPath(PathType, Core.Parts, Core.Parts.Count, folderName);
-    }
-
-    public RelativeFilePath MakeRelative(AbsoluteFilePath target) {
-        LinkedList<string> relative = PathHelper.MakeRelative(this, target.Folder);
-        return new RelativeFilePath(PathType.Relative, relative, relative.Count, target.FileName);
-    }
-
-    public RelativeFolderPath MakeRelative(AbsoluteFolderPath target) {
-        LinkedList<string> relative = PathHelper.MakeRelative(this, target);
-        return new RelativeFolderPath(PathType.Relative, relative, relative.Count);
-    }
-
-    public AbsoluteFolderPath ResolveRelative(RelativeFolderPath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(this, relative);
-        return new AbsoluteFolderPath(PathType, parts, parts.Count);
+        return new AbsoluteFolderPath(Core.GetChild(folderName));
     }
 
     public AbsoluteFilePath ResolveRelative(RelativeFilePath relative) {
-        LinkedList<string> parts = PathHelper.MakeAbsolute(this, relative);
-        return new AbsoluteFilePath(PathType, parts, parts.Count);
+        PathCore core = Core.AdjustAbsolute(relative.Core);
+        return new AbsoluteFilePath(core);
+    }
+
+    public AbsoluteFolderPath ResolveRelative(RelativeFolderPath relative) {
+        PathCore core = Core.AdjustAbsolute(relative.Core);
+        return new AbsoluteFolderPath(core);
+    }
+
+    public AbsoluteQueryPath ResolveRelative(RelativeQueryPath relative) {
+        PathCore core = Core.AdjustAbsolute(relative.Core);
+        return new AbsoluteQueryPath(core);
     }
 
     public static bool TryParse(string value, [NotNullWhen(true)] out AbsoluteFolderPath? path) {
@@ -79,6 +89,10 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return root.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
+    public static AbsoluteQueryPath operator /(AbsoluteFolderPath root, RelativeQueryPath relative) {
+        return root.ResolveRelative(relative);
+    }
+
     [return: NotNullIfNotNull(nameof(path))]
     public static implicit operator AbsoluteFolderPath?(string? path) {
         return path is null ? null : new AbsoluteFolderPath(path);
@@ -90,15 +104,19 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
     }
 
     public static RelativeFolderPath operator >> (AbsoluteFolderPath fromDir, AbsoluteFolderPath toDir) {
-        return fromDir.MakeRelative(toDir);
+        return fromDir.ComputeRelative(toDir);
     }
 
     public static RelativeFilePath operator >> (AbsoluteFolderPath fromDir, AbsoluteFilePath toFile) {
-        return fromDir.MakeRelative(toFile);
+        return fromDir.ComputeRelative(toFile);
     }
 
 #if !NETSTANDARD2_0
     static IPath IFolderPath.operator /(IFolderPath start, IRelativePath relative) {
+        return SmartPath.Combine(start, relative);
+    }
+
+    static IPathQuery IFolderPath.operator /(IFolderPath start, RelativeQueryPath relative) {
         return SmartPath.Combine(start, relative);
     }
 #endif

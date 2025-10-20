@@ -11,4 +11,6 @@ public interface IPathQuery
 
     IFolderPath AsFolderPath();
 
+    string ToString();
+
 }

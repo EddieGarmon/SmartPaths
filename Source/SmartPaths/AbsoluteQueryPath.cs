@@ -1,19 +1,22 @@
 ﻿namespace SmartPaths;
 
-public class AbsolutePathQuery : BaseQuery, IAbsolutePathQuery
+public class AbsoluteQueryPath : BaseQuery
 {
 
-    public AbsolutePathQuery(string query)
+    public AbsoluteQueryPath(string query)
         : base(PathType.Absolute, query) { }
+
+    internal AbsoluteQueryPath(PathCore core)
+        : base(core) { }
 
     public string RootValue => Core.RootValue;
 
     public AbsoluteFilePath ToFilePath() {
-        return new AbsoluteFilePath(Core.PathType, Core.Parts, Core.Parts.Count);
+        return new AbsoluteFilePath(Core);
     }
 
     public AbsoluteFolderPath ToFolderPath() {
-        return new AbsoluteFolderPath(Core.PathType, Core.Parts, Core.Parts.Count);
+        return new AbsoluteFolderPath(Core);
     }
 
     protected override IFilePath AsFilePath() {

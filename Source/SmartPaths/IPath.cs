@@ -25,4 +25,6 @@ public interface IPath
 
     IFolderPath? GetParent();
 
+    string ToString();
+
 }

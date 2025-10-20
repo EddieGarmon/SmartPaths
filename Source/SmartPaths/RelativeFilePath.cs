@@ -11,8 +11,8 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public RelativeFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, false, parts, partsLength, newItemName) { }
+    internal RelativeFilePath(PathCore core)
+        : base(false, core) { }
 
     public string FileExtension {
         get {
@@ -49,23 +49,23 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     }
 
     public static RelativeFilePath operator +(RelativeFilePath file, string relativeFile) {
-        return file.Folder!.ResolveRelative(new RelativeFilePath(relativeFile));
+        return file.Folder!.AdjustRelative(new RelativeFilePath(relativeFile));
     }
 
     public static RelativeFilePath operator +(RelativeFilePath file, RelativeFilePath relativeFile) {
-        return file.Folder!.ResolveRelative(relativeFile);
+        return file.Folder!.AdjustRelative(relativeFile);
     }
 
     public static RelativeFolderPath operator /(RelativeFilePath file, string relativeFolder) {
-        return file.Folder!.ResolveRelative(new RelativeFolderPath(relativeFolder));
+        return file.Folder!.AdjustRelative(new RelativeFolderPath(relativeFolder));
     }
 
     public static RelativeFolderPath operator /(RelativeFilePath file, RelativeFolderPath relativeFolder) {
-        return file.Folder!.ResolveRelative(relativeFolder);
+        return file.Folder!.AdjustRelative(relativeFolder);
     }
 
     public static RelativeFilePath operator /(RelativeFilePath file, RelativeFilePath relative) {
-        return file.Folder!.ResolveRelative(relative);
+        return file.Folder!.AdjustRelative(relative);
     }
 
     [return: NotNullIfNotNull(nameof(path))]

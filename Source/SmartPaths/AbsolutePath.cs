@@ -5,16 +5,20 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
 
     private AbsoluteFolderPath? _parent;
 
+    internal AbsolutePath(bool isFolder, PathCore core)
+        : base(isFolder, core) { }
+
     protected AbsolutePath(bool isFolder, string path)
         : base(PathType.Absolute, isFolder, path) { }
 
-    protected AbsolutePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, isFolder, parts, partsLength, newItemName) { }
-
-    public override bool HasParent => Core.Parts.Count > 1;
-
-    public AbsoluteFolderPath Parent =>
-        HasParent ? _parent ??= new AbsoluteFolderPath(PathType, Core.Parts, Core.Parts.Count - 1) : throw new Exception($"The root {RootValue} does not have a parent.");
+    public AbsoluteFolderPath Parent {
+        get {
+            if (HasParent) {
+                return _parent ??= new AbsoluteFolderPath(Core.GetParent());
+            }
+            throw new Exception($"The root {RootValue} does not have a parent.");
+        }
+    }
 
     public string RootValue => Core.RootValue;
 
@@ -28,8 +32,7 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
         if (Core.Parts.Count == 1) {
             throw PathExceptions.UndefinedSiblingFor(RootValue);
         }
-
-        return new AbsoluteFilePath(PathType, Core.Parts, Core.Parts.Count - 1, fileNameWithExtension);
+        return new AbsoluteFilePath(Core.GetParent().GetChild(fileNameWithExtension));
     }
 
     public AbsoluteFolderPath GetSiblingFolderPath(string folderName) {
@@ -38,10 +41,10 @@ public abstract class AbsolutePath : BasePath, IAbsolutePath
         if (Core.Parts.Count == 1) {
             throw PathExceptions.UndefinedSiblingFor(RootValue);
         }
-
-        return new AbsoluteFolderPath(PathType, Core.Parts, Core.Parts.Count - 1, folderName);
+        return new AbsoluteFolderPath(Core.GetParent().GetChild(folderName));
     }
 
+    //todo: what is this for?
     internal AbsoluteFolderPath GetRoot() {
         AbsoluteFolderPath root = this switch {
             AbsoluteFolderPath folderPath => folderPath,

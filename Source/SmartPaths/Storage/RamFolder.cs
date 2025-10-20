@@ -100,12 +100,13 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
 
     internal async Task<RamFolder> EnsureFolderTree(AbsoluteFolderPath folderPath) {
         //match path parts, then create missing.
-        LinkedList<string> relative = PathHelper.MakeRelative(Path, folderPath);
-        if (relative.First!.Next!.Value != ".") {
+        PathCore core = Path.Core.ComputeRelative(false, folderPath.Core);
+        if (core[1] != ".") {
             throw new Exception($"The specified path ({folderPath}) is not a child path of ({Path}).");
         }
+
         RamFolder folder = this;
-        foreach (string name in relative.Skip(2)) {
+        foreach (string name in core.Parts.Skip(2)) {
             folder = await folder.CreateFolder(name);
         }
         return folder;
@@ -121,12 +122,12 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
 
     internal override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
         _files.TryGetValue(filePath, out RamFile? file);
-        return Task.FromResult<RamFile?>(file);
+        return Task.FromResult(file);
     }
 
     internal override Task<RamFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         _folders.TryGetValue(folderPath, out RamFolder? folder);
-        return Task.FromResult<RamFolder?>(folder);
+        return Task.FromResult(folder);
     }
 
     internal void Register(RamFile newFile, bool notify = true) {

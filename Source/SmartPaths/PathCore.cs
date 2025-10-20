@@ -8,10 +8,7 @@ namespace SmartPaths;
 internal class PathCore : IEquatable<PathCore>
 {
 
-    public PathCore(string path)
-        : this(PathType.Unknown, path) { }
-
-    public PathCore(PathType pathType, string path) {
+    internal PathCore(PathType pathType, string path) {
         path = path.Trim();
         ArgumentException.ThrowIfNullOrEmpty(path);
 
@@ -87,13 +84,23 @@ internal class PathCore : IEquatable<PathCore>
         CleanUpRoute();
     }
 
+    internal bool HasParent {
+        get {
+            if (IsAbsolute) {
+                return Parts.Count > 1;
+            }
+            //otherwise relative
+            return Parts.Count > 2 && !IsRelativeSpecialPart(Parts.Last!.Previous!.Value);
+        }
+    }
+
     /// <summary>Gets a value indicating whether this instance is an absolute path.</summary>
     /// <value><c>true</c> if this instance is absolute path; otherwise, <c>false</c>.</value>
-    public bool IsAbsolute => PathType.HasFlag(PathType.Absolute);
+    internal bool IsAbsolute => PathType.HasFlag(PathType.Absolute);
 
-    public bool IsRelative => PathType.HasFlag(PathType.Relative);
+    internal bool IsRelative => PathType.HasFlag(PathType.Relative);
 
-    public bool IsRooted {
+    internal bool IsRooted {
         get {
             switch (PathType) {
                 case PathType.Relative:
@@ -112,17 +119,41 @@ internal class PathCore : IEquatable<PathCore>
         }
     }
 
-    public string ItemName => Parts.Last!.Value;
+    internal string ItemName => Parts.Last!.Value;
 
     /// <summary>A list containing all the individual parts of the path. <br /> The root is always stored
     ///     in the first segment. If that segment is <see cref="string.Empty" />, it is a relative path.</summary>
-    public LinkedList<string> Parts { get; }
+    internal LinkedList<string> Parts { get; }
 
-    public IEnumerable<string> PartsAfterRoot => Parts.Skip(1);
+    internal IEnumerable<string> PartsAfterRoot => Parts.Skip(1);
 
-    public PathType PathType { get; }
+    internal PathType PathType { get; }
 
-    public string RootValue => Parts.First!.Value;
+    internal string RootValue => Parts.First!.Value;
+
+    internal string this[int index] {
+        get {
+            if (index < 0 || Parts.Count <= index) {
+                throw new IndexOutOfRangeException(nameof(index));
+            }
+            //have to walk from front or back
+            LinkedListNode<string> node;
+            if (index < Parts.Count / 2) {
+                //start at head
+                node = Parts.First;
+                for (int i = 0; i < index; i++) {
+                    node = node.Next!;
+                }
+                return node.Value;
+            }
+            //start at tail
+            node = Parts.Last;
+            for (int i = Parts.Count - 1; i > index; i--) {
+                node = node.Previous!;
+            }
+            return node.Value;
+        }
+    }
 
     public override bool Equals(object? obj) {
         if (obj is null) {
@@ -173,6 +204,143 @@ internal class PathCore : IEquatable<PathCore>
         }
 
         return builder.ToString();
+    }
+
+    internal PathCore AdjustAbsolute(PathCore adjustment) {
+        if (IsRelative) {
+            throw new Exception($"Starting point must be absolute: {ToString()}");
+        }
+        if (!adjustment.IsRelative && !adjustment.PathType.HasFlag(PathType.RootRelative)) {
+            throw new Exception($"Adjustment must be relative: {adjustment}");
+        }
+
+        LinkedList<string> result;
+
+        //handle RootRelative
+        if (adjustment.PathType == PathType.RootRelative) {
+            result = [];
+            result.AddFirst(RootValue);
+            foreach (string part in adjustment.PartsAfterRoot) {
+                result.AddLast(part);
+            }
+        }
+
+        //handle Relative
+        result = new LinkedList<string>(Parts);
+        foreach (string part in adjustment.PartsAfterRoot) {
+            switch (part) {
+                case ".":
+                    break;
+                case "..":
+                    if (result.Count > 1) {
+                        result.RemoveLast();
+                    } else {
+                        throw new Exception($"Can not resolve '{adjustment}' from '{ToString()}'.");
+                    }
+                    break;
+                default:
+                    result.AddLast(part);
+                    break;
+            }
+        }
+
+        return new PathCore(PathType, result, result.Count);
+    }
+
+    internal PathCore AdjustRelative(PathCore adjustment) {
+        if (!IsRelative && !PathType.HasFlag(PathType.RootRelative)) {
+            throw new Exception($"Starting point must be relative: {ToString()}");
+        }
+
+        //handle root relative adjustment
+        if (adjustment.PathType.HasFlag(PathType.RootRelative)) {
+            return adjustment;
+        }
+
+        //handle relative
+        LinkedList<string> result = new(Parts);
+        bool takeRemaining = false;
+        foreach (string part in adjustment.PartsAfterRoot) {
+            if (takeRemaining) {
+                result.AddLast(part);
+                continue;
+            }
+
+            switch (part) {
+                case ".":
+                    //skip current dir
+                    break;
+                case "..":
+                    //remove named dir, or append ".."
+                    if (result.Count > 1) {
+                        result.RemoveLast();
+                    } else {
+                        takeRemaining = true;
+                        result.AddLast(part);
+                    }
+                    break;
+                default:
+                    takeRemaining = true;
+                    result.AddLast(part);
+                    break;
+            }
+        }
+        return new PathCore(PathType, result, result.Count);
+    }
+
+    internal PathCore ComputeRelative(bool isStartAFile, PathCore absoluteEnd) {
+        if (IsRelative) {
+            throw new Exception($"Starting point must be absolute: {ToString()}");
+        }
+        if (absoluteEnd.IsRelative) {
+            throw new Exception($"Ending point must be absolute: {absoluteEnd}");
+        }
+        if (RootValue != absoluteEnd.RootValue && absoluteEnd.PathType != PathType.RootRelative) {
+            throw new Exception($"No shared root between: {ToString()} -> {absoluteEnd}");
+        }
+
+        //start build relative paths after the root
+        LinkedListNode<string>? fromNode = Parts.First!.Next;
+        LinkedListNode<string>? toNode = absoluteEnd.Parts.First!.Next;
+
+        while (fromNode is not null && toNode is not null && fromNode.Value == toNode.Value) {
+            if (isStartAFile && fromNode.Next is null) {
+                // NB: Exclude filename from path consideration
+                fromNode = fromNode.Next;
+                break;
+            }
+            fromNode = fromNode.Next;
+            toNode = toNode.Next;
+        }
+
+        LinkedList<string> relative = new([string.Empty]);
+        while (fromNode is not null) {
+            relative.AddLast("..");
+            fromNode = fromNode.Next;
+        }
+
+        if (relative.Count == 1) {
+            //NB: establish relative root as current directory
+            relative.AddLast(".");
+        }
+
+        while (toNode is not null) {
+            relative.AddLast(toNode.Value);
+            toNode = toNode.Next;
+        }
+
+        return new PathCore(PathType.Relative, relative, relative.Count);
+    }
+
+    internal PathCore GetChild(string name) {
+        return new PathCore(PathType, Parts, Parts.Count, name);
+    }
+
+    internal PathCore GetParent() {
+        if (HasParent) {
+            return new PathCore(PathType, Parts, Parts.Count - 1);
+        }
+        throw new Exception($"The path {ToString()}, does not have a parent.");
     }
 
     private void CleanUpRoute() {
@@ -230,14 +398,18 @@ internal class PathCore : IEquatable<PathCore>
 
         // re-validate cleaned up input
         // .\ and ..\ illegal for all rooted paths @ Parts[1]
-        if (IsRooted && Parts.Count > 1 && PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+        if (IsRooted && Parts.Count > 1 && IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
             throw new Exception("Not a valid rooted path.");
         }
         // .\ and ..\ required for non-rooted relative paths @ Parts[1]
-        if (IsRelative && !PathHelper.IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
+        if (IsRelative && !IsRelativeSpecialPart(Parts.First!.Next!.Value)) {
             //normalize to current directory relative
             Parts.AddAfter(Parts.First, ".");
         }
+    }
+
+    private static bool IsRelativeSpecialPart(string part) {
+        return part is "." or "..";
     }
 
 }

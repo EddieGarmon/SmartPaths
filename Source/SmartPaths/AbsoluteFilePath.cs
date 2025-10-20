@@ -11,8 +11,8 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     public AbsoluteFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, false, parts, partsLength, newItemName) { }
+    internal AbsoluteFilePath(PathCore core)
+        : base(false, core) { }
 
     public string FileExtension {
         get {
@@ -79,11 +79,11 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     }
 
     public static RelativeFolderPath operator >> (AbsoluteFilePath fromFile, AbsoluteFolderPath toDir) {
-        return fromFile.Parent.MakeRelative(toDir);
+        return fromFile.Parent.ComputeRelative(toDir);
     }
 
     public static RelativeFilePath operator >> (AbsoluteFilePath fromFile, AbsoluteFilePath toFile) {
-        return fromFile.Parent.MakeRelative(toFile);
+        return fromFile.Parent.ComputeRelative(toFile);
     }
 
 }

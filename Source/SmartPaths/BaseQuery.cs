@@ -6,6 +6,10 @@ namespace SmartPaths;
 public abstract class BaseQuery : IPathQuery, IEquatable<BaseQuery>
 {
 
+    internal BaseQuery(PathCore core) {
+        Core = core;
+    }
+
     protected BaseQuery(PathType pathType, string query) {
         Core = new PathCore(pathType, query);
     }

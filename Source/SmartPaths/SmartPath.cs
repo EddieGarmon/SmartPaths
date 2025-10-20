@@ -16,10 +16,18 @@ public static class SmartPath
                 _ => throw new ArgumentOutOfRangeException(nameof(relative))
             },
             RelativeFolderPath relativeStart => relative switch {
-                RelativeFolderPath folderPath => relativeStart.ResolveRelative(folderPath),
-                RelativeFilePath filePath => relativeStart.ResolveRelative(filePath),
+                RelativeFolderPath folderPath => relativeStart.AdjustRelative(folderPath),
+                RelativeFilePath filePath => relativeStart.AdjustRelative(filePath),
                 _ => throw new ArgumentOutOfRangeException(nameof(relative))
             },
+            _ => throw new ArgumentOutOfRangeException(nameof(start))
+        };
+    }
+
+    public static IPathQuery Combine(IFolderPath start, RelativeQueryPath relative) {
+        return start switch {
+            AbsoluteFolderPath absoluteStart => absoluteStart.ResolveRelative(relative),
+            RelativeFolderPath relativeStart => relativeStart.AdjustRelative(relative),
             _ => throw new ArgumentOutOfRangeException(nameof(start))
         };
     }
@@ -61,10 +69,10 @@ public static class SmartPath
     public static IPathQuery ParseQuery(string query) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(query);
         if (pathType.HasFlag(PathType.Relative)) {
-            return new RelativePathQuery(query);
+            return new RelativeQueryPath(query);
         }
         if (pathType.HasFlag(PathType.Absolute)) {
-            return new AbsolutePathQuery(query);
+            return new AbsoluteQueryPath(query);
         }
         throw new Exception($"Invalid path query: {query}");
     }

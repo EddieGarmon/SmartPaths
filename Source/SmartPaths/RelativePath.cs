@@ -5,15 +5,20 @@ public abstract class RelativePath : BasePath, IRelativePath
 
     private RelativeFolderPath? _parent;
 
+    internal RelativePath(bool isFolder, PathCore core)
+        : base(isFolder, core) { }
+
     protected RelativePath(bool isFolder, string path)
         : base(PathType.Relative, isFolder, path) { }
 
-    protected RelativePath(PathType pathType, bool isFolder, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, isFolder, parts, partsLength, newItemName) { }
-
-    public override bool HasParent => Core.Parts.Count > 2 && !PathHelper.IsRelativeSpecialPart(Core.Parts.Last!.Previous!.Value);
-
-    public RelativeFolderPath? Parent => HasParent ? _parent ??= new RelativeFolderPath(PathType, Core.Parts, Core.Parts.Count - 1) : null;
+    public RelativeFolderPath? Parent {
+        get {
+            if (HasParent) {
+                return _parent ??= new RelativeFolderPath(Core.GetParent());
+            }
+            return null;
+        }
+    }
 
     public RelativeFilePath GetSiblingFilePath(string name, string extension) {
         return GetSiblingFilePath($"{name}.{extension}");
@@ -25,8 +30,7 @@ public abstract class RelativePath : BasePath, IRelativePath
         if (Core.Parts.Count == 1) {
             throw PathExceptions.UndefinedSiblingFor(Core.RootValue);
         }
-
-        return new RelativeFilePath(PathType, Core.Parts, Core.Parts.Count - 1, fileNameWithExtension);
+        return new RelativeFilePath(Core.GetParent().GetChild(fileNameWithExtension));
     }
 
     public RelativeFolderPath GetSiblingFolderPath(string folderName) {
@@ -35,8 +39,7 @@ public abstract class RelativePath : BasePath, IRelativePath
         if (Core.Parts.Count == 1) {
             throw PathExceptions.UndefinedSiblingFor(Core.RootValue);
         }
-
-        return new RelativeFolderPath(PathType, Core.Parts, Core.Parts.Count - 1, folderName);
+        return new RelativeFolderPath(Core.GetParent().GetChild(folderName));
     }
 
     protected override IFolderPath? GetParent() {
