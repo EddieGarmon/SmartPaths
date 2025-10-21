@@ -89,12 +89,7 @@ namespace SmartPaths
         }
 
     }
-}
-#endif
 
-#if NET6_0 || NETSTANDARD2_0
-namespace SmartPaths
-{
     public class ArgumentException
     {
 

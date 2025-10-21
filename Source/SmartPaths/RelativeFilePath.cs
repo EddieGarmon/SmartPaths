@@ -11,8 +11,8 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public RelativeFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, false, parts, partsLength, newItemName) { }
+    internal RelativeFilePath(PathCore core)
+        : base(false, core) { }
 
     public string FileExtension {
         get {
@@ -77,5 +77,15 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public static implicit operator string?(RelativeFilePath? path) {
         return path?.ToString();
     }
+
+#if !NETSTANDARD2_0
+    static IPath IFilePath.operator /(IFilePath start, IRelativePath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+
+    static IQuery IFilePath.operator /(IFilePath start, RelativeQuery relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+#endif
 
 }

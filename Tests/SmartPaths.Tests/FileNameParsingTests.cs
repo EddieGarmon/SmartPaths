@@ -2,7 +2,7 @@
 
 namespace SmartPaths;
 
-public class FileParsingTests
+public class FileNameParsingTests
 {
 
     [Theory]

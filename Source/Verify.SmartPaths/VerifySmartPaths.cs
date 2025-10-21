@@ -22,6 +22,7 @@ public static class VerifySmartPaths
         VerifierSettings.AddExtraSettings(serializer => {
                                               List<JsonConverter> converters = serializer.Converters;
                                               converters.Add(new IPathConverter());
+                                              converters.Add(new IPathQueryConverter());
                                               converters.Add(new LedgerConverter());
                                           });
         VerifierSettings.RegisterFileConverter<Ledger>(Convert);

@@ -7,7 +7,7 @@
       <Field Name="_userGivenName" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAACAAAAAAAAACAAAAAAAAAAAAAAAEAAoEAAABABAA=</HashCode>
+      <HashCode>AIAACAAAAAAAAACAQAQAAEAAAAAAAAEAAoEAAABABAA=</HashCode>
       <FileName>AbsoluteFilePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -15,7 +15,7 @@
   <Class Name="SmartPaths.AbsoluteFolderPath">
     <Position X="16.25" Y="8.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>EAAAAAAABAAAAAAAQAQAAAIBAAAAAAAAAyAACAAAAAA=</HashCode>
+      <HashCode>EIAAAAAABAAAAAAAQAQAAEIBAAAAAQAAAwAACAAAAAA=</HashCode>
       <FileName>AbsoluteFolderPath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -27,7 +27,7 @@
       <Field Name="_userGivenName" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAEAAIEAAABABIA=</HashCode>
+      <HashCode>AIAAAAAAAAAAAACAQAQAAEAAAAAAAAEAAIEAAABABIA=</HashCode>
       <FileName>RelativeFilePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -35,7 +35,7 @@
   <Class Name="SmartPaths.RelativeFolderPath">
     <Position X="10.75" Y="8.5" Width="2.5" />
     <TypeIdentifier>
-      <HashCode>EAAAAAAABAAAAAAAAAAAAAJAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>EIAAAAAABAAAAAAAQAQAAEJAAAAAAAAAAAAACAAAAAA=</HashCode>
       <FileName>RelativeFolderPath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -46,7 +46,7 @@
       <Field Name="_parent" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAARAAAAAAAAAACQAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAAAAAAARAAAAAAAAAAAQAAQAAAAAAAAAAAAAAQAAAA=</HashCode>
       <FileName>RelativePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.21" />
@@ -57,18 +57,15 @@
       <Field Name="_parent" Hidden="true" />
     </Members>
     <TypeIdentifier>
-      <HashCode>AAAAAAAARAAAAAAAAAACQAAQAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>AIAAAAAARAAAAAAAAAAAQAAQAAAAAAAAAAAAABQAAAA=</HashCode>
       <FileName>AbsolutePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="SmartPaths.BasePath">
     <Position X="13.75" Y="2.5" Width="2" />
-    <Members>
-      <Field Name="_toString" Hidden="true" />
-    </Members>
     <TypeIdentifier>
-      <HashCode>IABEIAAAAACAAAgEgBGKQIAAAAAAAIAAAAAAABgAAiA=</HashCode>
+      <HashCode>IABEAAAAAAAAAAgEgAAiAAAAAAAAAIAAAAAAABwAAjA=</HashCode>
       <FileName>BasePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
@@ -83,7 +80,7 @@
   <Class Name="SmartPaths.SmartPath">
     <Position X="20.25" Y="1.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>QAAhAgAAAAAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>QIAhAgAAAAAAAAAAAAABAAQAAAAAAAACABABAAAEAAA=</HashCode>
       <FileName>SmartPath.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -97,7 +94,7 @@
   <Interface Name="SmartPaths.IPath">
     <Position X="5.5" Y="3.25" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>IABAAAAAAAAAAAgAAAACQAAAAAAAAAAAAAAAABgAAAA=</HashCode>
+      <HashCode>IABAAAAAAAAAAAgEAAACAAAAAAAAAAAAAAAAABwAAAA=</HashCode>
       <FileName>IPath.cs</FileName>
     </TypeIdentifier>
   </Interface>
@@ -139,7 +136,7 @@
   <Enum Name="SmartPaths.PathType">
     <Position X="0.5" Y="1" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAgAAAAAAAgAAAAAAAAAABAAAAAAAAAAAAAAACACABA=</HashCode>
+      <HashCode>AAgAAAAAAAgAAAAAAAAAAAAAAAAAAAIAAAAAACAAABA=</HashCode>
       <FileName>PathType.cs</FileName>
     </TypeIdentifier>
   </Enum>

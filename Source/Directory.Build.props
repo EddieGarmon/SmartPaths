@@ -3,7 +3,7 @@
     <PropertyGroup>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <LangVersion>12</LangVersion>
+        <LangVersion>latest</LangVersion>
         <!-- todo: <WarningsAsErrors>nullable</WarningsAsErrors> -->
 
         <Product>SmartPaths</Product>

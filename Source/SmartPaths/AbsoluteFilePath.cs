@@ -11,8 +11,8 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     public AbsoluteFilePath(string path)
         : base(false, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal AbsoluteFilePath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, false, parts, partsLength, newItemName) { }
+    internal AbsoluteFilePath(PathCore core)
+        : base(false, core) { }
 
     public string FileExtension {
         get {
@@ -48,11 +48,19 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         }
     }
 
+    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
     public static AbsoluteFilePath operator +(AbsoluteFilePath file, string relativeFile) {
         return file.Folder.ResolveRelative(new RelativeFilePath(relativeFile));
     }
 
-    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
+    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -60,11 +68,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return file.Folder.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
-        return file.Folder.ResolveRelative(relative);
-    }
-
-    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
+    public static AbsoluteQuery operator /(AbsoluteFilePath file, RelativeQuery relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -79,11 +83,21 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     }
 
     public static RelativeFolderPath operator >> (AbsoluteFilePath fromFile, AbsoluteFolderPath toDir) {
-        return fromFile.Parent.MakeRelative(toDir);
+        return fromFile.Parent.ComputeRelative(toDir);
     }
 
     public static RelativeFilePath operator >> (AbsoluteFilePath fromFile, AbsoluteFilePath toFile) {
-        return fromFile.Parent.MakeRelative(toFile);
+        return fromFile.Parent.ComputeRelative(toFile);
     }
+
+#if !NETSTANDARD2_0
+    static IPath IFilePath.operator /(IFilePath start, IRelativePath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+
+    static IQuery IFilePath.operator /(IFilePath start, RelativeQuery relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+#endif
 
 }

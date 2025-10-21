@@ -8,8 +8,8 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     public RelativeFolderPath(string path)
         : base(true, path ?? throw new ArgumentNullException(nameof(path))) { }
 
-    internal RelativeFolderPath(PathType pathType, IEnumerable<string> parts, int partsLength, string? newItemName = null)
-        : base(pathType, true, parts, partsLength, newItemName) { }
+    internal RelativeFolderPath(PathCore core)
+        : base(true, core) { }
 
     public string FolderName => ItemName;
 
@@ -22,8 +22,8 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         if (fileNameWithExtension.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
             throw new Exception("Invalid filename: " + fileNameWithExtension);
         }
-
-        return new RelativeFilePath(PathType, Parts, Parts.Count, fileNameWithExtension);
+        PathCore core = new(PathType, Core.Parts, Core.Parts.Count, fileNameWithExtension);
+        return new RelativeFilePath(core);
     }
 
     public RelativeFolderPath GetChildFolderPath(string folderName) {
@@ -31,18 +31,23 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         if (folderName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0) {
             throw new Exception("Invalid folder name: " + folderName);
         }
-
-        return new RelativeFolderPath(PathType, Parts, Parts.Count, folderName);
+        PathCore newCore = new(PathType, Core.Parts, Core.Parts.Count, folderName);
+        return new RelativeFolderPath(newCore);
     }
 
-    public RelativeFolderPath ResolveRelative(RelativeFolderPath relativeFolderPath) {
-        LinkedList<string> parts = PathHelper.MakeRelative(this, relativeFolderPath);
-        return new RelativeFolderPath(PathType, parts, parts.Count);
+    public RelativeFolderPath ResolveRelative(RelativeFolderPath relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeFolderPath(core);
     }
 
-    public RelativeFilePath ResolveRelative(RelativeFilePath relativeFilePath) {
-        LinkedList<string> parts = PathHelper.MakeRelative(this, relativeFilePath);
-        return new RelativeFilePath(PathType, parts, parts.Count);
+    public RelativeFilePath ResolveRelative(RelativeFilePath relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeFilePath(core);
+    }
+
+    public RelativeQuery ResolveRelative(RelativeQuery relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeQuery(core);
     }
 
     public static bool TryParse(string value, [NotNullWhen(true)] out RelativeFolderPath? path) {
@@ -67,12 +72,16 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return start.ResolveRelative(relativeFile);
     }
 
+    public static RelativeFolderPath operator /(RelativeFolderPath start, RelativeFolderPath relativeFolder) {
+        return start.ResolveRelative(relativeFolder);
+    }
+
     public static RelativeFolderPath operator /(RelativeFolderPath start, string relativeFolder) {
         return start.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static RelativeFolderPath operator /(RelativeFolderPath start, RelativeFolderPath relativeFolder) {
-        return start.ResolveRelative(relativeFolder);
+    public static RelativeQuery operator /(RelativeFolderPath start, RelativeQuery relativeQuery) {
+        return start.ResolveRelative(relativeQuery);
     }
 
     [return: NotNullIfNotNull(nameof(path))]
@@ -87,6 +96,10 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
 
 #if !NETSTANDARD2_0
     static IPath IFolderPath.operator /(IFolderPath start, IRelativePath relative) {
+        return SmartPath.Combine(start, relative);
+    }
+
+    static IQuery IFolderPath.operator /(IFolderPath start, RelativeQuery relative) {
         return SmartPath.Combine(start, relative);
     }
 #endif
