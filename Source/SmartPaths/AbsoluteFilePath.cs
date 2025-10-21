@@ -68,7 +68,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return file.Folder.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static AbsoluteQueryPath operator /(AbsoluteFilePath file, RelativeQueryPath relative) {
+    public static AbsoluteQuery operator /(AbsoluteFilePath file, RelativeQuery relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -95,7 +95,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return SmartPath.Combine(start.GetParent()!, relative);
     }
 
-    static IPathQuery IFilePath.operator /(IFilePath start, RelativeQueryPath relative) {
+    static IQuery IFilePath.operator /(IFilePath start, RelativeQuery relative) {
         return SmartPath.Combine(start.GetParent()!, relative);
     }
 #endif

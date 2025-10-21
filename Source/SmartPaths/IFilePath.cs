@@ -12,7 +12,7 @@ public interface IFilePath : IPath
 #if !NETSTANDARD2_0
     static abstract IPath operator /(IFilePath start, IRelativePath relative);
 
-    static abstract IPathQuery operator /(IFilePath start, RelativeQueryPath relative);
+    static abstract IQuery operator /(IFilePath start, RelativeQuery relative);
 #endif
 
 }

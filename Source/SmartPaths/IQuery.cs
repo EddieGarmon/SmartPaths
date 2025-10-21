@@ -1,6 +1,6 @@
 ﻿namespace SmartPaths;
 
-public interface IPathQuery
+public interface IQuery
 {
 
     bool IsAbsoluteQuery { get; }

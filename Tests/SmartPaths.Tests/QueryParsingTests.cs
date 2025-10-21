@@ -12,8 +12,8 @@ public class QueryParsingTests
     [InlineData(@"/../nope")]
     //todo: [InlineData(@"...")]
     public Task InvalidQuery(string source) {
-        Should.Throw<Exception>(() => new AbsoluteQueryPath(source));
-        Should.Throw<Exception>(() => new RelativeQueryPath(source));
+        Should.Throw<Exception>(() => new AbsoluteQuery(source));
+        Should.Throw<Exception>(() => new RelativeQuery(source));
         Should.Throw<Exception>(() => SmartPath.ParseQuery(source));
         SmartPath.TryParse(source, out IPath? _).ShouldBeFalse();
         return Task.CompletedTask;
@@ -27,8 +27,8 @@ public class QueryParsingTests
     [InlineData(@"/some/path")]
     [InlineData(@"/some/../path")]
     public Task ValidAbsoluteQuery(string source) {
-        IPathQuery query = SmartPath.ParseQuery(source);
-        query.ShouldBe(new AbsoluteQueryPath(source));
+        IQuery query = SmartPath.ParseQuery(source);
+        query.ShouldBe(new AbsoluteQuery(source));
         return Task.CompletedTask;
     }
 
@@ -37,8 +37,8 @@ public class QueryParsingTests
     [InlineData(@"./")]
     [InlineData(@".\")]
     public Task ValidRelativeQuery(string source) {
-        IPathQuery query = SmartPath.ParseQuery(source);
-        query.ShouldBe(new RelativeQueryPath(source));
+        IQuery query = SmartPath.ParseQuery(source);
+        query.ShouldBe(new RelativeQuery(source));
         return Task.CompletedTask;
     }
 

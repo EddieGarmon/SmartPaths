@@ -83,7 +83,7 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
         return SmartPath.Combine(start.GetParent()!, relative);
     }
 
-    static IPathQuery IFilePath.operator /(IFilePath start, RelativeQueryPath relative) {
+    static IQuery IFilePath.operator /(IFilePath start, RelativeQuery relative) {
         return SmartPath.Combine(start.GetParent()!, relative);
     }
 #endif

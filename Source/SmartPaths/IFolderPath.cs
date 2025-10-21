@@ -8,7 +8,7 @@ public interface IFolderPath : IPath
 #if !NETSTANDARD2_0
     static abstract IPath operator /(IFolderPath start, IRelativePath relative);
 
-    static abstract IPathQuery operator /(IFolderPath start, RelativeQueryPath relative);
+    static abstract IQuery operator /(IFolderPath start, RelativeQuery relative);
 #endif
 
 }

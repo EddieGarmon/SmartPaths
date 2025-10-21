@@ -25,9 +25,9 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new RelativeFolderPath(core);
     }
 
-    public RelativeQueryPath ComputeRelative(AbsoluteQueryPath target) {
+    public RelativeQuery ComputeRelative(AbsoluteQuery target) {
         PathCore core = Core.ComputeRelative(false, target.Core);
-        return new RelativeQueryPath(core);
+        return new RelativeQuery(core);
     }
 
     public AbsoluteFilePath GetChildFilePath(string name, string extension) {
@@ -54,9 +54,9 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return new AbsoluteFolderPath(core);
     }
 
-    public AbsoluteQueryPath ResolveRelative(RelativeQueryPath relative) {
+    public AbsoluteQuery ResolveRelative(RelativeQuery relative) {
         PathCore core = Core.AdjustAbsolute(relative.Core);
-        return new AbsoluteQueryPath(core);
+        return new AbsoluteQuery(core);
     }
 
     public static bool TryParse(string value, [NotNullWhen(true)] out AbsoluteFolderPath? path) {
@@ -89,7 +89,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return root.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static AbsoluteQueryPath operator /(AbsoluteFolderPath root, RelativeQueryPath relative) {
+    public static AbsoluteQuery operator /(AbsoluteFolderPath root, RelativeQuery relative) {
         return root.ResolveRelative(relative);
     }
 
@@ -116,7 +116,7 @@ public sealed class AbsoluteFolderPath : AbsolutePath, IAbsoluteFolderPath
         return SmartPath.Combine(start, relative);
     }
 
-    static IPathQuery IFolderPath.operator /(IFolderPath start, RelativeQueryPath relative) {
+    static IQuery IFolderPath.operator /(IFolderPath start, RelativeQuery relative) {
         return SmartPath.Combine(start, relative);
     }
 #endif

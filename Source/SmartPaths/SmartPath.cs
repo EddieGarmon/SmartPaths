@@ -24,7 +24,7 @@ public static class SmartPath
         };
     }
 
-    public static IPathQuery Combine(IFolderPath start, RelativeQueryPath relative) {
+    public static IQuery Combine(IFolderPath start, RelativeQuery relative) {
         return start switch {
             AbsoluteFolderPath absoluteStart => absoluteStart.ResolveRelative(relative),
             RelativeFolderPath relativeStart => relativeStart.ResolveRelative(relative),
@@ -66,13 +66,13 @@ public static class SmartPath
         throw new Exception($"Invalid path for folder: {path}");
     }
 
-    public static IPathQuery ParseQuery(string query) {
+    public static IQuery ParseQuery(string query) {
         (PathType pathType, Match _) = PathPatterns.DeterminePathType(query);
         if (pathType.HasFlag(PathType.Relative)) {
-            return new RelativeQueryPath(query);
+            return new RelativeQuery(query);
         }
         if (pathType.HasFlag(PathType.Absolute)) {
-            return new AbsoluteQueryPath(query);
+            return new AbsoluteQuery(query);
         }
         throw new Exception($"Invalid path query: {query}");
     }
@@ -133,7 +133,7 @@ public static class SmartPath
         return false;
     }
 
-    public static bool TryParseQuery(string query, [NotNullWhen(true)] out IPathQuery? pathQuery) {
+    public static bool TryParseQuery(string query, [NotNullWhen(true)] out IQuery? pathQuery) {
         pathQuery = null;
         if (string.IsNullOrWhiteSpace(query)) {
             return false;

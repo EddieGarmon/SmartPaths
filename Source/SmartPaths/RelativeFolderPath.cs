@@ -45,9 +45,9 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFilePath(core);
     }
 
-    public RelativeQueryPath ResolveRelative(RelativeQueryPath relative) {
+    public RelativeQuery ResolveRelative(RelativeQuery relative) {
         PathCore core = Core.AdjustRelative(relative.Core);
-        return new RelativeQueryPath(core);
+        return new RelativeQuery(core);
     }
 
     public static bool TryParse(string value, [NotNullWhen(true)] out RelativeFolderPath? path) {
@@ -80,7 +80,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return start.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static RelativeQueryPath operator /(RelativeFolderPath start, RelativeQueryPath relativeQuery) {
+    public static RelativeQuery operator /(RelativeFolderPath start, RelativeQuery relativeQuery) {
         return start.ResolveRelative(relativeQuery);
     }
 
@@ -99,7 +99,7 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return SmartPath.Combine(start, relative);
     }
 
-    static IPathQuery IFolderPath.operator /(IFolderPath start, RelativeQueryPath relative) {
+    static IQuery IFolderPath.operator /(IFolderPath start, RelativeQuery relative) {
         return SmartPath.Combine(start, relative);
     }
 #endif

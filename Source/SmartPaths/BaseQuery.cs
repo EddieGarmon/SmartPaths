@@ -3,7 +3,7 @@
 namespace SmartPaths;
 
 [DebuggerDisplay("{ToString()}")]
-public abstract class BaseQuery : IPathQuery, IEquatable<BaseQuery>
+public abstract class BaseQuery : IQuery, IEquatable<BaseQuery>
 {
 
     internal BaseQuery(PathCore core) {
@@ -54,11 +54,11 @@ public abstract class BaseQuery : IPathQuery, IEquatable<BaseQuery>
 
     protected abstract IFolderPath AsFolderPath();
 
-    IFilePath IPathQuery.AsFilePath() {
+    IFilePath IQuery.AsFilePath() {
         return AsFilePath();
     }
 
-    IFolderPath IPathQuery.AsFolderPath() {
+    IFolderPath IQuery.AsFolderPath() {
         return AsFolderPath();
     }
 
