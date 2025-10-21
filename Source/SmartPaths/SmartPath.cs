@@ -16,8 +16,8 @@ public static class SmartPath
                 _ => throw new ArgumentOutOfRangeException(nameof(relative))
             },
             RelativeFolderPath relativeStart => relative switch {
-                RelativeFolderPath folderPath => relativeStart.AdjustRelative(folderPath),
-                RelativeFilePath filePath => relativeStart.AdjustRelative(filePath),
+                RelativeFolderPath folderPath => relativeStart.ResolveRelative(folderPath),
+                RelativeFilePath filePath => relativeStart.ResolveRelative(filePath),
                 _ => throw new ArgumentOutOfRangeException(nameof(relative))
             },
             _ => throw new ArgumentOutOfRangeException(nameof(start))
@@ -27,7 +27,7 @@ public static class SmartPath
     public static IPathQuery Combine(IFolderPath start, RelativeQueryPath relative) {
         return start switch {
             AbsoluteFolderPath absoluteStart => absoluteStart.ResolveRelative(relative),
-            RelativeFolderPath relativeStart => relativeStart.AdjustRelative(relative),
+            RelativeFolderPath relativeStart => relativeStart.ResolveRelative(relative),
             _ => throw new ArgumentOutOfRangeException(nameof(start))
         };
     }

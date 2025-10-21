@@ -48,11 +48,19 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         }
     }
 
+    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
     public static AbsoluteFilePath operator +(AbsoluteFilePath file, string relativeFile) {
         return file.Folder.ResolveRelative(new RelativeFilePath(relativeFile));
     }
 
-    public static AbsoluteFilePath operator +(AbsoluteFilePath file, RelativeFilePath relative) {
+    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
+        return file.Folder.ResolveRelative(relative);
+    }
+
+    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -60,11 +68,7 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
         return file.Folder.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
-    public static AbsoluteFolderPath operator /(AbsoluteFilePath file, RelativeFolderPath relative) {
-        return file.Folder.ResolveRelative(relative);
-    }
-
-    public static AbsoluteFilePath operator /(AbsoluteFilePath file, RelativeFilePath relative) {
+    public static AbsoluteQueryPath operator /(AbsoluteFilePath file, RelativeQueryPath relative) {
         return file.Folder.ResolveRelative(relative);
     }
 
@@ -85,5 +89,15 @@ public sealed class AbsoluteFilePath : AbsolutePath, IFilePath
     public static RelativeFilePath operator >> (AbsoluteFilePath fromFile, AbsoluteFilePath toFile) {
         return fromFile.Parent.ComputeRelative(toFile);
     }
+
+#if !NETSTANDARD2_0
+    static IPath IFilePath.operator /(IFilePath start, IRelativePath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+
+    static IPathQuery IFilePath.operator /(IFilePath start, RelativeQueryPath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+#endif
 
 }

@@ -11,6 +11,10 @@ public class AbsoluteQueryPath : BaseQuery
 
     public string RootValue => Core.RootValue;
 
+    internal bool IsRoot => Core.Parts.Count == 1;
+
+    protected string ItemName => Core.ItemName;
+
     public AbsoluteFilePath ToFilePath() {
         return new AbsoluteFilePath(Core);
     }

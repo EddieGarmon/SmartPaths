@@ -13,21 +13,6 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
 
     public string FolderName => ItemName;
 
-    public RelativeFolderPath AdjustRelative(RelativeFolderPath relativeFolderPath) {
-        PathCore core = Core.AdjustRelative(relativeFolderPath.Core);
-        return new RelativeFolderPath(core);
-    }
-
-    public RelativeFilePath AdjustRelative(RelativeFilePath relativeFilePath) {
-        PathCore core = Core.AdjustRelative(relativeFilePath.Core);
-        return new RelativeFilePath(core);
-    }
-
-    public RelativeQueryPath AdjustRelative(RelativeQueryPath relativePathQuery) {
-        PathCore core = Core.AdjustRelative(relativePathQuery.Core);
-        return new RelativeQueryPath(core);
-    }
-
     public RelativeFilePath GetChildFilePath(string name, string extension) {
         return GetChildFilePath($"{name}.{extension}");
     }
@@ -50,6 +35,21 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
         return new RelativeFolderPath(newCore);
     }
 
+    public RelativeFolderPath ResolveRelative(RelativeFolderPath relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeFolderPath(core);
+    }
+
+    public RelativeFilePath ResolveRelative(RelativeFilePath relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeFilePath(core);
+    }
+
+    public RelativeQueryPath ResolveRelative(RelativeQueryPath relative) {
+        PathCore core = Core.AdjustRelative(relative.Core);
+        return new RelativeQueryPath(core);
+    }
+
     public static bool TryParse(string value, [NotNullWhen(true)] out RelativeFolderPath? path) {
         try {
             path = new RelativeFolderPath(value);
@@ -61,23 +61,27 @@ public sealed class RelativeFolderPath : RelativePath, IRelativeFolderPath
     }
 
     public static RelativeFilePath operator +(RelativeFolderPath start, string relativeFile) {
-        return start.AdjustRelative(new RelativeFilePath(relativeFile));
+        return start.ResolveRelative(new RelativeFilePath(relativeFile));
     }
 
     public static RelativeFilePath operator +(RelativeFolderPath start, RelativeFilePath relativeFile) {
-        return start.AdjustRelative(relativeFile);
+        return start.ResolveRelative(relativeFile);
     }
 
     public static RelativeFilePath operator /(RelativeFolderPath start, RelativeFilePath relativeFile) {
-        return start.AdjustRelative(relativeFile);
-    }
-
-    public static RelativeFolderPath operator /(RelativeFolderPath start, string relativeFolder) {
-        return start.AdjustRelative(new RelativeFolderPath(relativeFolder));
+        return start.ResolveRelative(relativeFile);
     }
 
     public static RelativeFolderPath operator /(RelativeFolderPath start, RelativeFolderPath relativeFolder) {
-        return start.AdjustRelative(relativeFolder);
+        return start.ResolveRelative(relativeFolder);
+    }
+
+    public static RelativeFolderPath operator /(RelativeFolderPath start, string relativeFolder) {
+        return start.ResolveRelative(new RelativeFolderPath(relativeFolder));
+    }
+
+    public static RelativeQueryPath operator /(RelativeFolderPath start, RelativeQueryPath relativeQuery) {
+        return start.ResolveRelative(relativeQuery);
     }
 
     [return: NotNullIfNotNull(nameof(path))]

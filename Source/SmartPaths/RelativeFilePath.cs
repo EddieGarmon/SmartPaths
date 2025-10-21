@@ -49,23 +49,23 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     }
 
     public static RelativeFilePath operator +(RelativeFilePath file, string relativeFile) {
-        return file.Folder!.AdjustRelative(new RelativeFilePath(relativeFile));
+        return file.Folder!.ResolveRelative(new RelativeFilePath(relativeFile));
     }
 
     public static RelativeFilePath operator +(RelativeFilePath file, RelativeFilePath relativeFile) {
-        return file.Folder!.AdjustRelative(relativeFile);
+        return file.Folder!.ResolveRelative(relativeFile);
     }
 
     public static RelativeFolderPath operator /(RelativeFilePath file, string relativeFolder) {
-        return file.Folder!.AdjustRelative(new RelativeFolderPath(relativeFolder));
+        return file.Folder!.ResolveRelative(new RelativeFolderPath(relativeFolder));
     }
 
     public static RelativeFolderPath operator /(RelativeFilePath file, RelativeFolderPath relativeFolder) {
-        return file.Folder!.AdjustRelative(relativeFolder);
+        return file.Folder!.ResolveRelative(relativeFolder);
     }
 
     public static RelativeFilePath operator /(RelativeFilePath file, RelativeFilePath relative) {
-        return file.Folder!.AdjustRelative(relative);
+        return file.Folder!.ResolveRelative(relative);
     }
 
     [return: NotNullIfNotNull(nameof(path))]
@@ -77,5 +77,15 @@ public sealed class RelativeFilePath : RelativePath, IFilePath
     public static implicit operator string?(RelativeFilePath? path) {
         return path?.ToString();
     }
+
+#if !NETSTANDARD2_0
+    static IPath IFilePath.operator /(IFilePath start, IRelativePath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+
+    static IPathQuery IFilePath.operator /(IFilePath start, RelativeQueryPath relative) {
+        return SmartPath.Combine(start.GetParent()!, relative);
+    }
+#endif
 
 }
