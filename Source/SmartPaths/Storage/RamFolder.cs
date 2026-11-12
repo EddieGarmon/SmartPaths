@@ -122,12 +122,12 @@ public sealed class RamFolder : SmartFolder<RamFolder, RamFile>
 
     internal override Task<RamFile?> GetFile(AbsoluteFilePath filePath) {
         _files.TryGetValue(filePath, out RamFile? file);
-        return Task.FromResult(file);
+        return Task.FromResult<RamFile?>(file);
     }
 
     internal override Task<RamFolder?> GetFolder(AbsoluteFolderPath folderPath) {
         _folders.TryGetValue(folderPath, out RamFolder? folder);
-        return Task.FromResult(folder);
+        return Task.FromResult<RamFolder?>(folder);
     }
 
     internal void Register(RamFile newFile, bool notify = true) {
