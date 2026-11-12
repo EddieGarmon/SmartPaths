@@ -12,12 +12,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Fallout.Common" Version="10.4.0" />
+		<PackageReference Include="Fallout.Common" Version="10.5.0" />
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Pin to version 4.8.13 for free method level coverage -->
-		<PackageDownload Include="ReportGenerator" Version="[4.8.13]" />
+    <PackageDownload Include="ReportGenerator" Version="[5.6.0]" />
 	</ItemGroup>
 
 </Project>

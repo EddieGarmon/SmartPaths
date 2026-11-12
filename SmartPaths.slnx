@@ -4,10 +4,6 @@
       <Build Project="false" />
     </Project>
   </Folder>
-  <Folder Name="/Docs/">
-    <File Path="License.txt" />
-    <File Path="ReadMe.md" />
-  </Folder>
   <Folder Name="/Source/">
     <Project Path="Source/SmartPaths/SmartPaths.csproj" />
     <Project Path="Source/Verify.SmartPaths/Verify.SmartPaths.csproj" />
