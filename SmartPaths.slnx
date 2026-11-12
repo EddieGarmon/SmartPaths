@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/Build/">
+    <Project Path="build/_build.csproj">
+      <Build Project="false" />
+    </Project>
+  </Folder>
+  <Folder Name="/Docs/">
+    <File Path="License.txt" />
+    <File Path="ReadMe.md" />
+  </Folder>
+  <Folder Name="/Source/">
+    <Project Path="Source/SmartPaths/SmartPaths.csproj" />
+    <Project Path="Source/Verify.SmartPaths/Verify.SmartPaths.csproj" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/SmartPaths.Tests/SmartPaths.Tests.csproj" />
+    <Project Path="Tests/Verify.SmartPaths.Tests/Verify.SmartPaths.Tests.csproj" />
+  </Folder>
+</Solution>
